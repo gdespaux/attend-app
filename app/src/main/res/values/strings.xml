@@ -5,7 +5,7 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_register">Register</string>
@@ -112,4 +112,10 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
+    <string name="title_activity_add_class">AddClassActivity</string>
+    <string name="view_all_classes">View All Classes</string>
+    <string name="class_location">Class Location</string>
+    <string name="class_name">Class Name</string>
+    <string name="class_time">Class Time</string>
+    <string name="add_class">Add Class</string>
 </resources>

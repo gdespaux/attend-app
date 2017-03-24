@@ -34,7 +34,21 @@
         <activity
             android:name=".activity.ClassListActivity"
             android:label="@string/title_activity_class_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.classieapp.attend.activity.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activity.AddClassActivity"
+            android:label="@string/title_activity_add_class"
+            android:parentActivityName=".activity.ClassListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.classieapp.attend.activity.ClassListActivity" />
+        </activity>
     </application>
 
 </manifest>

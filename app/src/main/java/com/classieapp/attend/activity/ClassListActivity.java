@@ -46,6 +46,7 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,8 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         setContentView(R.layout.activity_class_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -71,7 +74,7 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
 
-        String userID = user.get("uid");
+        userID = user.get("uid");
         String name = user.get("name");
         String email = user.get("email");
 
@@ -79,8 +82,10 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Launching the add class activity
+                Intent intent = new Intent(ClassListActivity.this, AddClassActivity.class);
+                startActivity(intent);
+                //finish();
             }
         });
 
@@ -88,6 +93,12 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         listView.setOnItemClickListener(this);
         getAllClasses(userID);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getAllClasses(userID);
     }
 
     private void showClass(){
@@ -101,9 +112,11 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
                 JSONObject jo = result.getJSONObject(i);
                 String className = jo.getString("className");
                 String classLocation = jo.getString("classLocation");
+                String classTime = jo.getString("classTime");
 
                 HashMap<String,String> classes = new HashMap<>();
                 classes.put("className",className);
+                classes.put("classTime", classTime);
                 classes.put("classLocation",classLocation);
                 list.add(classes);
             }
@@ -114,8 +127,8 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
 
         ListAdapter adapter = new SimpleAdapter(
                 ClassListActivity.this, list, R.layout.list_item,
-                new String[]{"className","classLocation"},
-                new int[]{R.id.className, R.id.classLocation});
+                new String[]{"className", "classTime", "classLocation"},
+                new int[]{R.id.className, R.id.classTime, R.id.classLocation});
 
         listView.setAdapter(adapter);
     }
@@ -168,7 +181,7 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
                     if (!error) {
                         JSON_STRING = response;
                         showClass();
-                        Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
 
                         // Error occurred in registration. Get the error

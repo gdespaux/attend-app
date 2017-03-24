@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.android.volley.Request.Method;
@@ -37,6 +38,8 @@ public class RegisterActivity extends Activity {
     private ProgressDialog pDialog;
     private SessionManager session;
     private SQLiteHandler db;
+
+    private String accountType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,8 +78,8 @@ public class RegisterActivity extends Activity {
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
-                    registerUser(name, email, password);
+                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty() && !accountType.isEmpty()) {
+                    registerUser(name, email, password, accountType);
                 } else {
                     Toast.makeText(getApplicationContext(),
                             "Please enter your details!", Toast.LENGTH_LONG)
@@ -98,11 +101,28 @@ public class RegisterActivity extends Activity {
 
     }
 
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radioInstructor:
+                if (checked)
+                    accountType = "Instructor";
+                    break;
+            case R.id.radioStudent:
+                if (checked)
+                    accountType = "Student";
+                    break;
+        }
+    }
+
     /**
      * Function to store user in MySQL database will post params(tag, name,
      * email, password) to register url
      * */
-    private void registerUser(final String name, final String email, final String password) {
+    private void registerUser(final String name, final String email, final String password, final String accountType) {
         // Tag used to cancel the request
         String tag_string_req = "req_register";
 
@@ -128,11 +148,12 @@ public class RegisterActivity extends Activity {
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
+                        String accountType = user.getString("accountType");
                         String created_at = user
                                 .getString("created_at");
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, created_at);
+                        db.addUser(name, email, uid, accountType, created_at);
 
                         Toast.makeText(getApplicationContext(), "Registration successful. Login now!", Toast.LENGTH_LONG).show();
 
@@ -173,6 +194,7 @@ public class RegisterActivity extends Activity {
                 params.put("name", name);
                 params.put("email", email);
                 params.put("password", password);
+                params.put("accountType", accountType);
 
                 return params;
             }
