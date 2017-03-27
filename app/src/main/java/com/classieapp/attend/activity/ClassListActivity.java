@@ -1,11 +1,19 @@
 package com.classieapp.attend.activity;
 
+import android.app.ActivityOptions;
+import android.app.Fragment;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 
 import android.app.ProgressDialog;
@@ -14,6 +22,8 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -38,9 +48,8 @@ import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
-public class ClassListActivity extends AppCompatActivity implements ListView.OnItemClickListener {
+public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener {
     private static final String TAG = ClassListActivity.class.getSimpleName();
-    private ListView listView;
     private ProgressDialog pDialog;
 
     private String JSON_STRING;
@@ -48,24 +57,36 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
     private SessionManager session;
     private String userID;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_class_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    private String mParam1;
+    private String mParam2;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // Progress dialog
-        pDialog = new ProgressDialog(this);
+        pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
         // SqLite database handler
-        db = new SQLiteHandler(getApplicationContext());
+        db = new SQLiteHandler(getActivity());
 
         // session manager
-        session = new SessionManager(getApplicationContext());
+        session = new SessionManager(getActivity());
 
         if (!session.isLoggedIn()) {
             logoutUser();
@@ -78,25 +99,28 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         String name = user.get("name");
         String email = user.get("email");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Launching the add class activity
-                Intent intent = new Intent(ClassListActivity.this, AddClassActivity.class);
-                startActivity(intent);
-                //finish();
-            }
-        });
+        View view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
 
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(this);
         getAllClasses(userID);
+
+        return view;
 
     }
 
     @Override
-    protected void onResume() {
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        Log.i("Clicked!", "Item was clicked!");
+        HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
+        String className = map.get("className").toString();
+
+        Intent intent = new Intent(getActivity(), SingleClassActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onResume() {
         super.onResume();
         getAllClasses(userID);
     }
@@ -126,11 +150,11 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         }
 
         ListAdapter adapter = new SimpleAdapter(
-                ClassListActivity.this, list, R.layout.list_item,
+                getActivity(), list, R.layout.list_item,
                 new String[]{"className", "classTime", "classLocation"},
                 new int[]{R.id.className, R.id.classTime, R.id.classLocation});
 
-        listView.setAdapter(adapter);
+        setListAdapter(adapter);
     }
 
     /**
@@ -143,9 +167,9 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
         db.deleteUsers();
 
         // Launching the login activity
-        Intent intent = new Intent(ClassListActivity.this, LoginActivity.class);
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
-        finish();
+        getActivity().finish();
     }
 
     @Override
@@ -187,7 +211,7 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
+                        Toast.makeText(getActivity(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -200,7 +224,7 @@ public class ClassListActivity extends AppCompatActivity implements ListView.OnI
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 hideDialog();
             }

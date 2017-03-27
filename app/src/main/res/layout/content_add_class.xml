@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:visibility="visible"
+    android:padding="10dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.classieapp.attend.activity.AddClassActivity"
     tools:showIn="@layout/activity_add_class">
@@ -29,9 +30,10 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="0dp">
+            tools:layout_editor_absoluteY="0dp"
+            android:transitionGroup="true">
 
-            <EditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/className"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -47,9 +49,10 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="0dp">
+            tools:layout_editor_absoluteY="0dp"
+            android:transitionGroup="true">
 
-            <EditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/classTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -65,9 +68,10 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             tools:layout_editor_absoluteX="8dp"
-            tools:layout_editor_absoluteY="0dp">
+            tools:layout_editor_absoluteY="0dp"
+            android:transitionGroup="true">
 
-            <EditText
+            <android.support.design.widget.TextInputEditText
                 android:id="@+id/classLocation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,7 +88,8 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@android:color/holo_blue_dark"
             android:text="@string/add_class"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:layout_marginTop="40dp"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -12,8 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -50,9 +56,18 @@ public class AddClassActivity extends AppCompatActivity {
     private SQLiteHandler db;
     private SessionManager session;
 
+    private String userID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // inside your activity (if you did not enable transitions in your theme)
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        // set an exit transition
+        getWindow().setEnterTransition(new Explode());
+        getWindow().setExitTransition(new Explode());
+        getWindow().setAllowEnterTransitionOverlap(true);
+
         setContentView(R.layout.activity_add_class);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -80,13 +95,13 @@ public class AddClassActivity extends AppCompatActivity {
 
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
+        userID = user.get("uid");
 
         // View classes click event
         btnAddClass.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                String userID = user.get("uid");
                 String className = inputClassName.getText().toString().trim();
                 String classTime = inputClassTime.getText().toString();
                 String classLocation = inputClassLocation.getText().toString().trim();
@@ -126,6 +141,39 @@ public class AddClassActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_add_class, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_class:
+                String className = inputClassName.getText().toString().trim();
+                String classTime = inputClassTime.getText().toString();
+                String classLocation = inputClassLocation.getText().toString().trim();
+
+                if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty()) {
+                    addClass(userID, className, classTime, classLocation);
+                    return true;
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Please enter class details!", Toast.LENGTH_LONG)
+                            .show();
+                    return false;
+                }
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     /**

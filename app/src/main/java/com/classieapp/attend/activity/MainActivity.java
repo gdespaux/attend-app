@@ -1,51 +1,41 @@
 package com.classieapp.attend.activity;
 
-import android.app.ProgressDialog;
-import android.app.DialogFragment;
-import android.app.TimePickerDialog;
+import android.app.ActivityOptions;
 import android.content.Intent;
-import java.util.Calendar;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.view.View;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import android.view.Window;
+import android.widget.TextView;
 
 import com.classieapp.attend.R;
-import com.classieapp.attend.app.AppConfig;
-import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+
+    private Fragment fragment = null;
+
     private static final String TAG = MainActivity.class.getSimpleName();
     private TextView txtName;
     private TextView txtEmail;
-    private TextView txtAccountType;
-    private Button btnLogout;
-    private Button btnViewClasses;
-    private ProgressDialog pDialog;
 
     private SQLiteHandler db;
     private SessionManager session;
@@ -53,19 +43,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // inside your activity (if you did not enable transitions in your theme)
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        // set an exit transition
+        getWindow().setEnterTransition(new Fade());
+        getWindow().setExitTransition(new Explode());
+        getWindow().setAllowEnterTransitionOverlap(true);
+
         setContentView(R.layout.activity_main);
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        // Progress dialog
-        pDialog = new ProgressDialog(this);
-        pDialog.setCancelable(false);
-
-        txtName = (TextView) findViewById(R.id.name);
-        txtEmail = (TextView) findViewById(R.id.email);
-        txtAccountType = (TextView) findViewById(R.id.accountType);
-        btnLogout = (Button) findViewById(R.id.btnLogout);
-        btnViewClasses = (Button) findViewById(R.id.viewClassesBtn);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -82,39 +70,69 @@ public class MainActivity extends AppCompatActivity {
 
         String name = user.get("name");
         String email = user.get("email");
-        String accountType = user.get("accountType");
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Launching the add class activity
+                Intent intent = new Intent(MainActivity.this, AddClassActivity.class);
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+            }
+        });
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+
+        txtName = (TextView) headerView.findViewById(R.id.name);
+        txtEmail = (TextView) headerView.findViewById(R.id.email);
         // Displaying the user details on the screen
         txtName.setText(name);
         txtEmail.setText(email);
-        txtAccountType.setText(accountType);
 
-        // Logout button click event
-        btnLogout.setOnClickListener(new View.OnClickListener() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.frame_container, new ClassListActivity()).commit();
 
-            @Override
-            public void onClick(View v) {
-                logoutUser();
-            }
-        });
+    }
 
-        // View classes click event
-        btnViewClasses.setOnClickListener(new View.OnClickListener() {
+    /**
+     * Logging out the user. Will set isLoggedIn flag to false in shared
+     * preferences Clears the user data from sqlite users table
+     * */
+    private void logoutUser() {
+        session.setLogin(false);
 
-            @Override
-            public void onClick(View v) {
-                // Launching the class list activity
-                Intent intent = new Intent(MainActivity.this, ClassListActivity.class);
-                startActivity(intent);
-                //finish();
-            }
-        });
+        db.deleteUsers();
+
+        // Launching the login activity
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -133,28 +151,32 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Logging out the user. Will set isLoggedIn flag to false in shared
-     * preferences Clears the user data from sqlite users table
-     * */
-    private void logoutUser() {
-        session.setLogin(false);
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
 
-        db.deleteUsers();
+        if (id == R.id.nav_class_list) {
+            // Handle the camera action
+            fragment = new ClassListActivity();
+        } else if (id == R.id.nav_manage) {
 
-        // Launching the login activity
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish();
-    }
+        } else if (id == R.id.nav_share) {
 
-    private void showDialog() {
-        if (!pDialog.isShowing())
-            pDialog.show();
-    }
+        } else if (id == R.id.nav_send) {
 
-    private void hideDialog() {
-        if (pDialog.isShowing())
-            pDialog.dismiss();
+        }
+
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frame_container, fragment).commit();
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

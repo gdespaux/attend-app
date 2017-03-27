@@ -8,6 +8,13 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality. 
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:name=".app.AppController"
         android:allowBackup="true"
@@ -26,7 +33,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".activity.MainOldActivity"
             android:label="@string/app_name" />
         <activity
             android:name=".activity.RegisterActivity"
@@ -34,11 +41,11 @@
         <activity
             android:name=".activity.ClassListActivity"
             android:label="@string/title_activity_class_list"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName=".activity.MainOldActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.MainActivity" />
+                android:value="com.classieapp.attend.activity.MainOldActivity" />
         </activity>
         <activity
             android:name=".activity.AddClassActivity"
@@ -49,6 +56,31 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.classieapp.attend.activity.ClassListActivity" />
         </activity>
+        <activity
+            android:name=".activity.MainActivity"
+            android:label="@string/title_activity_main2"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.SingleClassActivity"
+            android:label="@string/title_activity_single_class"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.classieapp.attend.activity.MainActivity" />
+        </activity>
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
     </application>
 
 </manifest>
