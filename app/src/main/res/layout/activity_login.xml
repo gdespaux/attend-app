@@ -26,7 +26,7 @@
             android:padding="10dp"
             android:singleLine="true"
             android:textColor="@color/input_login"
-            android:textColorHint="@color/input_login_hint" />
+            android:textColorHint="@color/input_login_hint"/>
 
         <EditText
             android:id="@+id/password"
@@ -39,9 +39,18 @@
             android:padding="10dp"
             android:singleLine="true"
             android:textColor="@color/input_login"
-            android:textColorHint="@color/input_login_hint" />
+            android:textColorHint="@color/input_login_hint"/>
 
         <!-- Login Button -->
+
+        <Switch
+            android:id="@+id/rememberEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onSwitchButtonClicked"
+            android:text="Remember Email"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button"
+            android:textColor="@color/white" />
 
         <Button
             android:id="@+id/btnLogin"

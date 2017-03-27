@@ -81,8 +81,8 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:buttonTint="@color/colorAccent"
-                android:text="Student"
-                android:onClick="onRadioButtonClicked"/>
+                android:onClick="onRadioButtonClicked"
+                android:text="Student" />
                 android:textColor="@color/white" />
         </RadioGroup>
 

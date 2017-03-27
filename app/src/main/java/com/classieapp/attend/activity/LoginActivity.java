@@ -3,11 +3,14 @@ package com.classieapp.attend.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.Request.Method;
@@ -36,6 +39,7 @@ public class LoginActivity extends Activity {
     private ProgressDialog pDialog;
     private SessionManager session;
     private SQLiteHandler db;
+    private Switch switchRememberEmail;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,7 @@ public class LoginActivity extends Activity {
         inputPassword = (EditText) findViewById(R.id.password);
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
+        switchRememberEmail = (Switch) findViewById(R.id.rememberEmail);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -63,6 +68,16 @@ public class LoginActivity extends Activity {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
+        }
+
+        if(session.rememberEmail()){
+            inputEmail.setText(session.getUserEmail());
+            switchRememberEmail.setChecked(true);
+            switchRememberEmail.getThumbDrawable().setColorFilter(Color.argb(255, 29, 233, 182), PorterDuff.Mode.MULTIPLY);
+            switchRememberEmail.getTrackDrawable().setColorFilter(Color.argb(255, 178, 223, 219), PorterDuff.Mode.MULTIPLY);
+        } else {
+            switchRememberEmail.getThumbDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
+            switchRememberEmail.getTrackDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
         }
 
         // Login button Click Event
@@ -99,6 +114,19 @@ public class LoginActivity extends Activity {
 
     }
 
+    public void onSwitchButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((Switch) view).isChecked();
+
+        if(checked){
+            ((Switch) view).getThumbDrawable().setColorFilter(Color.argb(255, 29, 233, 182), PorterDuff.Mode.MULTIPLY);
+            ((Switch) view).getTrackDrawable().setColorFilter(Color.argb(255, 178, 223, 219), PorterDuff.Mode.MULTIPLY);
+        } else {
+            ((Switch) view).getThumbDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
+            ((Switch) view).getTrackDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
+        }
+    }
+
     /**
      * function to verify login details in mysql db
      * */
@@ -126,6 +154,7 @@ public class LoginActivity extends Activity {
                         // user successfully logged in
                         // Create login session
                         session.setLogin(true);
+                        session.setRememberEmail(switchRememberEmail.isChecked());
 
                         // Now store the user in SQLite
                         String uid = jObj.getString("uid");
@@ -136,6 +165,10 @@ public class LoginActivity extends Activity {
                         String accountType = user.getString("accountType");
                         String created_at = user
                                 .getString("created_at");
+
+                        if(switchRememberEmail.isChecked()){
+                            session.setUserEmail(email);
+                        }
 
                         // Inserting row in users table
                         db.addUser(name, email, uid, accountType, created_at);
