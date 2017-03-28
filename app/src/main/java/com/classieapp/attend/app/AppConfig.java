@@ -12,4 +12,7 @@ public class AppConfig {
 
     // Server get all classes url
     public static String URL_GET_ALL_CLASSES = "http://classie.nhctechservices.com/getAllClasses.php";
+
+    // Server get single class url
+    public static String URL_GET_SINGLE_CLASS = "http://classie.nhctechservices.com/getClass.php";
 }

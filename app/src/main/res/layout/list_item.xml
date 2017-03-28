@@ -8,12 +8,18 @@
 
 
     <TextView
+        android:id="@+id/classID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
         android:id="@+id/className"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Class Name"
+        android:text="@string/class_name"
         android:textAppearance="@android:style/TextAppearance.Material.Title"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,9 +32,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="409dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Class Time"
+        android:text="@string/class_time"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/classLocation"
@@ -41,9 +47,9 @@
         android:id="@+id/classLocation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Class Location"
+        android:text="@string/class_location"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/className" />
 
@@ -52,9 +58,9 @@
         android:id="@+id/classCount"
         android:layout_width="71dp"
         android:layout_height="61dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-        android:drawableLeft="@drawable/ic_group_black_24dp"
+        android:drawableStart="@drawable/ic_group_black_24dp"
         android:gravity="center"
         android:text="8"
         android:textAlignment="center"

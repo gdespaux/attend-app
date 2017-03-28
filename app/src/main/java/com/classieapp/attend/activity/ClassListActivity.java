@@ -113,9 +113,10 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         super.onListItemClick(l, v, position, id);
         Log.i("Clicked!", "Item was clicked!");
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
-        String className = map.get("className").toString();
+        String classID = map.get("classID").toString();
 
         Intent intent = new Intent(getActivity(), SingleClassActivity.class);
+        intent.putExtra("classID",classID);
         startActivity(intent);
     }
 
@@ -134,11 +135,13 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
             for(int i = 0; i<result.length(); i++){
                 JSONObject jo = result.getJSONObject(i);
+                String classID = jo.getString("classID");
                 String className = jo.getString("className");
                 String classLocation = jo.getString("classLocation");
                 String classTime = jo.getString("classTime");
 
                 HashMap<String,String> classes = new HashMap<>();
+                classes.put("classID",classID);
                 classes.put("className",className);
                 classes.put("classTime", classTime);
                 classes.put("classLocation",classLocation);
@@ -151,8 +154,8 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
         ListAdapter adapter = new SimpleAdapter(
                 getActivity(), list, R.layout.list_item,
-                new String[]{"className", "classTime", "classLocation"},
-                new int[]{R.id.className, R.id.classTime, R.id.classLocation});
+                new String[]{"classID", "className", "classTime", "classLocation"},
+                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation});
 
         setListAdapter(adapter);
     }

@@ -39,22 +39,13 @@
             android:name=".activity.RegisterActivity"
             android:label="@string/title_activity_register" />
         <activity
-            android:name=".activity.ClassListActivity"
-            android:label="@string/title_activity_class_list"
-            android:parentActivityName=".activity.MainOldActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.MainOldActivity" />
-        </activity>
-        <activity
             android:name=".activity.AddClassActivity"
             android:label="@string/title_activity_add_class"
-            android:parentActivityName=".activity.ClassListActivity"
+            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.ClassListActivity" />
+                android:value="com.classieapp.attend.activity.MainActivity" />
         </activity>
         <activity
             android:name=".activity.MainActivity"
@@ -80,6 +71,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <service android:name=".utils.GeofenceTransitionService"/>
 
     </application>
 
