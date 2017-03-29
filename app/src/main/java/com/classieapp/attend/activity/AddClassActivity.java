@@ -4,31 +4,18 @@ import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.transition.Explode;
-import android.transition.Fade;
-import android.transition.Slide;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -39,20 +26,27 @@ import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
-import com.classieapp.attend.utils.PlacesAutoCompleteAdapter;
+import com.classieapp.attend.utils.PlaceArrayAdapter;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.location.places.PlaceBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class AddClassActivity extends AppCompatActivity {
+public class AddClassActivity extends AppCompatActivity implements OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     private static final String TAG = AddClassActivity.class.getSimpleName();
     private Button btnAddClass;
     private ProgressDialog pDialog;
@@ -65,9 +59,12 @@ public class AddClassActivity extends AppCompatActivity {
 
     private String userID;
 
-    private PlacesAutoCompleteAdapter mAdapter;
-    HandlerThread mHandlerThread;
-    Handler mThreadHandler;
+    private GoogleApiClient mGoogleApiClient;
+    private PlaceArrayAdapter mPlaceArrayAdapter;
+    private static final int GOOGLE_API_CLIENT_ID = 0;
+    private AutoCompleteTextView mAutocompleteTextView;
+    private static final LatLngBounds BOUNDS_NEW_ORLEANS = new LatLngBounds(
+            new LatLng(29.867881, -89.597667), new LatLng(29.940349, -90.413854));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +82,19 @@ public class AddClassActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        mGoogleApiClient = new GoogleApiClient.Builder(AddClassActivity.this)
+                .addApi(Places.GEO_DATA_API)
+                .enableAutoManage(this, GOOGLE_API_CLIENT_ID, this)
+                .addConnectionCallbacks(this)
+                .build();
+        mAutocompleteTextView = (AutoCompleteTextView) findViewById(R.id
+                .classLocation);
+        mAutocompleteTextView.setThreshold(3);
+        mAutocompleteTextView.setOnItemClickListener(mAutocompleteClickListener);
+        mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1,
+                BOUNDS_NEW_ORLEANS, null);
+        mAutocompleteTextView.setAdapter(mPlaceArrayAdapter);
+
         // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
@@ -92,59 +102,7 @@ public class AddClassActivity extends AppCompatActivity {
         btnAddClass = (Button) findViewById(R.id.btnAddClass);
         inputClassName = (EditText) findViewById(R.id.className);
         inputClassTime = (EditText) findViewById(R.id.classTime);
-        //inputClassLocation = (EditText) findViewById(R.id.classLocation);
-
-        AutoCompleteTextView autocompleteView = (AutoCompleteTextView) findViewById(R.id.classLocation);
-        mAdapter = new PlacesAutoCompleteAdapter(AddClassActivity.this, R.layout.autocomplete_list_item);
-        autocompleteView.setAdapter(mAdapter);
-
-        autocompleteView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Get data associated with the specified position
-                // in the list (AdapterView)
-                String description = (String) parent.getItemAtPosition(position);
-                Toast.makeText(AddClassActivity.this, description, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        autocompleteView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                final String value = s.toString();
-
-                // Remove all callbacks and messages
-                mThreadHandler.removeCallbacksAndMessages(null);
-
-                // Now add a new one
-                mThreadHandler.postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // Background thread
-
-                        mAdapter.resultList = mAdapter.mPlaceAPI.autocomplete(value);
-
-                        // Footer
-                        if (mAdapter.resultList.size() > 0)
-                            mAdapter.resultList.add("footer");
-
-                        // Post to Main Thread
-                        mThreadHandler.sendEmptyMessage(1);
-                    }
-                }, 1000);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                //doAfterTextChanged();
-            }
-        });
+        inputClassLocation = (EditText) findViewById(R.id.classLocation);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -204,20 +162,20 @@ public class AddClassActivity extends AppCompatActivity {
 
             }
         });
-
-        ProfileFragment();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        // Get rid of our Place API Handlers
-        if (mThreadHandler != null) {
-            mThreadHandler.removeCallbacksAndMessages(null);
-            mHandlerThread.quit();
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final PlaceArrayAdapter.PlaceAutocomplete item = mPlaceArrayAdapter.getItem(position);
+            final String placeId = String.valueOf(item.placeId);
+            Log.i(TAG, "Selected: " + item.description);
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            Log.i(TAG, "Fetching details for ID: " + item.placeId);
         }
-    }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -250,46 +208,6 @@ public class AddClassActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    public void ProfileFragment() {
-        // Required empty public constructor
-
-        if (mThreadHandler == null) {
-            // Initialize and start the HandlerThread
-            // which is basically a Thread with a Looper
-            // attached (hence a MessageQueue)
-            mHandlerThread = new HandlerThread(TAG, android.os.Process.THREAD_PRIORITY_BACKGROUND);
-            mHandlerThread.start();
-
-            // Initialize the Handler
-            mThreadHandler = new Handler(mHandlerThread.getLooper()) {
-                @Override
-                public void handleMessage(Message msg) {
-                    if (msg.what == 1) {
-                        ArrayList<String> results = mAdapter.resultList;
-
-                        if (results != null && results.size() > 0) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mAdapter.notifyDataSetChanged();
-                                }
-                            });
-                        }
-                        else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mAdapter.notifyDataSetInvalidated();
-                                }
-                            });
-                        }
-                    }
-                }
-            };
-        }
-
     }
 
     /**
@@ -403,4 +321,27 @@ public class AddClassActivity extends AppCompatActivity {
             pDialog.dismiss();
     }
 
+    @Override
+    public void onConnected(Bundle bundle) {
+        mPlaceArrayAdapter.setGoogleApiClient(mGoogleApiClient);
+        Log.i(TAG, "Google Places API connected.");
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, "Google Places API connection failed with error code: "
+                + connectionResult.getErrorCode());
+
+        Toast.makeText(this,
+                "Google Places API connection failed with error code:" +
+                        connectionResult.getErrorCode(),
+                Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mPlaceArrayAdapter.setGoogleApiClient(null);
+        Log.e(TAG, "Google Places API connection suspended.");
+    }
 }
