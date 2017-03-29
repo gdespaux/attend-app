@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -21,6 +24,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,12 +39,14 @@ import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
+import com.classieapp.attend.utils.PlacesAutoCompleteAdapter;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -57,6 +64,10 @@ public class AddClassActivity extends AppCompatActivity {
     private SessionManager session;
 
     private String userID;
+
+    private PlacesAutoCompleteAdapter mAdapter;
+    HandlerThread mHandlerThread;
+    Handler mThreadHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +92,59 @@ public class AddClassActivity extends AppCompatActivity {
         btnAddClass = (Button) findViewById(R.id.btnAddClass);
         inputClassName = (EditText) findViewById(R.id.className);
         inputClassTime = (EditText) findViewById(R.id.classTime);
-        inputClassLocation = (EditText) findViewById(R.id.classLocation);
+        //inputClassLocation = (EditText) findViewById(R.id.classLocation);
+
+        AutoCompleteTextView autocompleteView = (AutoCompleteTextView) findViewById(R.id.classLocation);
+        mAdapter = new PlacesAutoCompleteAdapter(AddClassActivity.this, R.layout.autocomplete_list_item);
+        autocompleteView.setAdapter(mAdapter);
+
+        autocompleteView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get data associated with the specified position
+                // in the list (AdapterView)
+                String description = (String) parent.getItemAtPosition(position);
+                Toast.makeText(AddClassActivity.this, description, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        autocompleteView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                final String value = s.toString();
+
+                // Remove all callbacks and messages
+                mThreadHandler.removeCallbacksAndMessages(null);
+
+                // Now add a new one
+                mThreadHandler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // Background thread
+
+                        mAdapter.resultList = mAdapter.mPlaceAPI.autocomplete(value);
+
+                        // Footer
+                        if (mAdapter.resultList.size() > 0)
+                            mAdapter.resultList.add("footer");
+
+                        // Post to Main Thread
+                        mThreadHandler.sendEmptyMessage(1);
+                    }
+                }, 1000);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                //doAfterTextChanged();
+            }
+        });
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -141,6 +204,19 @@ public class AddClassActivity extends AppCompatActivity {
 
             }
         });
+
+        ProfileFragment();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Get rid of our Place API Handlers
+        if (mThreadHandler != null) {
+            mThreadHandler.removeCallbacksAndMessages(null);
+            mHandlerThread.quit();
+        }
     }
 
     @Override
@@ -174,6 +250,46 @@ public class AddClassActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    public void ProfileFragment() {
+        // Required empty public constructor
+
+        if (mThreadHandler == null) {
+            // Initialize and start the HandlerThread
+            // which is basically a Thread with a Looper
+            // attached (hence a MessageQueue)
+            mHandlerThread = new HandlerThread(TAG, android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            mHandlerThread.start();
+
+            // Initialize the Handler
+            mThreadHandler = new Handler(mHandlerThread.getLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == 1) {
+                        ArrayList<String> results = mAdapter.resultList;
+
+                        if (results != null && results.size() > 0) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                        else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mAdapter.notifyDataSetInvalidated();
+                                }
+                            });
+                        }
+                    }
+                }
+            };
+        }
+
     }
 
     /**
