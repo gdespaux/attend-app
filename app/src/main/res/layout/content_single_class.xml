@@ -25,6 +25,7 @@
 
         <TextView
             android:id="@+id/className"
+            android:transitionName="transClassName"
             android:layout_width="344dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -51,6 +52,7 @@
 
         <TextView
             android:id="@+id/classLocation"
+            android:transitionName="transClassLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -74,6 +76,7 @@
 
         <TextView
             android:id="@+id/classTime"
+            android:transitionName="transClassTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

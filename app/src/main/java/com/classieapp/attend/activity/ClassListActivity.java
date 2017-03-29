@@ -9,10 +9,12 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.ChangeBounds;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -66,6 +68,13 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // set an exit transition
+        getActivity().getWindow().setSharedElementEnterTransition(new ChangeBounds());
+        getActivity().getWindow().setSharedElementExitTransition(new ChangeBounds());
+        getActivity().getWindow().setEnterTransition(new Fade());
+        getActivity().getWindow().setExitTransition(new Explode());
+        getActivity().getWindow().setAllowEnterTransitionOverlap(true);
+
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -115,9 +124,23 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
         String classID = map.get("classID").toString();
 
-        Intent intent = new Intent(getActivity(), SingleClassActivity.class);
-        intent.putExtra("classID",classID);
-        startActivity(intent);
+        Intent i = new Intent(getActivity(), SingleClassActivity.class);
+
+        View sharedView = v;
+        String transitionName = "transClassName";
+
+        //ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+        //        Pair.create(v, "transClassName"),
+        //        Pair.create(v, "transClassTime"),
+        //        Pair.create(v, "transClassLocation"));
+
+        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(), sharedView, transitionName);
+        i.putExtra("classID",classID);
+        getActivity().startActivity(i, transitionActivityOptions.toBundle());
+
+        //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
+        //intent.putExtra("classID",classID);
+        //startActivity(intent);
     }
 
     @Override
