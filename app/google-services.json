@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "739467031581",
+    "firebase_url": "https://attend-a99d7.firebaseio.com",
+    "project_id": "attend-a99d7",
+    "storage_bucket": "attend-a99d7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739467031581:android:771b1f0ad329cda8",
+        "android_client_info": {
+          "package_name": "com.classieapp.attend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "739467031581-cnlk4e1i5tmdoi6dqnrdb48ierd71ocq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.classieapp.attend",
+            "certificate_hash": "9f1d39aa45d78bb512c3383115ff95507415f164"
+          }
+        },
+        {
+          "client_id": "739467031581-t9o2uek062nbno8vdbqlkbke8kkdgjgc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd-5M9x_YiafB1GSU9tI88yYmjzJYbIoc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "739467031581-t9o2uek062nbno8vdbqlkbke8kkdgjgc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
