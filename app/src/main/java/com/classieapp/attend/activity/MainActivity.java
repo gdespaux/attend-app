@@ -30,14 +30,20 @@ import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
+import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.NotificationUtils;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -50,6 +56,8 @@ public class MainActivity extends AppCompatActivity
 
     private SQLiteHandler db;
     private SessionManager session;
+
+    private String userID;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
@@ -151,6 +159,7 @@ public class MainActivity extends AppCompatActivity
 
         if (!TextUtils.isEmpty(regId)) {
             Toast.makeText(getApplicationContext(), "Firebase Reg Id: " + regId, Toast.LENGTH_LONG).show();
+            sendRegistrationToServer(regId);
         } else{
             Toast.makeText(getApplicationContext(), "Firebase Reg Id is not received yet!", Toast.LENGTH_LONG).show();
         }
@@ -253,5 +262,69 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    /**
+     * Function to store device id in MySQL database will post params(token)
+     * to register url
+     * */
+    public void sendRegistrationToServer(final String token) {
+
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(AppConfig.SHARED_PREF, 0);
+
+        if(token == ""){
+            pref.getString("regID", "");
+        }
+
+        // SqLite database handler
+        db = new SQLiteHandler(getApplicationContext());
+
+        // session manager
+        session = new SessionManager(getApplicationContext());
+
+        // Fetching user details from sqlite
+        final HashMap<String, String> user = db.getUserDetails();
+        userID = user.get("uid");
+
+        if(userID != null){
+            // Tag used to cancel the request
+            String tag_string_req = "req_reg_id";
+
+            // sending gcm token to server
+            Log.e(TAG, "sendRegistrationToServer: " + token);
+
+            StringRequest strReq = new StringRequest(Request.Method.POST,
+                    AppConfig.URL_REG_ID, new Response.Listener<String>() {
+
+                @Override
+                public void onResponse(String response) {
+                    Log.d(TAG, "Add Reg ID Response: " + response.toString());
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(TAG, "Device ID Reg Error: " + error.getMessage());
+                }
+            }) {
+
+                @Override
+                protected Map<String, String> getParams() {
+                    // Posting params to register url
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("userID", userID);
+                    params.put("regID", token);
+
+                    Log.e(TAG, "USERID: " + userID);
+                    Log.e(TAG, "REGID: " + token);
+
+                    return params;
+                }
+
+            };
+
+            // Adding request to request queue
+            AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+        }
     }
 }

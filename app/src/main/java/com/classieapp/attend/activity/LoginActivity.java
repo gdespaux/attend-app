@@ -27,6 +27,7 @@ import java.util.Map;
 import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
+import com.classieapp.attend.utils.FirebaseIDService;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
