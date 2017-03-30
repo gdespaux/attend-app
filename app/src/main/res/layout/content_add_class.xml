@@ -38,6 +38,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableStart="@drawable/ic_fitness_center_black_24dp"
+                android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
                 android:hint="@string/class_name"
                 android:inputType="textPersonName" />
@@ -57,7 +59,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableStart="@drawable/ic_access_time_black_24dp"
+                android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
+                android:focusable="false"
                 android:hint="@string/class_time"
                 android:inputType="none" />
         </android.support.design.widget.TextInputLayout>
@@ -76,6 +81,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableStart="@drawable/ic_location_on_black_24dp"
+                android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
                 android:hint="@string/class_location"
                 android:inputType="textPersonName" />
@@ -88,8 +95,20 @@
             android:layout_height="wrap_content"
             android:backgroundTint="@android:color/holo_blue_dark"
             android:text="@string/add_class"
-            android:visibility="visible"
+            android:visibility="gone"
             android:layout_marginTop="40dp"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/classLat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/classLng"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
 </android.support.constraint.ConstraintLayout>

@@ -26,7 +26,7 @@
     <string name="title_activity_class_list">Classes</string>
     <string name="title_activity_add_class">Add class</string>
     <string name="view_all_classes">View All Classes</string>
-    <string name="class_location">Class Location</string>
+    <string name="class_location">Class Location (City)</string>
     <string name="class_name">Class Name</string>
     <string name="class_time">Class Time</string>
     <string name="add_class">Add Class</string>

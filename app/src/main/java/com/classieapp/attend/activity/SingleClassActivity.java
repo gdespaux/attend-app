@@ -269,7 +269,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         return new Intent(geofenceService, SingleClassActivity.class);
     }
 
-    // Start Geofence creation process
+    // Start Geofence creation process (Overall Geofence function)
     private void startGeofence() {
         Log.i(TAG, "startGeofence()");
         if (fenceLat != 0 && fenceLong != 0) {

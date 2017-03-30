@@ -1,6 +1,9 @@
 package com.classieapp.attend.utils;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
@@ -29,6 +32,8 @@ public class PlaceArrayAdapter
     private AutocompleteFilter mPlaceFilter;
     private LatLngBounds mBounds;
     private ArrayList<PlaceAutocomplete> mResultList;
+
+    private static final CharacterStyle STYLE_BOLD = new StyleSpan(Typeface.BOLD);
 
     /**
      * Constructor
@@ -90,7 +95,7 @@ public class PlaceArrayAdapter
             while (iterator.hasNext()) {
                 AutocompletePrediction prediction = iterator.next();
                 resultList.add(new PlaceAutocomplete(prediction.getPlaceId(),
-                        prediction.getFullText(null)));
+                        prediction.getFullText(STYLE_BOLD)));
             }
             // Buffer release
             autocompletePredictions.release();

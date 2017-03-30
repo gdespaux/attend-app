@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.Html;
+import android.text.TextWatcher;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.Menu;
@@ -16,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -33,6 +37,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,11 +60,15 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
     private EditText inputClassName;
     private EditText inputClassTime;
     private EditText inputClassLocation;
+    private TextView inputClassLat;
+    private TextView inputClassLng;
 
     private SQLiteHandler db;
     private SessionManager session;
 
     private String userID;
+
+    private boolean didSelectItem = false;
 
     private GoogleApiClient mGoogleApiClient;
     private PlaceArrayAdapter mPlaceArrayAdapter;
@@ -91,8 +102,12 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 .classLocation);
         mAutocompleteTextView.setThreshold(3);
         mAutocompleteTextView.setOnItemClickListener(mAutocompleteClickListener);
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_CITIES)
+                .setCountry("US")
+                .build();
         mPlaceArrayAdapter = new PlaceArrayAdapter(this, android.R.layout.simple_list_item_1,
-                BOUNDS_NEW_ORLEANS, null);
+                BOUNDS_NEW_ORLEANS, typeFilter);
         mAutocompleteTextView.setAdapter(mPlaceArrayAdapter);
 
         // Progress dialog
@@ -103,6 +118,8 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         inputClassName = (EditText) findViewById(R.id.className);
         inputClassTime = (EditText) findViewById(R.id.classTime);
         inputClassLocation = (EditText) findViewById(R.id.classLocation);
+        inputClassLat = (TextView) findViewById(R.id.classLat);
+        inputClassLng = (TextView) findViewById(R.id.classLng);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -126,12 +143,20 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 String className = inputClassName.getText().toString().trim();
                 String classTime = inputClassTime.getText().toString();
                 String classLocation = inputClassLocation.getText().toString().trim();
+                String classLat = inputClassLat.getText().toString().trim();
+                String classLng = inputClassLng.getText().toString().trim();
 
-                if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty()) {
-                    addClass(userID, className, classTime, classLocation);
+                if(didSelectItem){
+                    if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty() && !classLat.isEmpty() && !classLng.isEmpty()) {
+                        addClass(userID, className, classTime, classLocation, classLat, classLng);
+                    } else {
+                        Toast.makeText(getApplicationContext(),
+                                "Please enter class details!", Toast.LENGTH_LONG)
+                                .show();
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter class details!", Toast.LENGTH_LONG)
+                            "Please select your location from the list!", Toast.LENGTH_LONG)
                             .show();
                 }
             }
@@ -153,12 +178,29 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                         if(hour == 0){
                             hour = 12;
                         }
-                        inputClassTime.setText(String.format(Locale.US, "%02d:%02d %s", hour, minute,
+                        inputClassTime.setText(String.format(Locale.US, "%2d:%02d %s", hour, minute,
                                 hourOfDay < 12 ? "am" : "pm"));
                     }
                 }, hour, minute, false);//Yes 24 hour time
                 mTimePicker.setTitle("Select Time");
                 mTimePicker.show();
+
+            }
+        });
+
+        inputClassLocation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                didSelectItem = false;
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
 
             }
         });
@@ -173,7 +215,27 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
             Log.i(TAG, "Selected: " + item.description);
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
             Log.i(TAG, "Fetching details for ID: " + item.placeId);
+            didSelectItem = true; //true when item selected from list
+        }
+    };
+
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                Log.e(TAG, "Place query did not complete. Error: " +
+                        places.getStatus().toString());
+                return;
+            }
+            // Selecting the first object buffer.
+            final Place place = places.get(0);
+            final LatLng location = place.getLatLng();
+
+            inputClassLat.setText(Double.toString(location.latitude));
+            inputClassLng.setText(Double.toString(location.longitude));
         }
     };
 
@@ -191,13 +253,23 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 String className = inputClassName.getText().toString().trim();
                 String classTime = inputClassTime.getText().toString();
                 String classLocation = inputClassLocation.getText().toString().trim();
+                String classLat = inputClassLat.getText().toString().trim();
+                String classLng = inputClassLng.getText().toString().trim();
 
-                if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty()) {
-                    addClass(userID, className, classTime, classLocation);
-                    return true;
+                if(didSelectItem){
+                    if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty() && !classLat.isEmpty() && !classLng.isEmpty()) {
+                        addClass(userID, className, classTime, classLocation, classLat, classLng);
+
+                        return true;
+                    } else {
+                        Toast.makeText(getApplicationContext(),
+                                "Please enter class details!", Toast.LENGTH_LONG)
+                                .show();
+                        return false;
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter class details!", Toast.LENGTH_LONG)
+                            "Please select your location from the list!", Toast.LENGTH_LONG)
                             .show();
                     return false;
                 }
@@ -229,7 +301,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
      * Function to store user in MySQL database will post params(tag, name,
      * email, password) to register url
      * */
-    private void addClass(final String userID, final String className, final String classTime, final String classLocation) {
+    private void addClass(final String userID, final String className, final String classTime, final String classLocation, final String classLat, final String classLng) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_class";
 
@@ -247,6 +319,8 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 inputClassName.setText("");
                 inputClassTime.setText("");
                 inputClassLocation.setText("");
+                inputClassLat.setText("");
+                inputClassLng.setText("");
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -301,6 +375,8 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 params.put("className", className);
                 params.put("classTime", classTime);
                 params.put("classLocation", classLocation);
+                params.put("classLat", classLat);
+                params.put("classLng", classLng);
 
                 return params;
             }
