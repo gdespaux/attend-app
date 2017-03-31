@@ -89,6 +89,7 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
                 // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
+                Log.d("FOREGROUND", "THIS ONE");
             } else {
                 // app is in background, show the notification in notification tray
                 Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -101,6 +102,7 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
                     // image is present, show notification with image
                     showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
                 }
+                Log.d("FOREGROUND", "THAT ONE");
             }
         } catch (JSONException e) {
             Log.e(TAG, "Json Exception: " + e.getMessage());

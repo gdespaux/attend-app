@@ -141,7 +141,10 @@ public class MainActivity extends AppCompatActivity
                     String message = intent.getStringExtra("message");
 
                     Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Got ya message!");
                 }
+
+                Log.d(TAG, "Uh oh!");
             }
         };
 

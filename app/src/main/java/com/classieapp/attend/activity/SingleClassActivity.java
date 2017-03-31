@@ -3,9 +3,11 @@ package com.classieapp.attend.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +39,7 @@ import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.GeofenceTransitionService;
+import com.classieapp.attend.utils.NotificationUtils;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 import com.google.android.gms.common.ConnectionResult;
@@ -53,6 +57,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -88,13 +93,13 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
     private static final long GEO_DURATION = 15000;
     private String geoFence_class_id = "";
-    private static final float GEOFENCE_RADIUS = 500.0f; // in meters
+    private static final float GEOFENCE_RADIUS = 5000.0f; // in meters
 
     private PendingIntent geoFencePendingIntent;
     private final int GEOFENCE_REQ_CODE = 0;
 
-    private double fenceLat = 29.834646; //temp values to test fencing
-    private double fenceLong = -90.051499;
+    private double fenceLat;
+    private double fenceLong;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -102,6 +107,8 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private String userID;
 
     private String classID;
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,13 +163,96 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         startClassButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startGeofence();
+                startThisClass();
             }
         });
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                if (intent.getAction().equals(AppConfig.PUSH_NOTIFICATION)) {
+                    // new push notification is received
+
+                    String message = intent.getStringExtra("message");
+
+                    Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "Got ya message!");
+                }
+
+                Log.d(TAG, "Uh oh!");
+            }
+        };
 
         classID = getIntent().getStringExtra("classID");
         getSingleClass(classID);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // register GCM registration complete receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(AppConfig.REGISTRATION_COMPLETE));
+
+        // register new push message receiver
+        // by doing this, the activity will be notified each time a new message arrives
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(AppConfig.PUSH_NOTIFICATION));
+
+        // clear the notification area when the app is opened
+        NotificationUtils.clearNotifications(getApplicationContext());
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
+    }
+
+    /**
+     * Function to start checking for students in class will post params(class id)
+     * to class url
+     * */
+    public void startThisClass() {
+
+        if(classID != null){
+            // Tag used to cancel the request
+            String tag_string_req = "req_start_class";
+
+            StringRequest strReq = new StringRequest(Request.Method.POST,
+                    AppConfig.URL_START_CLASS, new Response.Listener<String>() {
+
+                @Override
+                public void onResponse(String response) {
+                    Log.d(TAG, "Start Class Response: " + response.toString());
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(TAG, "Start Class Error: " + error.getMessage());
+                }
+            }) {
+
+                @Override
+                protected Map<String, String> getParams() {
+                    // Posting params to class url
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("classID", classID);
+
+                    Log.e(TAG, "classID: " + classID);
+
+                    return params;
+                }
+
+            };
+
+            // Adding request to request queue
+            AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+        }
     }
 
     private void showClass(){
@@ -174,12 +264,17 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
             String className = jo.getString("className");
             String classLocation = jo.getString("classLocation");
             String classTime = jo.getString("classTime");
+            String classLat = jo.getString("classLat");
+            String classLng = jo.getString("classLng");
+
 
             classNameText.setText(className);
             classLocationText.setText(classLocation);
             classTimeText.setText(classTime);
 
             geoFence_class_id = className;
+            fenceLat = Double.parseDouble(classLat);
+            fenceLong = Double.parseDouble(classLng);
 
         } catch (JSONException e) {
             e.printStackTrace();

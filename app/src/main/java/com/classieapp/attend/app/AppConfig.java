@@ -19,6 +19,9 @@ public class AppConfig {
     // Server add reg id url
     public static String URL_REG_ID = "http://classie.nhctechservices.com/addRegID.php";
 
+    // Server start class url
+    public static String URL_START_CLASS = "http://classie.nhctechservices.com/startThisClass.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
