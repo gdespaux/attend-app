@@ -84,6 +84,7 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
                 // app is in foreground, broadcast the push message
                 Intent pushNotification = new Intent(AppConfig.PUSH_NOTIFICATION);
                 pushNotification.putExtra("message", message);
+                pushNotification.putExtra("payload", payload.toString());
                 LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
 
                 // play notification sound

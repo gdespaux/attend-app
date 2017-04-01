@@ -13,21 +13,26 @@
             android:title="Profile" />
     </group>
 
-    <item android:title="Options">
-        <menu>
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="Settings" />
-        </menu>
-    </item>
-
     <item android:title="Communicate">
         <menu>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_send"
                 android:title="Feedback" />
+        </menu>
+    </item>
+
+    <item android:title="Options">
+        <menu>
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Settings" />
+
+            <item
+                android:id="@+id/nav_log_out"
+                android:icon="@drawable/ic_power_settings_new_black_24dp"
+                android:title="Logout"/>
         </menu>
     </item>
 

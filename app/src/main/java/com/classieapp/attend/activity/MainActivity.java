@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
         Log.e(TAG, "Firebase reg id: " + regId);
 
         if (!TextUtils.isEmpty(regId)) {
-            Toast.makeText(getApplicationContext(), "Firebase Reg Id: " + regId, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Firebase Reg Id: " + regId, Toast.LENGTH_LONG).show();
             sendRegistrationToServer(regId);
         } else{
             Toast.makeText(getApplicationContext(), "Firebase Reg Id is not received yet!", Toast.LENGTH_LONG).show();
@@ -253,6 +253,8 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        } else if(id == R.id.nav_log_out){
+            logoutUser();
         }
 
         if (fragment != null) {

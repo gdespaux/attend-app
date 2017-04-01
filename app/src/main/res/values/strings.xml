@@ -47,4 +47,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="quick_attend_logo">Quick Attend Logo</string>
+    <string name="title_activity_class_student_list">ClassStudentListActivity</string>
+    <string name="student_name">Student Name</string>
+    <string name="present">Present</string>
+    <string name="open_class">Open Class</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="go_to_students">Go To Students</string>
 </resources>

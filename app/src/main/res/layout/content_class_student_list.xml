@@ -5,22 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.classieapp.attend.activity.ClassListActivity"
-    tools:showIn="@layout/activity_class_list"
-    tools:layout_editor_absoluteY="81dp"
-    tools:layout_editor_absoluteX="0dp">
+    tools:context="com.classieapp.attend.activity.ClassStudentListActivity"
+    tools:showIn="@layout/activity_class_student_list">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0.0">
 
         <ListView
             android:id="@+id/listView"
@@ -29,6 +28,6 @@
             android:clipToPadding="false"
             android:paddingBottom="80dp"
             android:scrollbarStyle="outsideOverlay"
-            tools:listitem="@layout/list_item" />
+            tools:listitem="@layout/student_list_item" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

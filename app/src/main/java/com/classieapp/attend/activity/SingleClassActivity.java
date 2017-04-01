@@ -2,6 +2,7 @@ package com.classieapp.attend.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,10 +22,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.SimpleAdapter;
@@ -76,6 +80,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private TextView mLatitudeText;
     private TextView mLongitudeText;
     private Button startClassButton;
+    private Button showStudentsButton;
 
     private TextView classNameText;
     private TextView classTimeText;
@@ -93,7 +98,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
     private static final long GEO_DURATION = 15000;
     private String geoFence_class_id = "";
-    private static final float GEOFENCE_RADIUS = 5000.0f; // in meters
+    private static final float GEOFENCE_RADIUS = 15000.0f; // in meters
 
     private PendingIntent geoFencePendingIntent;
     private final int GEOFENCE_REQ_CODE = 0;
@@ -113,6 +118,14 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // inside your activity (if you did not enable transitions in your theme)
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        // set an exit transition
+        getWindow().setEnterTransition(new Fade());
+        getWindow().setExitTransition(new Explode());
+        getWindow().setAllowEnterTransitionOverlap(true);
+
         setContentView(R.layout.activity_single_class);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -130,6 +143,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         mLatitudeText = (TextView) findViewById(R.id.latLoc);
         mLongitudeText = (TextView) findViewById(R.id.lonLoc);
         startClassButton = (Button) findViewById(R.id.btnStartClass);
+        showStudentsButton = (Button) findViewById(R.id.btnShowStudents);
         classNameText = (TextView) findViewById(R.id.className);
         classTimeText = (TextView) findViewById(R.id.classTime);
         classLocationText = (TextView) findViewById(R.id.classLocation);
@@ -167,6 +181,18 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
             }
         });
 
+        showStudentsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Launching the add class activity
+                Intent intent = new Intent(SingleClassActivity.this, ClassStudentListActivity.class);
+                intent.putExtra("classID",classID);
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
+
+            }
+        });
+
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -175,9 +201,20 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                     // new push notification is received
 
                     String message = intent.getStringExtra("message");
+                    try {
+                        JSONObject jsonObj = new JSONObject(intent.getStringExtra("payload"));
+                        fenceLat = Double.parseDouble(jsonObj.getString("classLat"));
+                        fenceLong = Double.parseDouble(jsonObj.getString("classLng"));
+
+                        Log.d("FENCELAT", Double.toString(fenceLat));
+                        Log.d("FENCELNG", Double.toString(fenceLong));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
                     Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Got ya message!");
+                    startGeofence();
                 }
 
                 Log.d(TAG, "Uh oh!");
@@ -215,10 +252,10 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     /**
      * Function to start checking for students in class will post params(class id)
      * to class url
-     * */
+     */
     public void startThisClass() {
 
-        if(classID != null){
+        if (classID != null) {
             // Tag used to cancel the request
             String tag_string_req = "req_start_class";
 
@@ -242,6 +279,8 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                     // Posting params to class url
                     Map<String, String> params = new HashMap<String, String>();
                     params.put("classID", classID);
+                    params.put("classLat", String.valueOf(mLastLocation.getLatitude()));
+                    params.put("classLng", String.valueOf(mLastLocation.getLongitude()));
 
                     Log.e(TAG, "classID: " + classID);
 
@@ -255,7 +294,52 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         }
     }
 
-    private void showClass(){
+    /**
+     * Function to start checking for students in class will post params(class id)
+     * to class url
+     */
+    public void attendThisClass() {
+
+        if (classID != null) {
+            // Tag used to cancel the request
+            String tag_string_req = "req_start_class";
+
+            StringRequest strReq = new StringRequest(Request.Method.POST,
+                    AppConfig.URL_START_CLASS, new Response.Listener<String>() {
+
+                @Override
+                public void onResponse(String response) {
+                    Log.d(TAG, "Start Class Response: " + response.toString());
+                }
+            }, new Response.ErrorListener() {
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.e(TAG, "Start Class Error: " + error.getMessage());
+                }
+            }) {
+
+                @Override
+                protected Map<String, String> getParams() {
+                    // Posting params to class url
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("classID", classID);
+                    params.put("classLat", String.valueOf(mLastLocation.getLatitude()));
+                    params.put("classLng", String.valueOf(mLastLocation.getLongitude()));
+
+                    Log.e(TAG, "classID: " + classID);
+
+                    return params;
+                }
+
+            };
+
+            // Adding request to request queue
+            AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+        }
+    }
+
+    private void showClass() {
         JSONObject jsonObject = null;
         try {
             jsonObject = new JSONObject(JSON_STRING);
@@ -273,8 +357,8 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
             classTimeText.setText(classTime);
 
             geoFence_class_id = className;
-            fenceLat = Double.parseDouble(classLat);
-            fenceLong = Double.parseDouble(classLng);
+            //fenceLat = Double.parseDouble(classLat);
+            //fenceLong = Double.parseDouble(classLng);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -284,7 +368,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
     /**
      * Function to get selected class from MySQL DB
-     * */
+     */
     private void getSingleClass(final String classID) {
         // Tag used to cancel the request
         String tag_string_req = "req_get_single_class";
@@ -519,8 +603,8 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                         case LocationSettingsStatusCodes.SUCCESS:
                             // All location settings are satisfied. The client can
                             // initialize location requests here.
-                            Snackbar.make(findViewById(R.id.singleClassLayout), "Settings are correct!", Snackbar.LENGTH_SHORT)
-                                    .setAction("Action", null).show();
+                            //Snackbar.make(findViewById(R.id.singleClassLayout), "Settings are correct!", Snackbar.LENGTH_SHORT)
+                            //        .setAction("Action", null).show();
                             break;
                         case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                             // Location settings are not satisfied, but this can be fixed
@@ -549,32 +633,26 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("onActivityResult()", Integer.toString(resultCode));
 
         //final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case REQUEST_CHECK_SETTINGS:
-                switch (resultCode)
-                {
-                    case Activity.RESULT_OK:
-                    {
+                switch (resultCode) {
+                    case Activity.RESULT_OK: {
                         // All required changes were successfully made
                         Snackbar.make(findViewById(R.id.singleClassLayout), "High Accuracy Location Enabled!", Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();
                         break;
                     }
-                    case Activity.RESULT_CANCELED:
-                    {
+                    case Activity.RESULT_CANCELED: {
                         // The user was asked to change settings, but chose not to
                         Snackbar.make(findViewById(R.id.singleClassLayout), "User cancelled request!", Snackbar.LENGTH_SHORT)
                                 .setAction("Action", null).show();
                         break;
                     }
-                    default:
-                    {
+                    default: {
                         break;
                     }
                 }
@@ -652,7 +730,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                         @Override
                         public void onResult(Status status) {
-                            if (status.isSuccess()){
+                            if (status.isSuccess()) {
 
                             }
                             // Remove notifiation here
@@ -671,7 +749,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     /**
      * Logging out the user. Will set isLoggedIn flag to false in shared
      * preferences Clears the user data from sqlite users table
-     * */
+     */
     private void logoutUser() {
         session.setLogin(false);
 

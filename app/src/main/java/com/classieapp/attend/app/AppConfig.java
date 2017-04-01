@@ -22,6 +22,12 @@ public class AppConfig {
     // Server start class url
     public static String URL_START_CLASS = "http://classie.nhctechservices.com/startThisClass.php";
 
+    // Server get class students url
+    public static String URL_GET_CLASS_STUDENTS = "http://classie.nhctechservices.com/getClassStudents.php";
+
+    // Server add attendance url
+    public static String URL_ADD_ATTENDANCE = "http://classie.nhctechservices.com/addAttendance.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
