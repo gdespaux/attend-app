@@ -19,6 +19,12 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <android.support.v4.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swipeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <ListView
             android:id="@android:id/list"
             android:layout_width="match_parent"
@@ -27,5 +33,6 @@
             android:paddingBottom="80dp"
             android:scrollbarStyle="outsideOverlay"
             tools:listitem="@layout/list_item" />
+        </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 </FrameLayout>

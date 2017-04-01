@@ -54,4 +54,6 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="go_to_students">Go To Students</string>
+    <string name="title_activity_add_student">AddStudentActivity</string>
+    <string name="student_age">Student Age</string>
 </resources>

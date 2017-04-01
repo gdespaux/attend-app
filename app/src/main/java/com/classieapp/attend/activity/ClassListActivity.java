@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.ChangeBounds;
@@ -50,9 +51,11 @@ import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
-public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener {
+public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = ClassListActivity.class.getSimpleName();
     private ProgressDialog pDialog;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -113,6 +116,13 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
         getAllClasses(userID);
 
+        /*
+         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+         * performs a swipe-to-refresh gesture.
+         */
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         return view;
 
     }
@@ -149,6 +159,15 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         getAllClasses(userID);
     }
 
+    @Override
+    public void onRefresh() {
+        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
+        // This method performs the actual data-refresh operation.
+        // The method calls setRefreshing(false) when it's finished.
+        getAllClasses(userID);
+    }
+
     private void showClass(){
         JSONObject jsonObject = null;
         ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
@@ -162,12 +181,14 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
                 String className = jo.getString("className");
                 String classLocation = jo.getString("classLocation");
                 String classTime = jo.getString("classTime");
+                String classCount = jo.getString("classCount");
 
                 HashMap<String,String> classes = new HashMap<>();
                 classes.put("classID",classID);
                 classes.put("className",className);
                 classes.put("classTime", classTime);
                 classes.put("classLocation",classLocation);
+                classes.put("classCount", classCount);
                 list.add(classes);
             }
 

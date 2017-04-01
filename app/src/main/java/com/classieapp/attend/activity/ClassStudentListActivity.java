@@ -25,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
+import com.classieapp.attend.adapters.StudentListAdapter;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
@@ -67,8 +68,10 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                // Launching the add class activity
+                Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
+                intent.putExtra("classID",classID);
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(ClassStudentListActivity.this).toBundle());
             }
         });
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -125,8 +128,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 JSONObject jo = result.getJSONObject(i);
                 String studentID = jo.getString("studentID");
                 String studentName = jo.getString("studentName");
-                //String studentPresent = jo.getString("studentPresent");
-                String studentPresent = "";
+                String studentPresent = jo.getString("studentPresent");
 
                 HashMap<String,String> student = new HashMap<>();
                 student.put("studentID",studentID);
@@ -139,8 +141,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new SimpleAdapter(
-                ClassStudentListActivity.this, list, R.layout.student_list_item,
+        ListAdapter adapter = new StudentListAdapter(
+                ClassStudentListActivity.this, list,
                 new String[]{"studentID", "studentName", "studentPresent"},
                 new int[]{R.id.studentID, R.id.studentName, R.id.studentPresent});
 

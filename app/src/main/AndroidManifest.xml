@@ -118,6 +118,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.classieapp.attend.activity.SingleClassActivity" />
         </activity>
+        <activity
+            android:name=".activity.AddStudentActivity"
+            android:label="@string/title_activity_add_student"
+            android:parentActivityName=".activity.ClassStudentListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.classieapp.attend.activity.ClassStudentListActivity" />
+        </activity>
     </application>
 
 </manifest>

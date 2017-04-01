@@ -28,6 +28,9 @@ public class AppConfig {
     // Server add attendance url
     public static String URL_ADD_ATTENDANCE = "http://classie.nhctechservices.com/addAttendance.php";
 
+    // Server add student url
+    public static String URL_ADD_STUDENT = "http://classie.nhctechservices.com/addStudent.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
