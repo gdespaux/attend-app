@@ -1,6 +1,7 @@
 package com.classieapp.attend.activity;
 
 import android.app.ActivityOptions;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,11 +11,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -35,11 +41,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
-public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener {
+public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private static final String TAG = ClassStudentListActivity.class.getSimpleName();
     private ListView listView;
     private ProgressDialog pDialog;
@@ -48,21 +59,54 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     private SQLiteHandler db;
     private SessionManager session;
     private String classID;
+    private String className;
+
+    private Calendar studentCalendar = Calendar.getInstance();
+    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            // TODO Auto-generated method stub
+            studentCalendar.set(Calendar.YEAR, year);
+            studentCalendar.set(Calendar.MONTH, monthOfYear);
+            studentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateStudentDate();
+        }
+
+    };
+
+    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition explode = new Explode();
+        explode.excludeTarget(android.R.id.statusBarBackground, true);
+        explode.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition slide = new Slide();
+        slide.excludeTarget(android.R.id.statusBarBackground, true);
+        slide.excludeTarget(android.R.id.navigationBarBackground, true);
 
         // inside your activity (if you did not enable transitions in your theme)
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // set an exit transition
-        getWindow().setEnterTransition(new Explode());
-        getWindow().setExitTransition(new Explode());
+        getWindow().setEnterTransition(slide);
+        getWindow().setExitTransition(explode);
         getWindow().setAllowEnterTransitionOverlap(true);
 
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_class_student_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        className = getIntent().getStringExtra("className");
+
+        getSupportActionBar().setTitle(className + ": " + currentDate);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -92,8 +136,47 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         listView = (ListView) findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
+
         classID = getIntent().getStringExtra("classID");
         getClassStudents(classID);
+    }
+
+    private void updateStudentDate() {
+
+        String myFormat = "MM/dd/yyyy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        currentDate = sdf.format(studentCalendar.getTime());
+
+        getSupportActionBar().setTitle("Today's Attendance: " + currentDate);
+        getClassStudents(classID);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_class_student_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_change_date) {
+            new DatePickerDialog(ClassStudentListActivity.this, date, studentCalendar
+                    .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
+                    studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -109,6 +192,13 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         studentPresent.setChecked(presentNow);
 
         addStudentAttendance(studentID, presentNow);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Toast.makeText(getApplicationContext(),
+                "Can't edit yet!", Toast.LENGTH_LONG).show();
+        return true;
     }
 
     @Override
@@ -220,6 +310,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 params.put("classID", classID);
                 params.put("studentID", studentID);
                 params.put("studentPresent", studentAttend);
+                params.put("classDate", currentDate);
                 return params;
             }
 
@@ -283,6 +374,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("classID", classID);
+                params.put("classDate", currentDate);
                 return params;
             }
 

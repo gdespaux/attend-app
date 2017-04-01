@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- "Change Date", should always appear as action button -->
+    <item
+        android:id="@+id/action_change_date"
+        android:icon="@drawable/ic_today_black_24dp"
+        android:title="Change Date"
+        app:showAsAction="always|withText"/>
+</menu>

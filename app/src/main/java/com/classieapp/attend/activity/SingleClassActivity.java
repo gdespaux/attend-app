@@ -22,8 +22,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.ChangeBounds;
 import android.transition.Explode;
 import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -112,6 +115,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private String userID;
 
     private String classID;
+    private String thisClassName;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
@@ -119,25 +123,29 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition explode = new Explode();
+        explode.excludeTarget(android.R.id.statusBarBackground, true);
+        explode.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition slide = new Slide();
+        slide.excludeTarget(android.R.id.statusBarBackground, true);
+        slide.excludeTarget(android.R.id.navigationBarBackground, true);
+
         // inside your activity (if you did not enable transitions in your theme)
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // set an exit transition
-        getWindow().setEnterTransition(new Fade());
-        getWindow().setExitTransition(new Explode());
+        getWindow().setEnterTransition(slide);
+        getWindow().setExitTransition(explode);
         getWindow().setAllowEnterTransitionOverlap(true);
 
         setContentView(R.layout.activity_single_class);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Just a placeholder for now, sorry!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mLatitudeText = (TextView) findViewById(R.id.latLoc);
@@ -188,6 +196,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                 // Launching the add class activity
                 Intent intent = new Intent(SingleClassActivity.this, ClassStudentListActivity.class);
                 intent.putExtra("classID",classID);
+                intent.putExtra("className", thisClassName);
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
 
             }
@@ -351,6 +360,9 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
             String classLat = jo.getString("classLat");
             String classLng = jo.getString("classLng");
 
+            getSupportActionBar().setTitle(className + " " + classTime);
+            thisClassName = className;
+
 
             classNameText.setText(className);
             classLocationText.setText(classLocation);
@@ -423,24 +435,6 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_single_class, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.geofence: {
-                startGeofence();
-                return true;
-            }
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     public static Intent makeNotificationIntent(Context geofenceService, String msg) {

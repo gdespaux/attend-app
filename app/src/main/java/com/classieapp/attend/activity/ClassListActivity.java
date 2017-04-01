@@ -14,6 +14,7 @@ import android.transition.ChangeBounds;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
+import android.transition.Transition;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -51,7 +52,7 @@ import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
-public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private static final String TAG = ClassListActivity.class.getSimpleName();
     private ProgressDialog pDialog;
 
@@ -71,12 +72,17 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        // set an exit transition
-        getActivity().getWindow().setSharedElementEnterTransition(new ChangeBounds());
-        getActivity().getWindow().setSharedElementExitTransition(new ChangeBounds());
-        getActivity().getWindow().setEnterTransition(new Fade());
-        getActivity().getWindow().setExitTransition(new Explode());
-        getActivity().getWindow().setAllowEnterTransitionOverlap(true);
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition explode = new Explode();
+        explode.excludeTarget(android.R.id.statusBarBackground, true);
+        explode.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition slide = new Slide();
+        slide.excludeTarget(android.R.id.statusBarBackground, true);
+        slide.excludeTarget(android.R.id.navigationBarBackground, true);
 
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -113,6 +119,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
         View view = inflater.inflate(R.layout.fragment_class_list, container, false);
         ListView listView = (ListView) view.findViewById(android.R.id.list);
+        listView.setOnItemLongClickListener(this);
 
         getAllClasses(userID);
 
@@ -121,7 +128,19 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
          * performs a swipe-to-refresh gesture.
          */
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        getAllClasses(userID);
+                    }
+                }
+        );
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
 
         return view;
 
@@ -144,7 +163,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         //        Pair.create(v, "transClassTime"),
         //        Pair.create(v, "transClassLocation"));
 
-        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(), sharedView, transitionName);
+        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
         i.putExtra("classID",classID);
         getActivity().startActivity(i, transitionActivityOptions.toBundle());
 
@@ -154,17 +173,15 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getAllClasses(userID);
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Toast.makeText(getActivity(),
+                "Can't edit yet!", Toast.LENGTH_LONG).show();
+        return true;
     }
 
     @Override
-    public void onRefresh() {
-        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
-
-        // This method performs the actual data-refresh operation.
-        // The method calls setRefreshing(false) when it's finished.
+    public void onResume() {
+        super.onResume();
         getAllClasses(userID);
     }
 
@@ -198,8 +215,8 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
         ListAdapter adapter = new SimpleAdapter(
                 getActivity(), list, R.layout.list_item,
-                new String[]{"classID", "className", "classTime", "classLocation"},
-                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation});
+                new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
+                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
         setListAdapter(adapter);
     }
@@ -264,6 +281,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                mSwipeRefreshLayout.setRefreshing(false);
 
             }
         }, new Response.ErrorListener() {

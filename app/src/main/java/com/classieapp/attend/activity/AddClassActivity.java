@@ -10,6 +10,8 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
 import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -80,11 +82,20 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+
+        Transition explode = new Explode();
+        explode.excludeTarget(android.R.id.statusBarBackground, true);
+        explode.excludeTarget(android.R.id.navigationBarBackground, true);
+
         // inside your activity (if you did not enable transitions in your theme)
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         // set an exit transition
-        getWindow().setEnterTransition(new Explode());
-        getWindow().setExitTransition(new Explode());
+        getWindow().setEnterTransition(explode);
+        getWindow().setExitTransition(explode);
         getWindow().setAllowEnterTransitionOverlap(true);
 
         setContentView(R.layout.activity_add_class);
