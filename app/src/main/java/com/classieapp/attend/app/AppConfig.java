@@ -25,6 +25,9 @@ public class AppConfig {
     // Server get class students url
     public static String URL_GET_CLASS_STUDENTS = "http://classie.nhctechservices.com/getClassStudents.php";
 
+    // Server get account students url
+    public static String URL_TYPEAHEAD_ACCOUNT_STUDENTS = "http://classie.nhctechservices.com/typeaheadAccountStudents.php";
+
     // Server add attendance url
     public static String URL_ADD_ATTENDANCE = "http://classie.nhctechservices.com/addAttendance.php";
 

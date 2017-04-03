@@ -33,7 +33,7 @@
             tools:layout_editor_absoluteX="8dp"
             tools:layout_editor_absoluteY="0dp">
 
-            <android.support.design.widget.TextInputEditText
+            <AutoCompleteTextView
                 android:id="@+id/studentName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

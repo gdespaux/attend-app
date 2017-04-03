@@ -120,11 +120,11 @@ public class LoginActivity extends Activity {
         boolean checked = ((Switch) view).isChecked();
 
         if(checked){
-            ((Switch) view).getThumbDrawable().setColorFilter(Color.argb(255, 29, 233, 182), PorterDuff.Mode.MULTIPLY);
-            ((Switch) view).getTrackDrawable().setColorFilter(Color.argb(255, 178, 223, 219), PorterDuff.Mode.MULTIPLY);
+            //((Switch) view).getThumbDrawable().setColorFilter(Color.argb(255, 29, 233, 182), PorterDuff.Mode.MULTIPLY);
+            //((Switch) view).getTrackDrawable().setColorFilter(Color.argb(255, 178, 223, 219), PorterDuff.Mode.MULTIPLY);
         } else {
-            ((Switch) view).getThumbDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
-            ((Switch) view).getTrackDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
+            //((Switch) view).getThumbDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
+            //((Switch) view).getTrackDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
         }
     }
 
@@ -159,6 +159,7 @@ public class LoginActivity extends Activity {
 
                         // Now store the user in SQLite
                         String uid = jObj.getString("uid");
+                        String accountID = jObj.getString("account_id");
 
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
@@ -172,7 +173,7 @@ public class LoginActivity extends Activity {
                         }
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, accountType, created_at);
+                        db.addUser(name, email, uid, accountID, accountType, created_at);
 
                         // Launch main activity
                         Intent intent = new Intent(LoginActivity.this,

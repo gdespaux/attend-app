@@ -144,6 +144,7 @@ public class RegisterActivity extends Activity {
                         // User successfully stored in MySQL
                         // Now store the user in sqlite
                         String uid = jObj.getString("uid");
+                        String accountID = jObj.getString("account_id");
 
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
@@ -153,7 +154,7 @@ public class RegisterActivity extends Activity {
                                 .getString("created_at");
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, accountType, created_at);
+                        db.addUser(name, email, uid, accountID, accountType, created_at);
 
                         Toast.makeText(getApplicationContext(), "Registration successful. Login now!", Toast.LENGTH_LONG).show();
 

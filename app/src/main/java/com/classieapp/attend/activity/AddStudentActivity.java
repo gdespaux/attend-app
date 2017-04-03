@@ -14,7 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -22,20 +25,34 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
+import com.classieapp.attend.adapters.AddStudentAdapter;
+import com.classieapp.attend.adapters.StudentListAdapter;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
+import com.classieapp.attend.utils.SQLiteHandler;
+import com.classieapp.attend.utils.SessionManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AddStudentActivity extends AppCompatActivity {
     private static final String TAG = AddStudentActivity.class.getSimpleName();
     private ProgressDialog pDialog;
-    private EditText inputStudentName;
+    private AutoCompleteTextView inputStudentName;
     private EditText inputStudentAge;
+
+    private String JSON_STRING;
+    private SQLiteHandler db;
+    private SessionManager session;
+    private String accountID;
+
+    List<String> studentList = new ArrayList<String>();
 
     private String classID;
 
@@ -66,11 +83,102 @@ public class AddStudentActivity extends AppCompatActivity {
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        inputStudentName = (EditText) findViewById(R.id.studentName);
+        // SqLite database handler
+        db = new SQLiteHandler(getApplicationContext());
+
+        // session manager
+        session = new SessionManager(getApplicationContext());
+
+        // Fetching user details from sqlite
+        final HashMap<String, String> user = db.getUserDetails();
+
+        accountID = user.get("account_id");
+
         inputStudentAge = (EditText) findViewById(R.id.studentAge);
+        inputStudentName = (AutoCompleteTextView)
+                findViewById(R.id.studentName);
 
         classID = getIntent().getStringExtra("classID");
 
+        getTypeaheadStudents();
+
+    }
+
+    /**
+     * Function to get all of user's classes from MySQL DB
+     * */
+    private void getTypeaheadStudents() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_get_all_classes";
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_TYPEAHEAD_ACCOUNT_STUDENTS, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Get Students Response: " + response.toString());
+                ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        JSON_STRING = response;
+                        JSONArray result = jObj.getJSONArray("students");
+
+                        for(int i = 0; i<result.length(); i++){
+                            JSONObject jo = result.getJSONObject(i);
+                            String studentName = jo.getString("studentName");
+                            String studentAge = jo.getString("studentAge");
+
+                            HashMap<String,String> student = new HashMap<>();
+                            student.put("studentName",studentName);
+                            student.put("studentAge", studentAge);
+                            list.add(student);
+                        }
+
+                        AddStudentAdapter adapter = new AddStudentAdapter(
+                                AddStudentActivity.this, list,
+                                new String[]{"studentName", "studentAge"},
+                                new int[]{R.id.studentName, R.id.studentAge});
+
+                        inputStudentName.setAdapter(adapter);
+
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     @Override
