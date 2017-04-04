@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -46,6 +47,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private ProgressDialog pDialog;
     private AutoCompleteTextView inputStudentName;
     private EditText inputStudentAge;
+    private EditText inputStudentID;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -95,6 +97,7 @@ public class AddStudentActivity extends AppCompatActivity {
         accountID = user.get("account_id");
 
         inputStudentAge = (EditText) findViewById(R.id.studentAge);
+        inputStudentID = (EditText) findViewById(R.id.studentID);
         inputStudentName = (AutoCompleteTextView)
                 findViewById(R.id.studentName);
 
@@ -130,19 +133,33 @@ public class AddStudentActivity extends AppCompatActivity {
                             JSONObject jo = result.getJSONObject(i);
                             String studentName = jo.getString("studentName");
                             String studentAge = jo.getString("studentAge");
+                            String studentID = jo.getString("studentID");
 
                             HashMap<String,String> student = new HashMap<>();
                             student.put("studentName",studentName);
                             student.put("studentAge", studentAge);
+                            student.put("studentID", studentID);
                             list.add(student);
                         }
 
                         AddStudentAdapter adapter = new AddStudentAdapter(
                                 AddStudentActivity.this, list,
-                                new String[]{"studentName", "studentAge"},
-                                new int[]{R.id.studentName, R.id.studentAge});
+                                new String[]{"studentName", "studentAge", "studentID"},
+                                new int[]{R.id.studentName, R.id.studentAge, R.id.studentID});
 
                         inputStudentName.setAdapter(adapter);
+                        inputStudentName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                                HashMap<String,String> student = (HashMap<String,String>) parent.getItemAtPosition(position);
+
+                                Log.i("FROMARRAY", student.get("studentName"));
+                                inputStudentName.setText(student.get("studentName"));
+                                inputStudentAge.setText(student.get("studentAge"));
+                                inputStudentID.setText(student.get("studentID"));
+                            }
+                        });
 
                     } else {
 
@@ -193,10 +210,11 @@ public class AddStudentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_student:
                 String studentName = inputStudentName.getText().toString().trim();
-                String studentAge = inputStudentAge.getText().toString();
+                String studentAge = inputStudentAge.getText().toString().trim();
+                String studentID = inputStudentID.getText().toString().trim();
 
                 if (!studentName.isEmpty() && !studentAge.isEmpty()) {
-                    addStudent(classID, studentName, studentAge);
+                    addStudent(classID, studentName, studentAge, studentID);
 
                     return true;
                 } else {
@@ -217,9 +235,9 @@ public class AddStudentActivity extends AppCompatActivity {
 
     /**
      * Function to store student in MySQL database will post params(class, name,
-     * age) to add student url
+     * age, existing id) to add student url
      * */
-    private void addStudent(final String classID, final String studentName, final String studentAge) {
+    private void addStudent(final String classID, final String studentName, final String studentAge, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_student";
 
@@ -236,6 +254,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
                 inputStudentName.setText("");
                 inputStudentAge.setText("");
+                inputStudentID.setText("");
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -273,6 +292,7 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("classID", classID);
                 params.put("studentName", studentName);
                 params.put("studentAge", studentAge);
+                params.put("studentID", studentID);
 
                 return params;
             }

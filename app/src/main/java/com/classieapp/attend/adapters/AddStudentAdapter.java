@@ -70,11 +70,13 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
 
             holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
             holder.studentAge = (TextView) convertView.findViewById(R.id.studentAge);
+            holder.studentID = (TextView) convertView.findViewById(R.id.studentID);
 
             Log.i("RESPONSE", list.toString());
 
             holder.studentName.setText(list.get(position).get("studentName"));
             holder.studentAge.setText("Age: " + list.get(position).get("studentAge"));
+            holder.studentID.setText(list.get(position).get("studentID"));
 
 
             convertView.setTag(holder);
@@ -124,10 +126,12 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
                         String data = mOriginalValues.get(i).get("studentName");
                         String studentName = mOriginalValues.get(i).get("studentName");
                         String studentAge = mOriginalValues.get(i).get("studentAge");
+                        String studentID = mOriginalValues.get(i).get("studentID");
                         if (data.toLowerCase().startsWith(constraint.toString())) {
                             HashMap<String,String> filteredStudent = new HashMap<>();
                             filteredStudent.put("studentName",studentName);
                             filteredStudent.put("studentAge", studentAge);
+                            filteredStudent.put("studentID", studentID);
                             FilteredArrList.add(filteredStudent);
                         }
                     }
@@ -144,5 +148,6 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
     private static class ViewHolder {
         TextView studentName;
         TextView studentAge;
+        TextView studentID;
     }
 }
