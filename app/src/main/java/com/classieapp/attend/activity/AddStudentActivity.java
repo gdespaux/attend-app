@@ -290,6 +290,7 @@ public class AddStudentActivity extends AppCompatActivity {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("classID", classID);
+                params.put("accountID", accountID);
                 params.put("studentName", studentName);
                 params.put("studentAge", studentAge);
                 params.put("studentID", studentID);

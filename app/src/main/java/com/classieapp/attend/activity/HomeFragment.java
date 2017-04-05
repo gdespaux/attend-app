@@ -1,33 +1,20 @@
 package com.classieapp.attend.activity;
 
 import android.app.ActivityOptions;
-import android.app.Fragment;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.transition.ChangeBounds;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -38,8 +25,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.android.volley.Request;
@@ -52,8 +42,8 @@ import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 
-public class ClassListActivity extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
-    private static final String TAG = ClassListActivity.class.getSimpleName();
+public class HomeFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+    private static final String TAG = HomeFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -62,6 +52,8 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
     private SQLiteHandler db;
     private SessionManager session;
     private String userID;
+
+    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -100,6 +92,8 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("My Classes: " + currentDate);
+
         // SqLite database handler
         db = new SQLiteHandler(getActivity());
 
@@ -121,7 +115,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         ListView listView = (ListView) view.findViewById(android.R.id.list);
         listView.setOnItemLongClickListener(this);
 
-        getAllClasses(userID);
+        getTodayClasses(userID);
 
         /*
          * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -136,7 +130,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
-                        getAllClasses(userID);
+                        getTodayClasses(userID);
                     }
                 }
         );
@@ -152,8 +146,9 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
         Log.i("Clicked!", "Item was clicked!");
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
         String classID = map.get("classID").toString();
+        String className = map.get("className").toString();
 
-        Intent i = new Intent(getActivity(), SingleClassActivity.class);
+        Intent i = new Intent(getActivity(), ClassStudentListActivity.class);
 
         View sharedView = v;
         String transitionName = "transClassName";
@@ -165,6 +160,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
 
         ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
         i.putExtra("classID",classID);
+        i.putExtra("className", className);
         getActivity().startActivity(i, transitionActivityOptions.toBundle());
 
         //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
@@ -182,7 +178,7 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
     @Override
     public void onResume() {
         super.onResume();
-        getAllClasses(userID);
+        getTodayClasses(userID);
     }
 
     private void showClass(){
@@ -248,15 +244,15 @@ public class ClassListActivity extends android.support.v4.app.ListFragment imple
     /**
      * Function to get all of user's classes from MySQL DB
      * */
-    private void getAllClasses(final String userID) {
+    private void getTodayClasses(final String userID) {
         // Tag used to cancel the request
-        String tag_string_req = "req_get_all_classes";
+        String tag_string_req = "req_get_today_classes";
 
         pDialog.setMessage("Loading Classes...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_ALL_CLASSES, new Response.Listener<String>() {
+                AppConfig.URL_GET_TODAY_CLASSES, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {

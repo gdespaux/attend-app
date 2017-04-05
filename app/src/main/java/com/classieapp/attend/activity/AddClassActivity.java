@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -65,10 +66,19 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
     private TextView inputClassLat;
     private TextView inputClassLng;
 
+    private ToggleButton toggleSunday;
+    private ToggleButton toggleMonday;
+    private ToggleButton toggleTuesday;
+    private ToggleButton toggleWednesday;
+    private ToggleButton toggleThursday;
+    private ToggleButton toggleFriday;
+    private ToggleButton toggleSaturday;
+
     private SQLiteHandler db;
     private SessionManager session;
 
     private String userID;
+    private String accountID;
 
     private boolean didSelectItem = false;
 
@@ -132,6 +142,15 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         inputClassLat = (TextView) findViewById(R.id.classLat);
         inputClassLng = (TextView) findViewById(R.id.classLng);
 
+        toggleSunday = (ToggleButton) findViewById(R.id.toggleSunday);
+        toggleMonday = (ToggleButton) findViewById(R.id.toggleMonday);
+        toggleTuesday = (ToggleButton) findViewById(R.id.toggleTuesday);
+        toggleWednesday = (ToggleButton) findViewById(R.id.toggleWednesday);
+        toggleThursday = (ToggleButton) findViewById(R.id.toggleThursday);
+        toggleFriday = (ToggleButton) findViewById(R.id.toggleFriday);
+        toggleSaturday = (ToggleButton) findViewById(R.id.toggleSaturday);
+
+
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
 
@@ -145,6 +164,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
         userID = user.get("uid");
+        accountID = user.get("account_id");
 
         // View classes click event
         btnAddClass.setOnClickListener(new View.OnClickListener() {
@@ -157,9 +177,19 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 String classLat = inputClassLat.getText().toString().trim();
                 String classLng = inputClassLng.getText().toString().trim();
 
+                String[] onDays = new String[7];
+
+                onDays[0] = toggleSunday.isChecked() ? "true" : "false";
+                onDays[1] = toggleMonday.isChecked() ? "true" : "false";
+                onDays[2] = toggleTuesday.isChecked() ? "true" : "false";
+                onDays[3] = toggleWednesday.isChecked() ? "true" : "false";
+                onDays[4] = toggleThursday.isChecked() ? "true" : "false";
+                onDays[5] = toggleFriday.isChecked() ? "true" : "false";
+                onDays[6] = toggleSaturday.isChecked() ? "true" : "false";
+
                 if(didSelectItem){
                     if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty() && !classLat.isEmpty() && !classLng.isEmpty()) {
-                        addClass(userID, className, classTime, classLocation, classLat, classLng);
+                        addClass(userID, className, classTime, classLocation, onDays, classLat, classLng);
                     } else {
                         Toast.makeText(getApplicationContext(),
                                 "Please enter class details!", Toast.LENGTH_LONG)
@@ -267,9 +297,20 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 String classLat = inputClassLat.getText().toString().trim();
                 String classLng = inputClassLng.getText().toString().trim();
 
+                String[] onDays = new String[7];
+
+                onDays[0] = toggleSunday.isChecked() ? "true" : "false";
+                onDays[1] = toggleMonday.isChecked() ? "true" : "false";
+                onDays[2] = toggleTuesday.isChecked() ? "true" : "false";
+                onDays[3] = toggleWednesday.isChecked() ? "true" : "false";
+                onDays[4] = toggleThursday.isChecked() ? "true" : "false";
+                onDays[5] = toggleFriday.isChecked() ? "true" : "false";
+                onDays[6] = toggleSaturday.isChecked() ? "true" : "false";
+
+
                 if(didSelectItem){
                     if (!className.isEmpty() && !classTime.isEmpty() && !classLocation.isEmpty() && !classLat.isEmpty() && !classLng.isEmpty()) {
-                        addClass(userID, className, classTime, classLocation, classLat, classLng);
+                        addClass(userID, className, classTime, classLocation, onDays, classLat, classLng);
 
                         return true;
                     } else {
@@ -312,7 +353,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
      * Function to store user in MySQL database will post params(tag, name,
      * email, password) to register url
      * */
-    private void addClass(final String userID, final String className, final String classTime, final String classLocation, final String classLat, final String classLng) {
+    private void addClass(final String userID, final String className, final String classTime, final String classLocation, final String[] onDays, final String classLat, final String classLng) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_class";
 
@@ -332,6 +373,14 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 inputClassLocation.setText("");
                 inputClassLat.setText("");
                 inputClassLng.setText("");
+
+                toggleSunday.setChecked(false);
+                toggleMonday.setChecked(false);
+                toggleTuesday.setChecked(false);
+                toggleWednesday.setChecked(false);
+                toggleThursday.setChecked(false);
+                toggleFriday.setChecked(false);
+                toggleSaturday.setChecked(false);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -383,11 +432,19 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("userID", userID);
+                params.put("accountID", accountID);
                 params.put("className", className);
                 params.put("classTime", classTime);
                 params.put("classLocation", classLocation);
                 params.put("classLat", classLat);
                 params.put("classLng", classLng);
+                params.put("onSunday", onDays[0]);
+                params.put("onMonday", onDays[1]);
+                params.put("onTuesday", onDays[2]);
+                params.put("onWednesday", onDays[3]);
+                params.put("onThursday", onDays[4]);
+                params.put("onFriday", onDays[5]);
+                params.put("onSaturday", onDays[6]);
 
                 return params;
             }

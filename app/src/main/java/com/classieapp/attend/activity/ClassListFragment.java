@@ -2,46 +2,34 @@ package com.classieapp.attend.activity;
 
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
+
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.classieapp.attend.R;
-import com.classieapp.attend.adapters.StudentListAdapter;
-import com.classieapp.attend.app.AppConfig;
-import com.classieapp.attend.app.AppController;
-import com.classieapp.attend.utils.SQLiteHandler;
-import com.classieapp.attend.utils.SessionManager;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,17 +38,26 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
-    private static final String TAG = ClassStudentListActivity.class.getSimpleName();
-    private ListView listView;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.classieapp.attend.R;
+import com.classieapp.attend.app.AppConfig;
+import com.classieapp.attend.app.AppController;
+import com.classieapp.attend.utils.SQLiteHandler;
+import com.classieapp.attend.utils.SessionManager;
+
+public class ClassListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+    private static final String TAG = ClassListFragment.class.getSimpleName();
     private ProgressDialog pDialog;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
-    private String classID;
-    private String className;
-    private String accountID;
+    private String userID;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -77,10 +74,17 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     };
 
-    String currentDate;
+    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+
+    private String mParam1;
+    private String mParam2;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         Transition fade = new Fade();
         fade.excludeTarget(android.R.id.statusBarBackground, true);
         fade.excludeTarget(android.R.id.navigationBarBackground, true);
@@ -93,66 +97,70 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         slide.excludeTarget(android.R.id.statusBarBackground, true);
         slide.excludeTarget(android.R.id.navigationBarBackground, true);
 
-        // inside your activity (if you did not enable transitions in your theme)
-        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        // set an exit transition
-        getWindow().setEnterTransition(slide);
-        getWindow().setExitTransition(explode);
-        getWindow().setAllowEnterTransitionOverlap(true);
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_class_student_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        className = getIntent().getStringExtra("className");
-
-        if(getIntent().hasExtra("classDate")){
-            currentDate = getIntent().getStringExtra("classDate");
-        } else {
-            currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+        if (getArguments() != null) {
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        setHasOptionsMenu(true);
+    }
 
-        getSupportActionBar().setTitle(className + ": " + currentDate);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Launching the add class activity
-                Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
-                intent.putExtra("classID",classID);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(ClassStudentListActivity.this).toBundle());
-            }
-        });
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // Progress dialog
-        pDialog = new ProgressDialog(this);
+        pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("All Classes");
+
         // SqLite database handler
-        db = new SQLiteHandler(getApplicationContext());
-
-        // Fetching user details from sqlite
-        final HashMap<String, String> user = db.getUserDetails();
-
-        accountID = user.get("account_id");
+        db = new SQLiteHandler(getActivity());
 
         // session manager
-        session = new SessionManager(getApplicationContext());
+        session = new SessionManager(getActivity());
 
         if (!session.isLoggedIn()) {
             logoutUser();
         }
 
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(this);
+        // Fetching user details from sqlite
+        final HashMap<String, String> user = db.getUserDetails();
+
+        userID = user.get("uid");
+        String name = user.get("name");
+        String email = user.get("email");
+
+        View view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        ListView listView = (ListView) view.findViewById(android.R.id.list);
         listView.setOnItemLongClickListener(this);
 
-        classID = getIntent().getStringExtra("classID");
-        getClassStudents(classID);
+        getAllClasses(userID);
+
+        /*
+         * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
+         * performs a swipe-to-refresh gesture.
+         */
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
+                        // This method performs the actual data-refresh operation.
+                        // The method calls setRefreshing(false) when it's finished.
+                        getAllClasses(userID);
+                    }
+                }
+        );
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
+
+        return view;
+
     }
 
     private void updateStudentDate() {
@@ -162,15 +170,15 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         currentDate = sdf.format(studentCalendar.getTime());
 
-        getSupportActionBar().setTitle("Today's Attendance: " + currentDate);
-        getClassStudents(classID);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("My Classes: " + currentDate);
+        getTodayClasses();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_class_student_list, menu);
-        return true;
+        inflater.inflate(R.menu.menu_class_list, menu);
+        super.onCreateOptionsMenu(menu,inflater);
     }
 
     @Override
@@ -182,7 +190,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_change_date) {
-            new DatePickerDialog(ClassStudentListActivity.this, date, studentCalendar
+            new DatePickerDialog(getActivity(), date, studentCalendar
                     .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
                     studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
 
@@ -193,63 +201,81 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Intent intent = new Intent(this, ViewEmployee.class);
-        HashMap<String,String> map =(HashMap)parent.getItemAtPosition(position);
-        String studentID = map.get("studentID").toString();
-        //intent.putExtra("classID",empId);
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        Log.i("Clicked!", "Item was clicked!");
+        HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
+        String classID = map.get("classID").toString();
+        String className = map.get("className").toString();
+
+        Intent i = new Intent(getActivity(), ClassStudentListActivity.class);
+
+        View sharedView = v;
+        String transitionName = "transClassName";
+
+        //ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
+        //        Pair.create(v, "transClassName"),
+        //        Pair.create(v, "transClassTime"),
+        //        Pair.create(v, "transClassLocation"));
+
+        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
+        i.putExtra("classID",classID);
+        i.putExtra("className", className);
+        i.putExtra("classDate", currentDate);
+        getActivity().startActivity(i, transitionActivityOptions.toBundle());
+
+        //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
+        //intent.putExtra("classID",classID);
         //startActivity(intent);
-
-        CheckBox studentPresent = (CheckBox) view.findViewById(R.id.studentPresent);
-        Boolean presentNow = !studentPresent.isChecked();
-        studentPresent.setChecked(presentNow);
-
-        addStudentAttendance(studentID, presentNow);
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getApplicationContext(),
+        Toast.makeText(getActivity(),
                 "Can't edit yet!", Toast.LENGTH_LONG).show();
         return true;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        getClassStudents(classID);
+        getAllClasses(userID);
     }
 
-    private void showStudent(){
+    private void showClass(){
         JSONObject jsonObject = null;
         ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
-            JSONArray result = jsonObject.getJSONArray("students");
+            JSONArray result = jsonObject.getJSONArray("classes");
 
             for(int i = 0; i<result.length(); i++){
                 JSONObject jo = result.getJSONObject(i);
-                String studentID = jo.getString("studentID");
-                String studentName = jo.getString("studentName");
-                String studentPresent = jo.getString("studentPresent");
+                String classID = jo.getString("classID");
+                String className = jo.getString("className");
+                String classLocation = jo.getString("classLocation");
+                String classTime = jo.getString("classTime");
+                String classCount = jo.getString("classCount");
 
-                HashMap<String,String> student = new HashMap<>();
-                student.put("studentID",studentID);
-                student.put("studentName", studentName);
-                student.put("studentPresent",studentPresent);
-                list.add(student);
+                HashMap<String,String> classes = new HashMap<>();
+                classes.put("classID",classID);
+                classes.put("className",className);
+                classes.put("classTime", classTime);
+                classes.put("classLocation",classLocation);
+                classes.put("classCount", classCount);
+                list.add(classes);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new StudentListAdapter(
-                ClassStudentListActivity.this, list,
-                new String[]{"studentID", "studentName", "studentPresent"},
-                new int[]{R.id.studentID, R.id.studentName, R.id.studentPresent});
+        ListAdapter adapter = new SimpleAdapter(
+                getActivity(), list, R.layout.list_item,
+                new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
+                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
-        listView.setAdapter(adapter);
+        setListAdapter(adapter);
     }
 
     /**
@@ -262,40 +288,57 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         db.deleteUsers();
 
         // Launching the login activity
-        Intent intent = new Intent(ClassStudentListActivity.this, LoginActivity.class);
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
-        finish();
+        getActivity().finish();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //Intent intent = new Intent(this, ViewEmployee.class);
+        HashMap<String,String> map =(HashMap)parent.getItemAtPosition(position);
+        String className = map.get("className").toString();
+        //intent.putExtra("classID",empId);
+        //startActivity(intent);
     }
 
     /**
      * Function to get all of user's classes from MySQL DB
      * */
-    private void addStudentAttendance(final String studentID, final Boolean studentPresent) {
+    private void getAllClasses(final String userID) {
         // Tag used to cancel the request
-        String tag_string_req = "req_add_attendance";
+        String tag_string_req = "req_get_all_classes";
+
+        pDialog.setMessage("Loading Classes...");
+        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_ADD_ATTENDANCE, new Response.Listener<String>() {
+                AppConfig.URL_GET_ALL_CLASSES, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Attendance Response: " + response.toString());
+                Log.d(TAG, "Get Class Response: " + response.toString());
+                hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
+                        JSON_STRING = response;
+                        showClass();
                         //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
+
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
+                        Toast.makeText(getActivity(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                mSwipeRefreshLayout.setRefreshing(false);
 
             }
         }, new Response.ErrorListener() {
@@ -303,28 +346,17 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
             }
         }) {
-
-            String studentAttend = "";
 
             @Override
             protected Map<String, String> getParams() {
                 // Posting params to register url
-                if(studentPresent){
-                    studentAttend = "yes";
-                } else {
-                    studentAttend = "no";
-                }
-
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("classID", classID);
-                params.put("accountID", accountID);
-                params.put("studentID", studentID);
-                params.put("studentPresent", studentAttend);
-                params.put("classDate", currentDate);
+                params.put("userID", userID);
                 return params;
             }
 
@@ -337,19 +369,19 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     /**
      * Function to get all of user's classes from MySQL DB
      * */
-    private void getClassStudents(final String classID) {
+    private void getTodayClasses() {
         // Tag used to cancel the request
-        String tag_string_req = "req_get_class_students";
+        String tag_string_req = "req_get_today_classes";
 
-        pDialog.setMessage("Loading Students...");
+        pDialog.setMessage("Loading Classes...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_CLASS_STUDENTS, new Response.Listener<String>() {
+                AppConfig.URL_GET_TODAY_CLASSES, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Students Response: " + response.toString());
+                Log.d(TAG, "Get Class Response: " + response.toString());
                 hideDialog();
 
                 try {
@@ -357,19 +389,20 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
                         JSON_STRING = response;
-                        showStudent();
+                        showClass();
                         //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
 
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
+                        Toast.makeText(getActivity(),
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                mSwipeRefreshLayout.setRefreshing(false);
 
             }
         }, new Response.ErrorListener() {
@@ -377,7 +410,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 hideDialog();
             }
@@ -387,7 +420,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             protected Map<String, String> getParams() {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("classID", classID);
+                params.put("userID", userID);
                 params.put("classDate", currentDate);
                 return params;
             }
@@ -407,5 +440,4 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         if (pDialog.isShowing())
             pDialog.dismiss();
     }
-
 }

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:visibility="visible"
     android:padding="10dp"
+    android:visibility="visible"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.classieapp.attend.activity.AddStudentActivity"
     tools:showIn="@layout/activity_add_student">
@@ -42,7 +42,7 @@
                 android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
                 android:hint="@string/student_name"
-                android:inputType="textPersonName"
+                android:inputType="textCapWords|textPersonName"
                 tools:targetApi="m" />
         </android.support.design.widget.TextInputLayout>
 

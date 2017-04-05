@@ -82,7 +82,7 @@ public class MainOldActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Launching the class list activity
-                Intent intent = new Intent(MainOldActivity.this, ClassListActivity.class);
+                Intent intent = new Intent(MainOldActivity.this, ClassListFragment.class);
                 startActivity(intent);
                 //finish();
             }
