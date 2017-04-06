@@ -10,6 +10,9 @@ public class AppConfig {
     // Server add class url
     public static String URL_ADD_CLASS = "http://classie.nhctechservices.com/addClass.php";
 
+    // Server update class url
+    public static String URL_UPDATE_CLASS = "http://classie.nhctechservices.com/updateClass.php";
+
     // Server get all classes url
     public static String URL_GET_ALL_CLASSES = "http://classie.nhctechservices.com/getAllClasses.php";
 

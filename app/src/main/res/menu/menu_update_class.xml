@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- "Add Class", should always appear as action button -->
+    <!-- "Update Class", should always appear as action button -->
     <item
         android:id="@+id/action_update_class"
-        android:icon="@drawable/ic_edit_white_24dp"
-        android:title="Edit"
+        android:title="Save"
         app:showAsAction="always"/>
 </menu>

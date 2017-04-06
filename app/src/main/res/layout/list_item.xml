@@ -14,6 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:orientation="vertical"
+        android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:paddingTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -56,27 +57,34 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:orientation="vertical"
+        android:paddingBottom="8dp"
         android:paddingEnd="16dp"
+        android:paddingStart="16dp"
         android:paddingTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/linearLayout9">
 
+        <ImageView
+            android:id="@+id/classCountIcon"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/class_count_icon"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_group_black_24dp" />
+
         <TextView
             android:id="@+id/classCount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@drawable/ic_group_black_24dp"
             android:fontFamily="sans-serif"
             android:gravity="center"
             android:text="8"
             android:textAlignment="center"
             android:textAppearance="@android:style/TextAppearance.Material.Title"
-            android:textSize="24sp"
-            android:typeface="normal"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textSize="36sp"
+            android:typeface="normal" />
     </LinearLayout>
 
     <TextView
@@ -87,6 +95,5 @@
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
-
 
 </android.support.constraint.ConstraintLayout>

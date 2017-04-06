@@ -3,6 +3,7 @@ package com.classieapp.attend.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.DatePickerDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +30,7 @@ import android.transition.Slide;
 import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -69,8 +71,10 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,6 +92,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private TextView classNameText;
     private TextView classTimeText;
     private TextView classLocationText;
+    private TextView classDaysText;
 
     private final int REQUEST_PERMISSION_LOCATION = 1;
     private final int REQUEST_CHECK_SETTINGS = 2;
@@ -115,7 +120,11 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private String userID;
 
     private String classID;
-    private String thisClassName;
+    private String className;
+    private String classLocation;
+    private String classTime;
+    private String[] onDays = new String[7];
+    private static final int STATIC_RESULT = 3;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
@@ -146,7 +155,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mLatitudeText = (TextView) findViewById(R.id.latLoc);
         mLongitudeText = (TextView) findViewById(R.id.lonLoc);
@@ -155,6 +164,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         classNameText = (TextView) findViewById(R.id.className);
         classTimeText = (TextView) findViewById(R.id.classTime);
         classLocationText = (TextView) findViewById(R.id.classLocation);
+        classDaysText = (TextView) findViewById(R.id.classDays);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -195,8 +205,8 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 // Launching the add class activity
                 Intent intent = new Intent(SingleClassActivity.this, ClassStudentListActivity.class);
-                intent.putExtra("classID",classID);
-                intent.putExtra("className", thisClassName);
+                intent.putExtra("classID", classID);
+                intent.putExtra("className", className);
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
 
             }
@@ -233,6 +243,38 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         classID = getIntent().getStringExtra("classID");
         getSingleClass(classID);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_single_class, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_update_class:
+
+                // Launching the add class activity
+                Intent intent = new Intent(SingleClassActivity.this, AddClassActivity.class);
+                intent.putExtra("editMode", true);
+                intent.putExtra("classID", classID);
+                intent.putExtra("className", classNameText.getText());
+                intent.putExtra("classTime", classTimeText.getText());
+                intent.putExtra("classLocation", classLocationText.getText());
+                intent.putExtra("onDays", onDays);
+                startActivityForResult(intent, STATIC_RESULT, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
+
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     @Override
@@ -354,19 +396,41 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
             jsonObject = new JSONObject(JSON_STRING);
 
             JSONObject jo = jsonObject.getJSONObject("class");
+            JSONObject cdObject = jo.getJSONObject("classDays");
+
             String className = jo.getString("className");
             String classLocation = jo.getString("classLocation");
             String classTime = jo.getString("classTime");
             String classLat = jo.getString("classLat");
             String classLng = jo.getString("classLng");
 
+            onDays[0] = cdObject.getString("Sunday");
+            onDays[1] = cdObject.getString("Monday");
+            onDays[2] = cdObject.getString("Tuesday");
+            onDays[3] = cdObject.getString("Wednesday");
+            onDays[4] = cdObject.getString("Thursday");
+            onDays[5] = cdObject.getString("Friday");
+            onDays[6] = cdObject.getString("Saturday");
+
             getSupportActionBar().setTitle(className + " " + classTime);
-            thisClassName = className;
+
+            this.className = className;
+            this.classLocation = classLocation;
+            this.classTime = classTime;
 
 
             classNameText.setText(className);
             classLocationText.setText(classLocation);
             classTimeText.setText(classTime);
+
+            classDaysText.setText("");
+            if (onDays[0].equals("true")) classDaysText.append("Sunday, ");
+            if (onDays[1].equals("true")) classDaysText.append("Monday, ");
+            if (onDays[2].equals("true")) classDaysText.append("Tuesday, ");
+            if (onDays[3].equals("true")) classDaysText.append("Wednesday, ");
+            if (onDays[4].equals("true")) classDaysText.append("Thursday, ");
+            if (onDays[5].equals("true")) classDaysText.append("Friday, ");
+            if (onDays[6].equals("true")) classDaysText.append("Saturday");
 
             geoFence_class_id = className;
             //fenceLat = Double.parseDouble(classLat);
@@ -651,6 +715,13 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                     }
                 }
                 break;
+
+            case STATIC_RESULT:
+                if(resultCode == Activity.RESULT_OK){
+                    getSingleClass(classID);
+                }
+                break;
+
         }
     }
 
@@ -707,7 +778,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
         Log.i("Connect Info: ", "Connection made!");
         super.onStart();
     }
@@ -715,6 +786,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     @Override
     protected void onStop() {
 
+        /*
         try {
             ArrayList<String> geofencIds = new ArrayList<String>();
             geofencIds.add(geoFence_class_id);
@@ -736,6 +808,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         }
 
         mGoogleApiClient.disconnect();
+        */
         Log.i("Connect Info: ", "Connection closed!");
         super.onStop();
     }

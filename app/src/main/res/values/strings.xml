@@ -59,4 +59,5 @@
     <string name="m">M</string>
     <string name="t">T</string>
     <string name="w">W</string>
+    <string name="class_count_icon">Class Count Icon</string>
 </resources>

@@ -208,7 +208,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         String classID = map.get("classID").toString();
         String className = map.get("className").toString();
 
-        Intent i = new Intent(getActivity(), ClassStudentListActivity.class);
+        Intent i = new Intent(getActivity(), SingleClassActivity.class);
 
         View sharedView = v;
         String transitionName = "transClassName";

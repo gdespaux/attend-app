@@ -113,7 +113,6 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
         }
 
-
         getSupportActionBar().setTitle(className + ": " + currentDate);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

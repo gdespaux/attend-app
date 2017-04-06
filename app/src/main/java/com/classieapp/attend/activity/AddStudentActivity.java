@@ -1,5 +1,6 @@
 package com.classieapp.attend.activity;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
@@ -38,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,6 +54,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private ProgressDialog pDialog;
     private AutoCompleteTextView inputStudentName;
     private EditText inputStudentDOB;
+    private EditText inputStudentPhone;
     private EditText inputStudentID;
     private ImageButton studentPicture;
 
@@ -65,6 +70,23 @@ public class AddStudentActivity extends AppCompatActivity {
     private String classID;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+
+    private Calendar studentCalendar = Calendar.getInstance();
+    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            // TODO Auto-generated method stub
+            studentCalendar.set(Calendar.YEAR, year);
+            studentCalendar.set(Calendar.MONTH, monthOfYear);
+            studentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateStudentDOB();
+        }
+
+    };
+
+    String selectedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +127,13 @@ public class AddStudentActivity extends AppCompatActivity {
         accountID = user.get("account_id");
 
         inputStudentDOB = (EditText) findViewById(R.id.studentDOB);
+        inputStudentPhone = (EditText) findViewById(R.id.studentPhone);
         inputStudentID = (EditText) findViewById(R.id.studentID);
         inputStudentName = (AutoCompleteTextView)
                 findViewById(R.id.studentName);
         studentPicture = (ImageButton) findViewById(R.id.studentPicture);
+
+        inputStudentPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
 
         studentPicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,23 +162,9 @@ public class AddStudentActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
-                TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(AddStudentActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
-                        int hour = hourOfDay % 12;
-                        if(hour == 0){
-                            hour = 12;
-                        }
-                        inputStudentDOB.setText(String.format(Locale.US, "%2d:%02d %s", hour, minute,
-                                hourOfDay < 12 ? "am" : "pm"));
-                    }
-                }, hour, minute, false);//Yes 24 hour time
-                mTimePicker.setTitle("Select Time");
-                mTimePicker.show();
+                new DatePickerDialog(AddStudentActivity.this, date, studentCalendar
+                        .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
+                        studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
 
             }
         });
@@ -179,6 +190,16 @@ public class AddStudentActivity extends AppCompatActivity {
                     studentGender = "Female";
                 break;
         }
+    }
+
+    private void updateStudentDOB() {
+
+        String myFormat = "MM/dd/yyyy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        selectedDate = sdf.format(studentCalendar.getTime());
+
+        inputStudentDOB.setText(selectedDate);
     }
 
     @Override
