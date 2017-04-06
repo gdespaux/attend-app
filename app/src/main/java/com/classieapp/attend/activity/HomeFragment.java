@@ -272,7 +272,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                         // message
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_LONG).show();
+                                errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

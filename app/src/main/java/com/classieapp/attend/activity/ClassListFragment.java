@@ -333,7 +333,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                         // message
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_LONG).show();
+                                errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

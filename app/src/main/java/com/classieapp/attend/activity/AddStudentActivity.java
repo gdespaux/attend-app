@@ -1,9 +1,14 @@
 package com.classieapp.attend.activity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
@@ -18,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
@@ -48,6 +54,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private AutoCompleteTextView inputStudentName;
     private EditText inputStudentAge;
     private EditText inputStudentID;
+    private ImageButton studentPicture;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -57,6 +64,8 @@ public class AddStudentActivity extends AppCompatActivity {
     List<String> studentList = new ArrayList<String>();
 
     private String classID;
+
+    static final int REQUEST_IMAGE_CAPTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,11 +109,43 @@ public class AddStudentActivity extends AppCompatActivity {
         inputStudentID = (EditText) findViewById(R.id.studentID);
         inputStudentName = (AutoCompleteTextView)
                 findViewById(R.id.studentName);
+        studentPicture = (ImageButton) findViewById(R.id.studentPicture);
+
+        studentPicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                AlertDialog.Builder builder = new AlertDialog.Builder(AddStudentActivity.this);
+//                builder.setTitle("Change Photo") //
+//                        .setMessage("Pick a picture!")
+//                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id) {
+//                                // TODO
+//                                dialog.dismiss();
+//                            }
+//                        });
+//                builder.show();
+
+                //Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                //    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                //}
+
+            }
+        });
 
         classID = getIntent().getStringExtra("classID");
 
         getTypeaheadStudents();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            studentPicture.setImageBitmap(imageBitmap);
+        }
     }
 
     /**

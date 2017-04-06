@@ -9,6 +9,9 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -60,7 +63,8 @@
             android:name=".activity.AddClassActivity"
             android:label="@string/title_activity_add_class"
             android:parentActivityName=".activity.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.classieapp.attend.activity.MainActivity" />
@@ -122,7 +126,8 @@
             android:name=".activity.AddStudentActivity"
             android:label="@string/title_activity_add_student"
             android:parentActivityName=".activity.ClassStudentListActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.classieapp.attend.activity.ClassStudentListActivity" />
