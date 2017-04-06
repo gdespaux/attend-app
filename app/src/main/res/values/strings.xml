@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Attend</string>
+    <string name="app_name">Quick Attend</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Sign in</string>
 
@@ -25,6 +25,7 @@
     <string name="title_activity_register">Register</string>
     <string name="title_activity_class_list">Classes</string>
     <string name="title_activity_add_class">Add class</string>
+    <string name="title_activity_single_class">Single class</string>
     <string name="view_all_classes">View All Classes</string>
     <string name="class_location">Class Location (City)</string>
     <string name="class_name">Class Name</string>
@@ -38,14 +39,9 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="youremail_example_com">youremail@example.com</string>
-    <string name="your_name_here">Your Name Here</string>
-    <string name="title_activity_single_class">SingleClassActivity</string>
-    <string name="title_activity_maps">Map</string>
     <string name="name_of_class">Name of Class</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="quick_attend_logo">Quick Attend Logo</string>
     <string name="title_activity_class_student_list">Class Students</string>
     <string name="student_name">Student Name</string>
@@ -55,7 +51,9 @@
     <string name="longitude">Longitude</string>
     <string name="go_to_students">Go To Students</string>
     <string name="title_activity_add_student">Add Student</string>
-    <string name="student_age">Student Age</string>
+    <string name="student_dob">Birthday</string>
+    <string name="your_name_here">Your Name</string>
+    <string name="youremail_example_com">Your Email</string>
     <string name="s">S</string>
     <string name="f">F</string>
     <string name="m">M</string>

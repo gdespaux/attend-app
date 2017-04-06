@@ -1,14 +1,10 @@
 package com.classieapp.attend.activity;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
@@ -20,11 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
+import android.widget.RadioButton;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -33,7 +29,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
 import com.classieapp.attend.adapters.AddStudentAdapter;
-import com.classieapp.attend.adapters.StudentListAdapter;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
@@ -44,17 +39,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class AddStudentActivity extends AppCompatActivity {
     private static final String TAG = AddStudentActivity.class.getSimpleName();
     private ProgressDialog pDialog;
     private AutoCompleteTextView inputStudentName;
-    private EditText inputStudentAge;
+    private EditText inputStudentDOB;
     private EditText inputStudentID;
     private ImageButton studentPicture;
+
+    private String studentGender;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -105,7 +104,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
         accountID = user.get("account_id");
 
-        inputStudentAge = (EditText) findViewById(R.id.studentAge);
+        inputStudentDOB = (EditText) findViewById(R.id.studentDOB);
         inputStudentID = (EditText) findViewById(R.id.studentID);
         inputStudentName = (AutoCompleteTextView)
                 findViewById(R.id.studentName);
@@ -133,10 +132,53 @@ public class AddStudentActivity extends AppCompatActivity {
             }
         });
 
+        inputStudentDOB.setOnClickListener(new EditText.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(AddStudentActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int hourOfDay, int minute) {
+                        int hour = hourOfDay % 12;
+                        if(hour == 0){
+                            hour = 12;
+                        }
+                        inputStudentDOB.setText(String.format(Locale.US, "%2d:%02d %s", hour, minute,
+                                hourOfDay < 12 ? "am" : "pm"));
+                    }
+                }, hour, minute, false);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+
+            }
+        });
+
         classID = getIntent().getStringExtra("classID");
 
         getTypeaheadStudents();
 
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radioMale:
+                if (checked)
+                    studentGender = "Male";
+                break;
+            case R.id.radioFemale:
+                if (checked)
+                    studentGender = "Female";
+                break;
+        }
     }
 
     @Override
@@ -197,7 +239,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
                                 Log.i("FROMARRAY", student.get("studentName"));
                                 inputStudentName.setText(student.get("studentName"));
-                                inputStudentAge.setText(student.get("studentAge"));
+                                inputStudentDOB.setText(student.get("studentAge"));
                                 inputStudentID.setText(student.get("studentID"));
                             }
                         });
@@ -251,7 +293,7 @@ public class AddStudentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_student:
                 String studentName = inputStudentName.getText().toString().trim();
-                String studentAge = inputStudentAge.getText().toString().trim();
+                String studentAge = inputStudentDOB.getText().toString().trim();
                 String studentID = inputStudentID.getText().toString().trim();
 
                 if (!studentName.isEmpty() && !studentAge.isEmpty()) {
@@ -294,7 +336,7 @@ public class AddStudentActivity extends AppCompatActivity {
                 hideDialog();
 
                 inputStudentName.setText("");
-                inputStudentAge.setText("");
+                inputStudentDOB.setText("");
                 inputStudentID.setText("");
 
                 try {

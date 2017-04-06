@@ -69,7 +69,7 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
-            android:id="@+id/layoutStudentAge"
+            android:id="@+id/layoutStudentDOB"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:transitionGroup="true"
@@ -78,17 +78,58 @@
             tools:layout_editor_absoluteY="0dp">
 
             <android.support.design.widget.TextInputEditText
-                android:id="@+id/studentAge"
+                android:id="@+id/studentDOB"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableStart="@drawable/ic_today_black_24dp"
                 android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
-                android:hint="@string/student_age"
-                android:inputType="number"
+                android:focusable="false"
+                android:hint="@string/student_dob"
+                android:inputType="none"
                 tools:targetApi="m" />
+
         </android.support.design.widget.TextInputLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="Gender"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioMale"
+                style="?attr/radioButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/colorAccent"
+                android:onClick="onRadioButtonClicked"
+                android:text="Male" />
+
+            <RadioButton
+                android:id="@+id/radioFemale"
+                style="?attr/radioButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/colorAccent"
+                android:onClick="onRadioButtonClicked"
+                android:text="Female" />
+        </RadioGroup>
 
         <EditText
             android:id="@+id/studentID"
