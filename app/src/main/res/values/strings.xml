@@ -66,4 +66,8 @@
     <string name="male">Male</string>
     <string name="add_student_photo_icon">Add Student Photo Icon</string>
     <string name="student_picture">Student Picture</string>
+    <string name="calendar_icon">Calendar Icon</string>
+    <string name="phone_icon">Phone Icon</string>
+    <string name="user_icon">User Icon</string>
+    <string name="title_activity_single_student">SingleStudentActivity</string>
 </resources>

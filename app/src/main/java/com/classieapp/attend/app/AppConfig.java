@@ -1,44 +1,51 @@
 package com.classieapp.attend.app;
 
 public class AppConfig {
+    
+    //Server Base URL
+    public static String BASE_URL = "http://classie.nhctechservices.com/";
+
     // Server user login url
-    public static String URL_LOGIN = "http://classie.nhctechservices.com/login.php";
+    public static String URL_LOGIN = BASE_URL + "login.php";
 
     // Server user register url
-    public static String URL_REGISTER = "http://classie.nhctechservices.com/register.php";
+    public static String URL_REGISTER = BASE_URL + "register.php";
 
     // Server add class url
-    public static String URL_ADD_CLASS = "http://classie.nhctechservices.com/addClass.php";
+    public static String URL_ADD_CLASS = BASE_URL + "addClass.php";
 
     // Server update class url
-    public static String URL_UPDATE_CLASS = "http://classie.nhctechservices.com/updateClass.php";
+    public static String URL_UPDATE_CLASS = BASE_URL + "updateClass.php";
 
     // Server get all classes url
-    public static String URL_GET_ALL_CLASSES = "http://classie.nhctechservices.com/getAllClasses.php";
+    public static String URL_GET_ALL_CLASSES = BASE_URL + "getAllClasses.php";
 
     // Server get todays classes url
-    public static String URL_GET_TODAY_CLASSES = "http://classie.nhctechservices.com/getTodayClasses.php";
+    public static String URL_GET_TODAY_CLASSES = BASE_URL + "getTodayClasses.php";
 
     // Server get single class url
-    public static String URL_GET_SINGLE_CLASS = "http://classie.nhctechservices.com/getClass.php";
+    public static String URL_GET_SINGLE_CLASS = BASE_URL + "getClass.php";
 
     // Server add reg id url
-    public static String URL_REG_ID = "http://classie.nhctechservices.com/addRegID.php";
+    public static String URL_REG_ID = BASE_URL + "addRegID.php";
 
     // Server start class url
-    public static String URL_START_CLASS = "http://classie.nhctechservices.com/startThisClass.php";
+    public static String URL_START_CLASS = BASE_URL + "startThisClass.php";
 
     // Server get class students url
-    public static String URL_GET_CLASS_STUDENTS = "http://classie.nhctechservices.com/getClassStudents.php";
+    public static String URL_GET_CLASS_STUDENTS = BASE_URL + "getClassStudents.php";
 
     // Server get account students url
-    public static String URL_TYPEAHEAD_ACCOUNT_STUDENTS = "http://classie.nhctechservices.com/typeaheadAccountStudents.php";
+    public static String URL_TYPEAHEAD_ACCOUNT_STUDENTS = BASE_URL + "typeaheadAccountStudents.php";
 
     // Server add attendance url
-    public static String URL_ADD_ATTENDANCE = "http://classie.nhctechservices.com/addAttendance.php";
+    public static String URL_ADD_ATTENDANCE = BASE_URL + "addAttendance.php";
 
     // Server add student url
-    public static String URL_ADD_STUDENT = "http://classie.nhctechservices.com/addStudent.php";
+    public static String URL_ADD_STUDENT = BASE_URL + "addStudent.php";
+
+    // Server get single student url
+    public static String URL_GET_SINGLE_STUDENT = BASE_URL + "getStudent.php";
 
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";

@@ -47,8 +47,8 @@
         <activity
             android:name=".activity.LoginActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -59,19 +59,19 @@
         <activity
             android:name=".activity.MainOldActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:label="@string/app_name" />
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.RegisterActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_register" />
+            android:label="@string/title_activity_register"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.AddClassActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_add_class"
             android:parentActivityName=".activity.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible">
             <meta-data
@@ -81,15 +81,15 @@
         <activity
             android:name=".activity.MainActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_main2"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.SingleClassActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_single_class"
             android:parentActivityName=".activity.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -129,9 +129,9 @@
         <activity
             android:name=".activity.ClassStudentListActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_class_student_list"
             android:parentActivityName=".activity.SingleClassActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -140,15 +140,19 @@
         <activity
             android:name=".activity.AddStudentActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_add_student"
             android:parentActivityName=".activity.ClassStudentListActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.classieapp.attend.activity.ClassStudentListActivity" />
         </activity>
+        <activity
+            android:name=".activity.SingleStudentActivity"
+            android:label="@string/title_activity_single_student"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

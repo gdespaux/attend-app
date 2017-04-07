@@ -314,11 +314,12 @@ public class AddStudentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_student:
                 String studentName = inputStudentName.getText().toString().trim();
-                String studentAge = inputStudentDOB.getText().toString().trim();
+                String studentBirthday = inputStudentDOB.getText().toString().trim();
                 String studentID = inputStudentID.getText().toString().trim();
+                String studentPhone = inputStudentPhone.getText().toString().trim();
 
-                if (!studentName.isEmpty() && !studentAge.isEmpty()) {
-                    addStudent(classID, studentName, studentAge, studentID);
+                if (!studentName.isEmpty() && !studentBirthday.isEmpty()) {
+                    addStudent(classID, studentName, studentBirthday, studentPhone, studentID);
 
                     return true;
                 } else {
@@ -341,7 +342,7 @@ public class AddStudentActivity extends AppCompatActivity {
      * Function to store student in MySQL database will post params(class, name,
      * age, existing id) to add student url
      * */
-    private void addStudent(final String classID, final String studentName, final String studentAge, final String studentID) {
+    private void addStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_student";
 
@@ -359,6 +360,10 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentName.setText("");
                 inputStudentDOB.setText("");
                 inputStudentID.setText("");
+                inputStudentPhone.setText("");
+
+                ((RadioButton)findViewById(R.id.radioMale)).setChecked(false);
+                ((RadioButton)findViewById(R.id.radioFemale)).setChecked(false);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -396,7 +401,9 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("classID", classID);
                 params.put("accountID", accountID);
                 params.put("studentName", studentName);
-                params.put("studentAge", studentAge);
+                params.put("studentDOB", studentDOB);
+                params.put("studentPhone", studentPhone);
+                params.put("studentGender", studentGender);
                 params.put("studentID", studentID);
 
                 return params;
