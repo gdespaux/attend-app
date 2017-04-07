@@ -60,4 +60,10 @@
     <string name="t">T</string>
     <string name="w">W</string>
     <string name="class_count_icon">Class Count Icon</string>
+    <string name="gender">Gender</string>
+    <string name="phone">Phone</string>
+    <string name="female">Female</string>
+    <string name="male">Male</string>
+    <string name="add_student_photo_icon">Add Student Photo Icon</string>
+    <string name="student_picture">Student Picture</string>
 </resources>
