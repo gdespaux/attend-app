@@ -73,9 +73,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class SingleStudentActivity extends AppCompatActivity {
@@ -87,21 +90,22 @@ public class SingleStudentActivity extends AppCompatActivity {
     private Button startClassButton;
     private Button showStudentsButton;
 
-    private TextView classNameText;
-    private TextView classTimeText;
-    private TextView classLocationText;
-    private TextView classDaysText;
+    private TextView studentNameText;
+    private TextView studentDOBText;
+    private TextView studentPhoneText;
+    private TextView studentGenderText;
 
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
     private String userID;
 
-    private String classID;
-    private String className;
-    private String classLocation;
-    private String classTime;
-    private static final int STATIC_RESULT = 3;
+    private String studentID;
+    private String studentName;
+    private String studentDOB;
+    private String studentPhone;
+    private String studentGender;
+    private static final int STATIC_RESULT = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,20 +130,14 @@ public class SingleStudentActivity extends AppCompatActivity {
         getWindow().setExitTransition(explode);
         getWindow().setAllowEnterTransitionOverlap(true);
 
-        setContentView(R.layout.activity_single_class);
+        setContentView(R.layout.activity_single_student);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        mLatitudeText = (TextView) findViewById(R.id.latLoc);
-        mLongitudeText = (TextView) findViewById(R.id.lonLoc);
-        startClassButton = (Button) findViewById(R.id.btnStartClass);
-        showStudentsButton = (Button) findViewById(R.id.btnShowStudents);
-        classNameText = (TextView) findViewById(R.id.className);
-        classTimeText = (TextView) findViewById(R.id.classTime);
-        classLocationText = (TextView) findViewById(R.id.classLocation);
-        classDaysText = (TextView) findViewById(R.id.classDays);
+        studentNameText = (TextView) findViewById(R.id.studentName);
+        studentDOBText = (TextView) findViewById(R.id.studentDOB);
+        studentPhoneText = (TextView) findViewById(R.id.studentPhone);
+        studentGenderText = (TextView) findViewById(R.id.studentGender);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -158,15 +156,15 @@ public class SingleStudentActivity extends AppCompatActivity {
         String name = user.get("name");
         String email = user.get("email");
 
-        classID = getIntent().getStringExtra("classID");
-        getSingleClass(classID);
+        studentID = getIntent().getStringExtra("studentID");
+        getSingleStudent();
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_single_class, menu);
+        getMenuInflater().inflate(R.menu.menu_single_student, menu);
 
         return true;
     }
@@ -174,13 +172,16 @@ public class SingleStudentActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_update_class:
+            case R.id.action_update_student:
 
                 // Launching the add class activity
                 Intent intent = new Intent(SingleStudentActivity.this, AddStudentActivity.class);
                 intent.putExtra("editMode", true);
-                intent.putExtra("classID", classID);
-                intent.putExtra("className", classNameText.getText());
+                intent.putExtra("studentID", studentID);
+                intent.putExtra("studentName", studentName);
+                intent.putExtra("studentDOB", studentDOB);
+                intent.putExtra("studentPhone", studentPhone);
+                intent.putExtra("studentGender", studentGender);
                 startActivityForResult(intent, STATIC_RESULT, ActivityOptions.makeSceneTransitionAnimation(SingleStudentActivity.this).toBundle());
 
                 return true;
@@ -197,30 +198,37 @@ public class SingleStudentActivity extends AppCompatActivity {
         try {
             jsonObject = new JSONObject(JSON_STRING);
 
-            JSONObject jo = jsonObject.getJSONObject("class");
-            JSONObject cdObject = jo.getJSONObject("classDays");
+            JSONObject jo = jsonObject.getJSONObject("student");
+            //JSONObject cdObject = jo.getJSONObject("classDays");
 
-            String className = jo.getString("className");
-            String classLocation = jo.getString("classLocation");
-            String classTime = jo.getString("classTime");
-            String classLat = jo.getString("classLat");
-            String classLng = jo.getString("classLng");
+            String studentName = jo.getString("studentName");
+            String studentDOB = jo.getString("studentDOB");
+            String studentPhone = jo.getString("studentPhone");
+            String studentGender = jo.getString("studentGender");
 
-            getSupportActionBar().setTitle(className + " " + classTime);
+            getSupportActionBar().setTitle(studentName);
 
-            this.className = className;
-            this.classLocation = classLocation;
-            this.classTime = classTime;
+            this.studentName = studentName;
+            this.studentDOB = studentDOB;
+            this.studentPhone = studentPhone;
+            this.studentGender = studentGender;
 
+            String myFormat = "yyyy-MM-dd"; //In which you need put here
+            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-            classNameText.setText(className);
-            classLocationText.setText(classLocation);
-            classTimeText.setText(classTime);
+            String newFormat = "MM/dd/yyyy"; //In which you need put here
+            SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
 
-            //fenceLat = Double.parseDouble(classLat);
-            //fenceLong = Double.parseDouble(classLng);
+            studentDOBText.setText(newSdf.format(sdf.parse(studentDOB)));
+
+            studentNameText.setText(studentName);
+            //studentDOBText.setText(studentDOB);
+            studentPhoneText.setText(studentPhone);
+            studentGenderText.setText(studentGender);
 
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 
@@ -229,7 +237,7 @@ public class SingleStudentActivity extends AppCompatActivity {
     /**
      * Function to get selected student from MySQL DB
      */
-    private void getSingleClass(final String classID) {
+    private void getSingleStudent() {
         // Tag used to cancel the request
         String tag_string_req = "req_get_single_student";
 
@@ -275,7 +283,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("classID", classID);
+                params.put("studentID", studentID);
                 return params;
             }
 
@@ -294,7 +302,7 @@ public class SingleStudentActivity extends AppCompatActivity {
 
             case STATIC_RESULT:
                 if(resultCode == Activity.RESULT_OK){
-                    getSingleClass(classID);
+                    getSingleStudent();
                 }
                 break;
 

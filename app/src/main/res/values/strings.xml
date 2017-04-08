@@ -70,4 +70,10 @@
     <string name="phone_icon">Phone Icon</string>
     <string name="user_icon">User Icon</string>
     <string name="title_activity_single_student">SingleStudentActivity</string>
+    <string name="student_gender">Student Gender</string>
+    <string name="student_birthday">Student Birthday</string>
+    <string name="student_phone">Student Phone</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

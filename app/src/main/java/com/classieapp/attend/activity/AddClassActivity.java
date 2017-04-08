@@ -165,7 +165,6 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             inputClassName.setText(getIntent().getStringExtra("className"));
             inputClassTime.setText(getIntent().getStringExtra("classTime"));
-            Log.i("CLASSTIME", getIntent().getStringExtra("classTime"));
             inputClassLocation.setText(getIntent().getStringExtra("classLocation"));
 
             classTime = getIntent().getStringExtra("classTime");

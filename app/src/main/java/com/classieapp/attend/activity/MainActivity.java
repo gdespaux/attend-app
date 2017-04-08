@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity
     private SQLiteHandler db;
     private SessionManager session;
 
+    private String fabAction;
+
     private String userID;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
@@ -108,7 +110,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 // Launching the add class activity
-                Intent intent = new Intent(MainActivity.this, AddClassActivity.class);
+                Intent intent;
+                if(fabAction.equals("Class")){
+                    intent = new Intent(MainActivity.this, AddClassActivity.class);
+                } else if(fabAction.equals("Student")){
+                    intent = new Intent(MainActivity.this, AddStudentActivity.class);
+                } else {
+                    intent = new Intent(MainActivity.this, AddClassActivity.class);
+                }
                 startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
             }
         });
@@ -237,9 +246,15 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Handle the camera action
             fragment = new HomeFragment();
+            fabAction = "Class";
         } else if (id == R.id.nav_class_list) {
             // Handle the camera action
             fragment = new ClassListFragment();
+            fabAction = "Class";
+        } else if (id == R.id.nav_student_list) {
+            // Handle the camera action
+            fragment = new StudentListFragment();
+            fabAction = "Student";
         } else if (id == R.id.nav_manage) {
 
         } else if(id == R.id.nav_log_out){

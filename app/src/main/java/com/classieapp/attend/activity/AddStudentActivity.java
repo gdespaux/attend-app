@@ -1,5 +1,6 @@
 package com.classieapp.attend.activity;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
@@ -41,9 +42,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -60,10 +63,14 @@ public class AddStudentActivity extends AppCompatActivity {
 
     private String studentGender;
 
+    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
     private String accountID;
+
+    private boolean editMode = false;
 
     List<String> studentList = new ArrayList<String>();
 
@@ -135,6 +142,31 @@ public class AddStudentActivity extends AppCompatActivity {
 
         inputStudentPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
 
+        if(getIntent().hasExtra("editMode")){
+            editMode = true;
+            inputStudentName.setText(getIntent().getStringExtra("studentName"));
+            inputStudentPhone.setText(getIntent().getStringExtra("studentPhone"));
+            inputStudentID.setText(getIntent().getStringExtra("studentID"));
+
+            studentGender = getIntent().getStringExtra("studentGender");
+
+            String myFormat = "yyyy-MM-dd"; //In which you need put here
+            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+            try {
+                studentCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
+                updateStudentDOB();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            ((RadioButton)findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
+            ((RadioButton)findViewById(R.id.radioFemale)).setChecked(getIntent().getStringExtra("studentGender").equals("Female"));
+
+        } else {
+            //currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+        }
+
         studentPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -161,10 +193,40 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                new DatePickerDialog(AddStudentActivity.this, date, studentCalendar
-                        .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
-                        studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
+
+                int year;
+                int month;
+                int day;
+
+/*
+                if(editMode){
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                    Date date = null;
+                    try {
+                        date = sdf.parse(inputStudentDOB.getText().toString());
+
+                        if(date == null){
+                            date = sdf.parse(currentDate);
+                        }
+                    } catch (ParseException e) {
+                    }
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(date);
+
+                    year = c.get(Calendar.YEAR);
+                    month = c.get(Calendar.MONTH);
+                    day = c.get(Calendar.DAY_OF_MONTH);
+                } else {
+                    year = studentCalendar.get(Calendar.YEAR);
+                    month = studentCalendar.get(Calendar.MONTH);
+                    day = studentCalendar.get(Calendar.DAY_OF_MONTH);
+                }
+*/
+                year = studentCalendar.get(Calendar.YEAR);
+                month = studentCalendar.get(Calendar.MONTH);
+                day = studentCalendar.get(Calendar.DAY_OF_MONTH);
+
+                new DatePickerDialog(AddStudentActivity.this, date, year, month, day).show();
 
             }
         });
@@ -305,21 +367,40 @@ public class AddStudentActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_add_student, menu);
+        if(editMode){
+            getMenuInflater().inflate(R.menu.menu_update_student, menu);
+        } else{
+            getMenuInflater().inflate(R.menu.menu_add_student, menu);
+        }
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+        String studentName = inputStudentName.getText().toString().trim();
+        String studentBirthday = inputStudentDOB.getText().toString().trim();
+        String studentID = inputStudentID.getText().toString().trim();
+        String studentPhone = inputStudentPhone.getText().toString().trim();
+
         switch (item.getItemId()) {
             case R.id.action_add_student:
-                String studentName = inputStudentName.getText().toString().trim();
-                String studentBirthday = inputStudentDOB.getText().toString().trim();
-                String studentID = inputStudentID.getText().toString().trim();
-                String studentPhone = inputStudentPhone.getText().toString().trim();
 
                 if (!studentName.isEmpty() && !studentBirthday.isEmpty()) {
                     addStudent(classID, studentName, studentBirthday, studentPhone, studentID);
+
+                    return true;
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Please enter student details!", Toast.LENGTH_LONG)
+                            .show();
+                    return false;
+                }
+
+            case R.id.action_update_student:
+
+                if (!studentName.isEmpty() && !studentBirthday.isEmpty()) {
+                    updateStudent(classID, studentName, studentBirthday, studentPhone, studentID);
 
                     return true;
                 } else {
@@ -354,7 +435,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Class Response: " + response.toString());
+                Log.d(TAG, "Add Student Response: " + response.toString());
                 hideDialog();
 
                 inputStudentName.setText("");
@@ -405,6 +486,83 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("studentPhone", studentPhone);
                 params.put("studentGender", studentGender);
                 params.put("studentID", studentID);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
+     * Function to update student in MySQL database will post params(class, name,
+     * age, existing id) to update student url
+     * */
+    private void updateStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_update_student";
+
+        pDialog.setMessage("Updating Student...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_UPDATE_STUDENT, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Update Student Response: " + response.toString());
+                hideDialog();
+
+                inputStudentName.setText("");
+                inputStudentDOB.setText("");
+                inputStudentID.setText("");
+                inputStudentPhone.setText("");
+
+                ((RadioButton)findViewById(R.id.radioMale)).setChecked(false);
+                ((RadioButton)findViewById(R.id.radioFemale)).setChecked(false);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        Toast.makeText(getApplicationContext(), "Student updated!", Toast.LENGTH_LONG).show();
+                        setResult(Activity.RESULT_OK);
+                        finish();
+                    } else {
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Creation Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("studentID", studentID);
+                params.put("studentName", studentName);
+                params.put("studentDOB", studentDOB);
+                params.put("studentPhone", studentPhone);
+                params.put("studentGender", studentGender);
 
                 return params;
             }

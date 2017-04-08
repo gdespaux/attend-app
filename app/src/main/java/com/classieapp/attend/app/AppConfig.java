@@ -35,6 +35,9 @@ public class AppConfig {
     // Server get class students url
     public static String URL_GET_CLASS_STUDENTS = BASE_URL + "getClassStudents.php";
 
+    // Server get all students url
+    public static String URL_GET_ALL_STUDENTS = BASE_URL + "getAllStudents.php";
+
     // Server get account students url
     public static String URL_TYPEAHEAD_ACCOUNT_STUDENTS = BASE_URL + "typeaheadAccountStudents.php";
 
@@ -43,6 +46,9 @@ public class AppConfig {
 
     // Server add student url
     public static String URL_ADD_STUDENT = BASE_URL + "addStudent.php";
+
+    // Server update student url
+    public static String URL_UPDATE_STUDENT = BASE_URL + "updateStudent.php";
 
     // Server get single student url
     public static String URL_GET_SINGLE_STUDENT = BASE_URL + "getStudent.php";

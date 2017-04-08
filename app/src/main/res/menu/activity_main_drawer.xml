@@ -12,6 +12,10 @@
             android:icon="@drawable/ic_view_list_black_24dp"
             android:title="Class List" />
         <item
+            android:id="@+id/nav_student_list"
+            android:icon="@drawable/ic_view_list_black_24dp"
+            android:title="Student List" />
+        <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Profile" />
