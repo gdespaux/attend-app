@@ -210,16 +210,21 @@ public class SingleStudentActivity extends AppCompatActivity {
 
             this.studentName = studentName;
             this.studentDOB = studentDOB;
+            Log.i("DOB", studentDOB);
             this.studentPhone = studentPhone;
             this.studentGender = studentGender;
 
-            String myFormat = "yyyy-MM-dd"; //In which you need put here
-            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+            if(!studentDOB.equals("0000-00-00")){
+                String myFormat = "yyyy-MM-dd"; //In which you need put here
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-            String newFormat = "MM/dd/yyyy"; //In which you need put here
-            SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
+                String newFormat = "MM/dd/yyyy"; //In which you need put here
+                SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
 
-            studentDOBText.setText(newSdf.format(sdf.parse(studentDOB)));
+                studentDOBText.setText(newSdf.format(sdf.parse(studentDOB)));
+            } else {
+                studentDOBText.setText("");
+            }
 
             studentNameText.setText(studentName);
             //studentDOBText.setText(studentDOB);

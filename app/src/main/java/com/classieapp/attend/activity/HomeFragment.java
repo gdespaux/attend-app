@@ -249,7 +249,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         String tag_string_req = "req_get_today_classes";
 
         pDialog.setMessage("Loading Classes...");
-        showDialog();
+        //showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 AppConfig.URL_GET_TODAY_CLASSES, new Response.Listener<String>() {
@@ -257,7 +257,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Get Class Response: " + response.toString());
-                hideDialog();
+                //hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -287,7 +287,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
                 Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
+                //hideDialog();
             }
         }) {
 

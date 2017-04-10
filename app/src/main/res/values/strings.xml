@@ -44,7 +44,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="quick_attend_logo">Quick Attend Logo</string>
     <string name="title_activity_class_student_list">Class Students</string>
-    <string name="student_name">Student Name</string>
+    <string name="student_name">Student Name*</string>
     <string name="present">Present</string>
     <string name="open_class">Open Class</string>
     <string name="latitude">Latitude</string>

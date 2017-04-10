@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.frame_container, new HomeFragment()).commit();
+        fabAction = "Class";
 
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override

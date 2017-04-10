@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneNumberFormattingTextWatcher;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
@@ -23,6 +25,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -59,7 +62,13 @@ public class AddStudentActivity extends AppCompatActivity {
     private EditText inputStudentDOB;
     private EditText inputStudentPhone;
     private EditText inputStudentID;
+    private EditText inputStudentEmail;
+    private EditText inputStudentAddress;
+    private EditText inputStudentEnrollDate;
+    private EditText inputStudentMedInfo;
     private ImageButton studentPicture;
+
+    private LinearLayout hideableInfo;
 
     private String studentGender;
 
@@ -71,6 +80,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private String accountID;
 
     private boolean editMode = false;
+    private boolean didSelectItem = false;
 
     List<String> studentList = new ArrayList<String>();
 
@@ -140,6 +150,13 @@ public class AddStudentActivity extends AppCompatActivity {
                 findViewById(R.id.studentName);
         studentPicture = (ImageButton) findViewById(R.id.studentPicture);
 
+        inputStudentEmail = (EditText) findViewById(R.id.studentEmail);
+        inputStudentAddress = (EditText) findViewById(R.id.studentAddress);
+        inputStudentEnrollDate = (EditText) findViewById(R.id.studentEnrollDate);
+        inputStudentMedInfo = (EditText) findViewById(R.id.studentMedInfo);
+
+        hideableInfo = (LinearLayout) findViewById(R.id.hideableInfo);
+
         inputStudentPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
 
         if(getIntent().hasExtra("editMode")){
@@ -153,11 +170,15 @@ public class AddStudentActivity extends AppCompatActivity {
             String myFormat = "yyyy-MM-dd"; //In which you need put here
             SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-            try {
-                studentCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
-                updateStudentDOB();
-            } catch (ParseException e) {
-                e.printStackTrace();
+            if(!getIntent().getStringExtra("studentDOB").equals("0000-00-00")){
+                try {
+                    studentCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
+                    updateStudentDOB();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                inputStudentDOB.setText("");
             }
 
             ((RadioButton)findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
@@ -185,6 +206,24 @@ public class AddStudentActivity extends AppCompatActivity {
                 //if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                 //    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 //}
+
+            }
+        });
+
+        inputStudentName.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                didSelectItem = false;
+                hideableInfo.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
 
             }
         });
@@ -322,8 +361,10 @@ public class AddStudentActivity extends AppCompatActivity {
 
                                 Log.i("FROMARRAY", student.get("studentName"));
                                 inputStudentName.setText(student.get("studentName"));
-                                inputStudentDOB.setText(student.get("studentAge"));
                                 inputStudentID.setText(student.get("studentID"));
+
+                                didSelectItem = true;
+                                hideableInfo.setVisibility(View.GONE);
                             }
                         });
 
@@ -386,26 +427,26 @@ public class AddStudentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_student:
 
-                if (!studentName.isEmpty() && !studentBirthday.isEmpty()) {
+                if (!studentName.isEmpty()) {
                     addStudent(classID, studentName, studentBirthday, studentPhone, studentID);
 
                     return true;
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter student details!", Toast.LENGTH_LONG)
+                            "Student name is required!", Toast.LENGTH_LONG)
                             .show();
                     return false;
                 }
 
             case R.id.action_update_student:
 
-                if (!studentName.isEmpty() && !studentBirthday.isEmpty()) {
+                if (!studentName.isEmpty()) {
                     updateStudent(classID, studentName, studentBirthday, studentPhone, studentID);
 
                     return true;
                 } else {
                     Toast.makeText(getApplicationContext(),
-                            "Please enter student details!", Toast.LENGTH_LONG)
+                            "Student name is required!", Toast.LENGTH_LONG)
                             .show();
                     return false;
                 }
