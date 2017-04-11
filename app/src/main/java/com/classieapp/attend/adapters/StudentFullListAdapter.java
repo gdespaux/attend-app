@@ -21,7 +21,7 @@ import com.classieapp.attend.utils.CircularNetworkImageView;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StudentListAdapter extends BaseAdapter {
+public class StudentFullListAdapter extends BaseAdapter {
     Context context;
     ArrayList<HashMap<String,String>> list;
     String[] fromString;
@@ -30,7 +30,7 @@ public class StudentListAdapter extends BaseAdapter {
     private static LayoutInflater inflater = null;
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
-    public StudentListAdapter(Context thisContext, ArrayList<HashMap<String,String>> hashMaps, String[] fromThis, int[] toThat) {
+    public StudentFullListAdapter(Context thisContext, ArrayList<HashMap<String,String>> hashMaps, String[] fromThis, int[] toThat) {
         // TODO Auto-generated constructor stub
         context = thisContext;
         list = hashMaps;
@@ -75,27 +75,20 @@ public class StudentListAdapter extends BaseAdapter {
         ViewHolder holder;
 
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.student_list_item, null);
+            convertView = inflater.inflate(R.layout.student_list_full_item, null);
             holder = new ViewHolder();
 
             holder.studentID = (TextView) convertView.findViewById(R.id.studentID);
             holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
             holder.studentPhoto = (CircularNetworkImageView) convertView.findViewById(R.id.studentPhoto);
-            holder.studentPresent = (CheckBox) convertView.findViewById(R.id.studentPresent);
 
             holder.studentID.setText(list.get(position).get("studentID"));
             holder.studentName.setText(list.get(position).get("studentName"));
             holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
 
-            if(list.get(position).get("studentPresent").equals("yes")){
-                holder.studentPresent.setChecked(true);
-            } else {
-                holder.studentPresent.setChecked(false);
-            }
-
             convertView.setTag(holder);
         } else {
-            holder = (ViewHolder)convertView.getTag();
+            holder = (ViewHolder) convertView.getTag();
         }
 
         return convertView;
@@ -105,6 +98,5 @@ public class StudentListAdapter extends BaseAdapter {
         TextView studentID;
         TextView studentName;
         CircularNetworkImageView studentPhoto;
-        CheckBox studentPresent;
     }
 }

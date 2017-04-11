@@ -43,6 +43,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
+import com.classieapp.attend.adapters.StudentFullListAdapter;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
@@ -196,11 +197,15 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
                 String studentID = jo.getString("studentID");
                 String studentName = jo.getString("studentName");
                 String studentPhone = jo.getString("studentPhone");
+                String studentPhoto = jo.getString("studentPhoto");
 
                 HashMap<String,String> students = new HashMap<>();
                 students.put("studentID",studentID);
                 students.put("studentName",studentName);
-                students.put("studentPhone", studentPhone);
+                //students.put("studentPhone", studentPhone);
+                students.put("studentPhoto", studentPhoto);
+
+                Log.d(TAG, studentName);
 
                 list.add(students);
             }
@@ -209,10 +214,10 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new SimpleAdapter(
-                getActivity(), list, R.layout.student_list_full_item,
-                new String[]{"studentID", "studentName", "studentPhone"},
-                new int[]{R.id.studentID, R.id.studentName, R.id.studentPhone});
+        ListAdapter adapter = new StudentFullListAdapter(
+                getActivity(), list,
+                new String[]{"studentID", "studentName", "studentPhoto"},
+                new int[]{R.id.studentID, R.id.studentName, R.id.studentPhoto});
 
         setListAdapter(adapter);
     }

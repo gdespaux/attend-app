@@ -43,10 +43,12 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.classieapp.attend.R;
 import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
+import com.classieapp.attend.utils.CircularNetworkImageView;
 import com.classieapp.attend.utils.GeofenceTransitionService;
 import com.classieapp.attend.utils.NotificationUtils;
 import com.classieapp.attend.utils.SQLiteHandler;
@@ -92,8 +94,10 @@ public class SingleStudentActivity extends AppCompatActivity {
 
     private TextView studentNameText;
     private TextView studentDOBText;
+    private TextView studentAgeText;
     private TextView studentPhoneText;
     private TextView studentGenderText;
+    private CircularNetworkImageView studentPhoto;
 
     private String JSON_STRING;
     private SQLiteHandler db;
@@ -106,6 +110,9 @@ public class SingleStudentActivity extends AppCompatActivity {
     private String studentPhone;
     private String studentGender;
     private static final int STATIC_RESULT = 4;
+
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
+    private Calendar studentCalendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,8 +143,10 @@ public class SingleStudentActivity extends AppCompatActivity {
 
         studentNameText = (TextView) findViewById(R.id.studentName);
         studentDOBText = (TextView) findViewById(R.id.studentDOB);
+        studentAgeText = (TextView) findViewById(R.id.studentAge);
         studentPhoneText = (TextView) findViewById(R.id.studentPhone);
         studentGenderText = (TextView) findViewById(R.id.studentGender);
+        studentPhoto = (CircularNetworkImageView) findViewById(R.id.studentPhoto);
 
         // SqLite database handler
         db = new SQLiteHandler(getApplicationContext());
@@ -159,6 +168,29 @@ public class SingleStudentActivity extends AppCompatActivity {
         studentID = getIntent().getStringExtra("studentID");
         getSingleStudent();
 
+    }
+
+    /**
+     * Method to extract the user's age from the entered Date of Birth.
+     *
+     * @return ageS String The user's age in years based on the supplied DoB.
+     */
+    private String getAge(int year, int month, int day){
+        Calendar dob = Calendar.getInstance();
+        Calendar today = Calendar.getInstance();
+
+        dob.set(year, month, day);
+
+        int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)){
+            age--;
+        }
+
+        Integer ageInt = new Integer(age);
+        String ageS = ageInt.toString();
+
+        return ageS;
     }
 
     @Override
@@ -205,6 +237,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             String studentDOB = jo.getString("studentDOB");
             String studentPhone = jo.getString("studentPhone");
             String studentGender = jo.getString("studentGender");
+            String studentPhoto = jo.getString("studentPhoto");
 
             getSupportActionBar().setTitle(studentName);
 
@@ -214,22 +247,29 @@ public class SingleStudentActivity extends AppCompatActivity {
             this.studentPhone = studentPhone;
             this.studentGender = studentGender;
 
+            String myFormat = "yyyy-MM-dd"; //In which you need put here
+            SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+            String newFormat = "MM/dd/yyyy"; //In which you need put here
+            SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
+
+            studentCalendar.setTime(sdf.parse(studentDOB));
+            int year = studentCalendar.get(Calendar.YEAR);
+            int month = studentCalendar.get(Calendar.MONTH);
+            int day = studentCalendar.get(Calendar.DAY_OF_MONTH);
+
             if(!studentDOB.equals("0000-00-00")){
-                String myFormat = "yyyy-MM-dd"; //In which you need put here
-                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-                String newFormat = "MM/dd/yyyy"; //In which you need put here
-                SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
-
                 studentDOBText.setText(newSdf.format(sdf.parse(studentDOB)));
+                studentAgeText.setText("Age: " + getAge(year, month, day));
             } else {
                 studentDOBText.setText("");
+                studentAgeText.setText("");
             }
 
             studentNameText.setText(studentName);
             //studentDOBText.setText(studentDOB);
             studentPhoneText.setText(studentPhone);
             studentGenderText.setText(studentGender);
+            this.studentPhoto.setImageUrl(studentPhoto, imageLoader);
 
         } catch (JSONException e) {
             e.printStackTrace();

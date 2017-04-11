@@ -1,12 +1,21 @@
 package com.classieapp.attend.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneNumberFormattingTextWatcher;
@@ -15,6 +24,7 @@ import android.text.TextWatcher;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,10 +40,13 @@ import android.widget.RadioButton;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.classieapp.attend.R;
 import com.classieapp.attend.adapters.AddStudentAdapter;
 import com.classieapp.attend.app.AppConfig;
@@ -45,12 +58,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,6 +103,10 @@ public class AddStudentActivity extends AppCompatActivity {
     private String classID;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    private final int REQUEST_PERMISSION_STORAGE = 2;
+    private final int REQUEST_CHECK_SETTINGS = 3;
+    String[] permissions = {"android.permission.WRITE_EXTERNAL_STORAGE"};
+    final CharSequence[] dialogItems = {"Take Photo", "Choose Photo"};
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -104,6 +124,11 @@ public class AddStudentActivity extends AppCompatActivity {
     };
 
     String selectedDate;
+
+    private Bitmap bitmap;
+    private final int PICK_IMAGE_REQUEST = 4;
+    private String KEY_IMAGE = "image";
+    private String KEY_NAME = "name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,21 +216,42 @@ public class AddStudentActivity extends AppCompatActivity {
         studentPicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                AlertDialog.Builder builder = new AlertDialog.Builder(AddStudentActivity.this);
-//                builder.setTitle("Change Photo") //
-//                        .setMessage("Pick a picture!")
-//                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int id) {
-//                                // TODO
-//                                dialog.dismiss();
-//                            }
-//                        });
-//                builder.show();
 
-                //Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                //    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                //}
+                if (ActivityCompat.checkSelfPermission(AddStudentActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(AddStudentActivity.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        showExplanation("Storage Permission Required", "We need access to your storage to temporarily store student photos!", Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_STORAGE);
+                    } else {
+                        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, REQUEST_PERMISSION_STORAGE);
+                    }
+
+                    Log.e("LOC ERROR", "no perms!");
+                    return;
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(AddStudentActivity.this);
+                builder.setTitle("Change Photo") //
+                        .setItems(dialogItems, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which == 0) { //"Take Photo
+                                    Log.i("OPTION", "Take Photo!");
+                                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                    if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                                    }
+                                } else if(which == 1){
+                                    Log.i("OPTION", "Choose Photo!");
+                                    showFileChooser();
+                                }
+                            }
+                        })
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // TODO
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
 
             }
         });
@@ -276,6 +322,24 @@ public class AddStudentActivity extends AppCompatActivity {
 
     }
 
+    private void showFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
     public void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
@@ -293,6 +357,47 @@ public class AddStudentActivity extends AppCompatActivity {
         }
     }
 
+    public String getStringImage(Bitmap bmp){
+
+        if(bmp == null){
+            return "";
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageBytes = baos.toByteArray();
+        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    // Check for permission to access Location
+    private boolean checkPermission() {
+        Log.d(TAG, "checkPermission()");
+        // Ask for permission if it wasn't granted yet
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void showExplanation(String title,
+                                 String message,
+                                 final String permission,
+                                 final int permissionRequestCode) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        requestPermission(permission, permissionRequestCode);
+                    }
+                });
+        builder.create().show();
+    }
+
+    private void requestPermission(String permissionName, int permissionRequestCode) {
+        ActivityCompat.requestPermissions(this,
+                new String[]{permissionName}, permissionRequestCode);
+    }
+
     private void updateStudentDOB() {
 
         String myFormat = "MM/dd/yyyy"; //In which you need put here
@@ -305,10 +410,24 @@ public class AddStudentActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            studentPicture.setImageBitmap(imageBitmap);
+            bitmap = (Bitmap) extras.get("data");
+            studentPicture.setImageBitmap(bitmap);
+        }
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri filePath = data.getData();
+            try {
+                //Getting the Bitmap from Gallery
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                //Setting the Bitmap to ImageView
+                studentPicture.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -518,6 +637,10 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             protected Map<String, String> getParams() {
+
+                //Converting Bitmap to String
+                String image = getStringImage(bitmap);
+
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("classID", classID);
@@ -526,6 +649,7 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("studentDOB", studentDOB);
                 params.put("studentPhone", studentPhone);
                 params.put("studentGender", studentGender);
+                params.put("studentPhoto", image);
                 params.put("studentID", studentID);
 
                 return params;
@@ -596,6 +720,10 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             protected Map<String, String> getParams() {
+
+                //Converting Bitmap to String
+                String image = getStringImage(bitmap);
+
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("accountID", accountID);
@@ -604,6 +732,7 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("studentDOB", studentDOB);
                 params.put("studentPhone", studentPhone);
                 params.put("studentGender", studentGender);
+                params.put("studentPhoto", image);
 
                 return params;
             }

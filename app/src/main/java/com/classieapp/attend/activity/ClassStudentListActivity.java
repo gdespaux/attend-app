@@ -231,11 +231,13 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 String studentID = jo.getString("studentID");
                 String studentName = jo.getString("studentName");
                 String studentPresent = jo.getString("studentPresent");
+                String studentPhoto = jo.getString("studentPhoto");
 
                 HashMap<String,String> student = new HashMap<>();
                 student.put("studentID",studentID);
                 student.put("studentName", studentName);
                 student.put("studentPresent",studentPresent);
+                student.put("studentPhoto",studentPhoto);
                 list.add(student);
             }
 
@@ -245,8 +247,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         ListAdapter adapter = new StudentListAdapter(
                 ClassStudentListActivity.this, list,
-                new String[]{"studentID", "studentName", "studentPresent"},
-                new int[]{R.id.studentID, R.id.studentName, R.id.studentPresent});
+                new String[]{"studentID", "studentName", "studentPresent", "studentPhoto"},
+                new int[]{R.id.studentID, R.id.studentName, R.id.studentPresent, R.id.studentPhoto});
 
         listView.setAdapter(adapter);
     }
