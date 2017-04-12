@@ -36,6 +36,8 @@ import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
+import com.instabug.library.Instabug;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,6 +63,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     private String classID;
     private String className;
     private String accountID;
+    private String email;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -138,6 +141,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         final HashMap<String, String> user = db.getUserDetails();
 
         accountID = user.get("account_id");
+        email = user.get("email");
 
         // session manager
         session = new SessionManager(getApplicationContext());
@@ -152,6 +156,11 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         classID = getIntent().getStringExtra("classID");
         getClassStudents(classID);
+
+        new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
+                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
+                .build();
+        Instabug.identifyUser(email, email);
     }
 
     private void updateStudentDate() {

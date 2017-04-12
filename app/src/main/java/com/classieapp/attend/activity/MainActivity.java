@@ -17,6 +17,7 @@ import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -40,6 +41,9 @@ import com.classieapp.attend.utils.NotificationUtils;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.instabug.library.Instabug;
+import com.instabug.library.InstabugTrackingDelegate;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +65,7 @@ public class MainActivity extends AppCompatActivity
     private String userID;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,15 +110,15 @@ public class MainActivity extends AppCompatActivity
         String name = user.get("name");
         String email = user.get("email");
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Launching the add class activity
                 Intent intent;
-                if(fabAction.equals("Class")){
+                if (fabAction.equals("Class")) {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
-                } else if(fabAction.equals("Student")){
+                } else if (fabAction.equals("Student")) {
                     intent = new Intent(MainActivity.this, AddStudentActivity.class);
                 } else {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
@@ -172,6 +177,10 @@ public class MainActivity extends AppCompatActivity
 
         displayFirebaseRegId();
 
+        new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
+                .setInvocationEvent(InstabugInvocationEvent.NONE)
+                .build();
+        Instabug.identifyUser(email, email);
     }
 
     // Fetches reg id from shared preferences
@@ -185,7 +194,7 @@ public class MainActivity extends AppCompatActivity
         if (!TextUtils.isEmpty(regId)) {
             //Toast.makeText(getApplicationContext(), "Firebase Reg Id: " + regId, Toast.LENGTH_LONG).show();
             sendRegistrationToServer(regId);
-        } else{
+        } else {
             Toast.makeText(getApplicationContext(), "Firebase Reg Id is not received yet!", Toast.LENGTH_LONG).show();
         }
     }
@@ -216,7 +225,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Logging out the user. Will set isLoggedIn flag to false in shared
      * preferences Clears the user data from sqlite users table
-     * */
+     */
     private void logoutUser() {
         session.setLogin(false);
 
@@ -248,17 +257,24 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
             fragment = new HomeFragment();
             fabAction = "Class";
+            fab.show();
         } else if (id == R.id.nav_class_list) {
             // Handle the camera action
             fragment = new ClassListFragment();
             fabAction = "Class";
+            fab.show();
         } else if (id == R.id.nav_student_list) {
             // Handle the camera action
             fragment = new StudentListFragment();
             fabAction = "Student";
-        } else if (id == R.id.nav_manage) {
-
-        } else if(id == R.id.nav_log_out){
+            fab.show();
+        } else if (id == R.id.nav_reports) {
+            // Handle the camera action
+            fragment = new ReportsFragment();
+            fab.hide();
+        } else if (id == R.id.nav_feedback) {
+            Instabug.invoke();
+        } else if (id == R.id.nav_log_out) {
             logoutUser();
         }
 
@@ -277,12 +293,12 @@ public class MainActivity extends AppCompatActivity
     /**
      * Function to store device id in MySQL database will post params(token)
      * to register url
-     * */
+     */
     public void sendRegistrationToServer(final String token) {
 
         SharedPreferences pref = getApplicationContext().getSharedPreferences(AppConfig.SHARED_PREF, 0);
 
-        if(token == ""){
+        if (token == "") {
             pref.getString("regID", "");
         }
 
@@ -296,7 +312,7 @@ public class MainActivity extends AppCompatActivity
         final HashMap<String, String> user = db.getUserDetails();
         userID = user.get("uid");
 
-        if(userID != null){
+        if (userID != null) {
             // Tag used to cancel the request
             String tag_string_req = "req_reg_id";
 

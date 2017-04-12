@@ -16,6 +16,7 @@ import android.transition.Transition;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -48,6 +49,9 @@ import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.instabug.library.Instabug;
+import com.instabug.library.InstabugTrackingDelegate;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,6 +88,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
     private SessionManager session;
 
     private String userID;
+    private String email;
     private String accountID;
     private String classTime;
     private String classID;
@@ -195,6 +200,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
         userID = user.get("uid");
+        email = user.get("email");
         accountID = user.get("account_id");
 
         // View classes click event
@@ -294,6 +300,11 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
 
             }
         });
+
+        new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
+                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
+                .build();
+        Instabug.identifyUser(email, email);
     }
 
     private AdapterView.OnItemClickListener mAutocompleteClickListener

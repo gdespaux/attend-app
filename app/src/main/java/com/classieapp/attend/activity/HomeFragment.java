@@ -55,13 +55,6 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
     String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
 
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Transition fade = new Fade();
@@ -77,10 +70,6 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         slide.excludeTarget(android.R.id.navigationBarBackground, true);
 
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override

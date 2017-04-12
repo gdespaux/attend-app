@@ -28,6 +28,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -53,6 +54,9 @@ import com.classieapp.attend.app.AppConfig;
 import com.classieapp.attend.app.AppController;
 import com.classieapp.attend.utils.SQLiteHandler;
 import com.classieapp.attend.utils.SessionManager;
+import com.instabug.library.Instabug;
+import com.instabug.library.InstabugTrackingDelegate;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,6 +98,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private SQLiteHandler db;
     private SessionManager session;
     private String accountID;
+    private String email;
 
     private boolean editMode = false;
     private boolean didSelectItem = false;
@@ -127,8 +132,6 @@ public class AddStudentActivity extends AppCompatActivity {
 
     private Bitmap bitmap;
     private final int PICK_IMAGE_REQUEST = 4;
-    private String KEY_IMAGE = "image";
-    private String KEY_NAME = "name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +170,7 @@ public class AddStudentActivity extends AppCompatActivity {
         final HashMap<String, String> user = db.getUserDetails();
 
         accountID = user.get("account_id");
+        email = user.get("email");
 
         inputStudentDOB = (EditText) findViewById(R.id.studentDOB);
         inputStudentPhone = (EditText) findViewById(R.id.studentPhone);
@@ -184,7 +188,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
         inputStudentPhone.addTextChangedListener(new PhoneNumberFormattingTextWatcher());
 
-        if(getIntent().hasExtra("editMode")){
+        if (getIntent().hasExtra("editMode")) {
             editMode = true;
             inputStudentName.setText(getIntent().getStringExtra("studentName"));
             inputStudentPhone.setText(getIntent().getStringExtra("studentPhone"));
@@ -195,7 +199,7 @@ public class AddStudentActivity extends AppCompatActivity {
             String myFormat = "yyyy-MM-dd"; //In which you need put here
             SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-            if(!getIntent().getStringExtra("studentDOB").equals("0000-00-00")){
+            if (!getIntent().getStringExtra("studentDOB").equals("0000-00-00")) {
                 try {
                     studentCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
                     updateStudentDOB();
@@ -206,8 +210,8 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentDOB.setText("");
             }
 
-            ((RadioButton)findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
-            ((RadioButton)findViewById(R.id.radioFemale)).setChecked(getIntent().getStringExtra("studentGender").equals("Female"));
+            ((RadioButton) findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
+            ((RadioButton) findViewById(R.id.radioFemale)).setChecked(getIntent().getStringExtra("studentGender").equals("Female"));
 
         } else {
             //currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
@@ -233,13 +237,13 @@ public class AddStudentActivity extends AppCompatActivity {
                 builder.setTitle("Change Photo") //
                         .setItems(dialogItems, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                if(which == 0) { //"Take Photo
+                                if (which == 0) { //"Take Photo
                                     Log.i("OPTION", "Take Photo!");
                                     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                                         startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                                     }
-                                } else if(which == 1){
+                                } else if (which == 1) {
                                     Log.i("OPTION", "Choose Photo!");
                                     showFileChooser();
                                 }
@@ -320,6 +324,11 @@ public class AddStudentActivity extends AppCompatActivity {
 
         getTypeaheadStudents();
 
+        new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
+                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
+                .build();
+        Instabug.identifyUser(email, email);
+
     }
 
     private void showFileChooser() {
@@ -345,7 +354,7 @@ public class AddStudentActivity extends AppCompatActivity {
         boolean checked = ((RadioButton) view).isChecked();
 
         // Check which radio button was clicked
-        switch(view.getId()) {
+        switch (view.getId()) {
             case R.id.radioMale:
                 if (checked)
                     studentGender = "Male";
@@ -357,9 +366,9 @@ public class AddStudentActivity extends AppCompatActivity {
         }
     }
 
-    public String getStringImage(Bitmap bmp){
+    public String getStringImage(Bitmap bmp) {
 
-        if(bmp == null){
+        if (bmp == null) {
             return "";
         }
 
@@ -433,7 +442,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
     /**
      * Function to get all of user's classes from MySQL DB
-     * */
+     */
     private void getTypeaheadStudents() {
         // Tag used to cancel the request
         String tag_string_req = "req_get_all_classes";
@@ -444,7 +453,7 @@ public class AddStudentActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Get Students Response: " + response.toString());
-                ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
+                ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -453,14 +462,14 @@ public class AddStudentActivity extends AppCompatActivity {
                         JSON_STRING = response;
                         JSONArray result = jObj.getJSONArray("students");
 
-                        for(int i = 0; i<result.length(); i++){
+                        for (int i = 0; i < result.length(); i++) {
                             JSONObject jo = result.getJSONObject(i);
                             String studentName = jo.getString("studentName");
                             String studentAge = jo.getString("studentAge");
                             String studentID = jo.getString("studentID");
 
-                            HashMap<String,String> student = new HashMap<>();
-                            student.put("studentName",studentName);
+                            HashMap<String, String> student = new HashMap<>();
+                            student.put("studentName", studentName);
                             student.put("studentAge", studentAge);
                             student.put("studentID", studentID);
                             list.add(student);
@@ -476,7 +485,7 @@ public class AddStudentActivity extends AppCompatActivity {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                                HashMap<String,String> student = (HashMap<String,String>) parent.getItemAtPosition(position);
+                                HashMap<String, String> student = (HashMap<String, String>) parent.getItemAtPosition(position);
 
                                 Log.i("FROMARRAY", student.get("studentName"));
                                 inputStudentName.setText(student.get("studentName"));
@@ -527,9 +536,9 @@ public class AddStudentActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        if(editMode){
+        if (editMode) {
             getMenuInflater().inflate(R.menu.menu_update_student, menu);
-        } else{
+        } else {
             getMenuInflater().inflate(R.menu.menu_add_student, menu);
         }
         return true;
@@ -582,7 +591,7 @@ public class AddStudentActivity extends AppCompatActivity {
     /**
      * Function to store student in MySQL database will post params(class, name,
      * age, existing id) to add student url
-     * */
+     */
     private void addStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_student";
@@ -603,8 +612,8 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentID.setText("");
                 inputStudentPhone.setText("");
 
-                ((RadioButton)findViewById(R.id.radioMale)).setChecked(false);
-                ((RadioButton)findViewById(R.id.radioFemale)).setChecked(false);
+                ((RadioButton) findViewById(R.id.radioMale)).setChecked(false);
+                ((RadioButton) findViewById(R.id.radioFemale)).setChecked(false);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -664,7 +673,7 @@ public class AddStudentActivity extends AppCompatActivity {
     /**
      * Function to update student in MySQL database will post params(class, name,
      * age, existing id) to update student url
-     * */
+     */
     private void updateStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_update_student";
@@ -685,8 +694,8 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentID.setText("");
                 inputStudentPhone.setText("");
 
-                ((RadioButton)findViewById(R.id.radioMale)).setChecked(false);
-                ((RadioButton)findViewById(R.id.radioFemale)).setChecked(false);
+                ((RadioButton) findViewById(R.id.radioMale)).setChecked(false);
+                ((RadioButton) findViewById(R.id.radioFemale)).setChecked(false);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -752,5 +761,4 @@ public class AddStudentActivity extends AppCompatActivity {
         if (pDialog.isShowing())
             pDialog.dismiss();
     }
-
 }

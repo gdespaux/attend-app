@@ -67,6 +67,8 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.instabug.library.Instabug;
+import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -242,6 +244,11 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
         classID = getIntent().getStringExtra("classID");
         getSingleClass(classID);
+
+        new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
+                .setInvocationEvent(InstabugInvocationEvent.SHAKE)
+                .build();
+        Instabug.identifyUser(email, email);
 
     }
 

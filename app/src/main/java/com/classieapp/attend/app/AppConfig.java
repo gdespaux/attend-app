@@ -53,6 +53,9 @@ public class AppConfig {
     // Server get single student url
     public static String URL_GET_SINGLE_STUDENT = BASE_URL + "getStudent.php";
 
+    // Server get chart attendance data url
+    public static String URL_GET_CHART_ATTENDANCE = BASE_URL + "getChartAttendance.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
@@ -65,4 +68,7 @@ public class AppConfig {
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
 
     public static final String SHARED_PREF = "qa_firebase";
+
+    //Change for production app
+    public static final String INSTABUG_KEY = "5709e0e9e263367bce61600df8d3c749";
 }

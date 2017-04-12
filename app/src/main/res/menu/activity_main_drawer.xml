@@ -16,6 +16,10 @@
             android:icon="@drawable/ic_view_list_black_24dp"
             android:title="Student List" />
         <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_show_chart_black_24dp"
+            android:title="Reports" />
+        <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Profile" />
@@ -24,9 +28,9 @@
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_feedback"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Feedback" />
+                android:title="Feedback &amp; Bugs" />
         </menu>
     </item>
 
