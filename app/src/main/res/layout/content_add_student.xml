@@ -89,6 +89,7 @@
                     android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                     android:ems="10"
                     android:hint="@string/student_name"
+                    android:imeOptions="actionNext"
                     android:inputType="textCapWords|textPersonName"
                     tools:targetApi="m" />
 
@@ -138,9 +139,8 @@
                         android:layout_weight="1"
                         android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                         android:ems="10"
-                        android:focusable="false"
                         android:hint="@string/student_dob"
-                        android:inputType="none"
+                        android:inputType="date"
                         tools:targetApi="m" />
 
                 </android.support.design.widget.TextInputLayout>
@@ -346,6 +346,7 @@
                         android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                         android:ems="10"
                         android:hint="Student Address"
+                        android:imeOptions="actionNext"
                         android:inputType="textEmailAddress"
                         tools:targetApi="m" />
                 </android.support.design.widget.TextInputLayout>
@@ -390,7 +391,7 @@
                         android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                         android:ems="10"
                         android:hint="Enrollment Date"
-                        android:inputType="textEmailAddress"
+                        android:inputType="date"
                         tools:targetApi="m" />
                 </android.support.design.widget.TextInputLayout>
 

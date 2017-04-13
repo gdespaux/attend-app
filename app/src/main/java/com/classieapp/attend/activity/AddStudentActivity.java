@@ -113,17 +113,32 @@ public class AddStudentActivity extends AppCompatActivity {
     String[] permissions = {"android.permission.WRITE_EXTERNAL_STORAGE"};
     final CharSequence[] dialogItems = {"Take Photo", "Choose Photo"};
 
-    private Calendar studentCalendar = Calendar.getInstance();
+    private Calendar studentDOBCalendar = Calendar.getInstance();
+    private Calendar studentEnrollDateCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
 
         @Override
         public void onDateSet(DatePicker view, int year, int monthOfYear,
                               int dayOfMonth) {
             // TODO Auto-generated method stub
-            studentCalendar.set(Calendar.YEAR, year);
-            studentCalendar.set(Calendar.MONTH, monthOfYear);
-            studentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            studentDOBCalendar.set(Calendar.YEAR, year);
+            studentDOBCalendar.set(Calendar.MONTH, monthOfYear);
+            studentDOBCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             updateStudentDOB();
+        }
+
+    };
+
+    DatePickerDialog.OnDateSetListener eDate = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            // TODO Auto-generated method stub
+            studentEnrollDateCalendar.set(Calendar.YEAR, year);
+            studentEnrollDateCalendar.set(Calendar.MONTH, monthOfYear);
+            studentEnrollDateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateStudentEnrollDate();
         }
 
     };
@@ -192,6 +207,10 @@ public class AddStudentActivity extends AppCompatActivity {
             editMode = true;
             inputStudentName.setText(getIntent().getStringExtra("studentName"));
             inputStudentPhone.setText(getIntent().getStringExtra("studentPhone"));
+            inputStudentEmail.setText(getIntent().getStringExtra("studentEmail"));
+            inputStudentAddress.setText(getIntent().getStringExtra("studentAddress"));
+            inputStudentMedInfo.setText(getIntent().getStringExtra("studentMedInfo"));
+
             inputStudentID.setText(getIntent().getStringExtra("studentID"));
 
             studentGender = getIntent().getStringExtra("studentGender");
@@ -201,13 +220,24 @@ public class AddStudentActivity extends AppCompatActivity {
 
             if (!getIntent().getStringExtra("studentDOB").equals("0000-00-00")) {
                 try {
-                    studentCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
+                    studentDOBCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentDOB")));
                     updateStudentDOB();
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             } else {
                 inputStudentDOB.setText("");
+            }
+
+            if (!getIntent().getStringExtra("studentEnrollDate").equals("0000-00-00")) {
+                try {
+                    studentEnrollDateCalendar.setTime(sdf.parse(getIntent().getStringExtra("studentEnrollDate")));
+                    updateStudentEnrollDate();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                inputStudentEnrollDate.setText("");
             }
 
             ((RadioButton) findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
@@ -278,14 +308,13 @@ public class AddStudentActivity extends AppCompatActivity {
             }
         });
 
-        inputStudentDOB.setOnClickListener(new EditText.OnClickListener() {
-
+        inputStudentDOB.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-
-                int year;
-                int month;
-                int day;
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    int year;
+                    int month;
+                    int day;
 
 /*
                 if(editMode){
@@ -311,12 +340,53 @@ public class AddStudentActivity extends AppCompatActivity {
                     day = studentCalendar.get(Calendar.DAY_OF_MONTH);
                 }
 */
-                year = studentCalendar.get(Calendar.YEAR);
-                month = studentCalendar.get(Calendar.MONTH);
-                day = studentCalendar.get(Calendar.DAY_OF_MONTH);
+                    year = studentDOBCalendar.get(Calendar.YEAR);
+                    month = studentDOBCalendar.get(Calendar.MONTH);
+                    day = studentDOBCalendar.get(Calendar.DAY_OF_MONTH);
 
-                new DatePickerDialog(AddStudentActivity.this, date, year, month, day).show();
+                    new DatePickerDialog(AddStudentActivity.this, date, year, month, day).show();
+                }
+            }
+        });
 
+        inputStudentEnrollDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    int year;
+                    int month;
+                    int day;
+
+/*
+                if(editMode){
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+                    Date date = null;
+                    try {
+                        date = sdf.parse(inputStudentDOB.getText().toString());
+
+                        if(date == null){
+                            date = sdf.parse(currentDate);
+                        }
+                    } catch (ParseException e) {
+                    }
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(date);
+
+                    year = c.get(Calendar.YEAR);
+                    month = c.get(Calendar.MONTH);
+                    day = c.get(Calendar.DAY_OF_MONTH);
+                } else {
+                    year = studentCalendar.get(Calendar.YEAR);
+                    month = studentCalendar.get(Calendar.MONTH);
+                    day = studentCalendar.get(Calendar.DAY_OF_MONTH);
+                }
+*/
+                    year = studentEnrollDateCalendar.get(Calendar.YEAR);
+                    month = studentEnrollDateCalendar.get(Calendar.MONTH);
+                    day = studentEnrollDateCalendar.get(Calendar.DAY_OF_MONTH);
+
+                    new DatePickerDialog(AddStudentActivity.this, eDate, year, month, day).show();
+                }
             }
         });
 
@@ -412,9 +482,19 @@ public class AddStudentActivity extends AppCompatActivity {
         String myFormat = "MM/dd/yyyy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
 
-        selectedDate = sdf.format(studentCalendar.getTime());
+        selectedDate = sdf.format(studentDOBCalendar.getTime());
 
         inputStudentDOB.setText(selectedDate);
+    }
+
+    private void updateStudentEnrollDate() {
+
+        String myFormat = "MM/dd/yyyy"; //In which you need put here
+        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+
+        selectedDate = sdf.format(studentEnrollDateCalendar.getTime());
+
+        inputStudentEnrollDate.setText(selectedDate);
     }
 
     @Override
@@ -551,12 +631,16 @@ public class AddStudentActivity extends AppCompatActivity {
         String studentBirthday = inputStudentDOB.getText().toString().trim();
         String studentID = inputStudentID.getText().toString().trim();
         String studentPhone = inputStudentPhone.getText().toString().trim();
+        String studentEmail = inputStudentEmail.getText().toString().trim();
+        String studentAddress = inputStudentAddress.getText().toString().trim();
+        String studentEnrollDate = inputStudentEnrollDate.getText().toString().trim();
+        String studentMedInfo = inputStudentMedInfo.getText().toString().trim();
 
         switch (item.getItemId()) {
             case R.id.action_add_student:
 
                 if (!studentName.isEmpty()) {
-                    addStudent(classID, studentName, studentBirthday, studentPhone, studentID);
+                    addStudent(classID, studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
 
                     return true;
                 } else {
@@ -592,7 +676,7 @@ public class AddStudentActivity extends AppCompatActivity {
      * Function to store student in MySQL database will post params(class, name,
      * age, existing id) to add student url
      */
-    private void addStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
+    private void addStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentEmail, final String studentAddress, final String studentEnrollDate, final String studentMedInfo, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_student";
 
@@ -611,6 +695,10 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentDOB.setText("");
                 inputStudentID.setText("");
                 inputStudentPhone.setText("");
+                inputStudentEmail.setText("");
+                inputStudentAddress.setText("");
+                inputStudentEnrollDate.setText("");
+                inputStudentMedInfo.setText("");
 
                 ((RadioButton) findViewById(R.id.radioMale)).setChecked(false);
                 ((RadioButton) findViewById(R.id.radioFemale)).setChecked(false);
@@ -659,6 +747,10 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("studentPhone", studentPhone);
                 params.put("studentGender", studentGender);
                 params.put("studentPhoto", image);
+                params.put("studentEmail", studentEmail);
+                params.put("studentAddress", studentAddress);
+                params.put("studentEnrollDate", studentEnrollDate);
+                params.put("studentMedInfo", studentMedInfo);
                 params.put("studentID", studentID);
 
                 return params;

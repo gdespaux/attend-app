@@ -99,6 +99,11 @@ public class SingleStudentActivity extends AppCompatActivity {
     private TextView studentAgeText;
     private TextView studentPhoneText;
     private TextView studentGenderText;
+    private TextView studentEmailText;
+    private TextView studentAddressText;
+    private TextView studentEnrollDateText;
+    private TextView studentMedInfoText;
+    private TextView studentLastSeenText;
     private CircularNetworkImageView studentPhoto;
 
     private String JSON_STRING;
@@ -111,6 +116,10 @@ public class SingleStudentActivity extends AppCompatActivity {
     private String studentDOB;
     private String studentPhone;
     private String studentGender;
+    private String studentEmail;
+    private String studentAddress;
+    private String studentEnrollDate;
+    private String studentMedInfo;
     private static final int STATIC_RESULT = 4;
 
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
@@ -148,6 +157,11 @@ public class SingleStudentActivity extends AppCompatActivity {
         studentAgeText = (TextView) findViewById(R.id.studentAge);
         studentPhoneText = (TextView) findViewById(R.id.studentPhone);
         studentGenderText = (TextView) findViewById(R.id.studentGender);
+        studentEmailText = (TextView) findViewById(R.id.studentEmail);
+        studentAddressText = (TextView) findViewById(R.id.studentAddress);
+        studentEnrollDateText = (TextView) findViewById(R.id.studentEnrollDate);
+        studentMedInfoText = (TextView) findViewById(R.id.studentMedInfo);
+        studentLastSeenText = (TextView) findViewById(R.id.studentLastSeen);
         studentPhoto = (CircularNetworkImageView) findViewById(R.id.studentPhoto);
 
         // SqLite database handler
@@ -221,6 +235,10 @@ public class SingleStudentActivity extends AppCompatActivity {
                 intent.putExtra("studentDOB", studentDOB);
                 intent.putExtra("studentPhone", studentPhone);
                 intent.putExtra("studentGender", studentGender);
+                intent.putExtra("studentEmail", studentEmail);
+                intent.putExtra("studentAddress", studentAddress);
+                intent.putExtra("studentEnrollDate", studentEnrollDate);
+                intent.putExtra("studentMedInfo", studentMedInfo);
                 startActivityForResult(intent, STATIC_RESULT, ActivityOptions.makeSceneTransitionAnimation(SingleStudentActivity.this).toBundle());
 
                 return true;
@@ -245,6 +263,12 @@ public class SingleStudentActivity extends AppCompatActivity {
             String studentPhone = jo.getString("studentPhone");
             String studentGender = jo.getString("studentGender");
             String studentPhoto = jo.getString("studentPhoto");
+            String studentEmail = jo.getString("studentEmail");
+            String studentAddress = jo.getString("studentAddress");
+            String studentEnrollDate = jo.getString("studentEnrollDate");
+            String studentMedInfo = jo.getString("studentMedInfo");
+            String lastClass = jo.getString("studentLastClass");
+            String lastClassDate = jo.getString("studentLastAttendance");
 
             getSupportActionBar().setTitle(studentName);
 
@@ -253,11 +277,21 @@ public class SingleStudentActivity extends AppCompatActivity {
             Log.i("DOB", studentDOB);
             this.studentPhone = studentPhone;
             this.studentGender = studentGender;
+            this.studentEmail = studentEmail;
+            this.studentAddress = studentAddress;
+            this.studentEnrollDate = studentEnrollDate;
+            this.studentMedInfo = studentMedInfo;
 
             String myFormat = "yyyy-MM-dd"; //In which you need put here
             SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
             String newFormat = "MM/dd/yyyy"; //In which you need put here
             SimpleDateFormat newSdf = new SimpleDateFormat(newFormat, Locale.US);
+
+            try{
+                studentLastSeenText.setText("Last seen\n" + newSdf.format(sdf.parse(lastClassDate)) + " in " + lastClass);
+            } catch(ParseException e){
+                studentLastSeenText.setText("No classes attended!");
+            }
 
             studentCalendar.setTime(sdf.parse(studentDOB));
             int year = studentCalendar.get(Calendar.YEAR);
@@ -272,11 +306,25 @@ public class SingleStudentActivity extends AppCompatActivity {
                 studentAgeText.setText("");
             }
 
+            if(!studentEnrollDate.equals("0000-00-00")){
+                studentEnrollDateText.setText(newSdf.format(sdf.parse(studentEnrollDate)));
+            } else {
+                studentEnrollDateText.setText("");
+            }
+
             studentNameText.setText(studentName);
             //studentDOBText.setText(studentDOB);
             studentPhoneText.setText(studentPhone);
             studentGenderText.setText(studentGender);
+            studentEmailText.setText(studentEmail);
+            studentAddressText.setText(studentAddress);
+            studentMedInfoText.setText(studentMedInfo);
             this.studentPhoto.setImageUrl(studentPhoto, imageLoader);
+
+            if(studentEmailText.getText().equals("")) studentEmailText.setVisibility(View.GONE);
+            if(studentAddressText.getText().equals("")) studentAddressText.setVisibility(View.GONE);
+            if(studentEnrollDateText.getText().equals("")) studentEnrollDateText.setVisibility(View.GONE);
+            if(studentMedInfoText.getText().equals("")) studentMedInfoText.setVisibility(View.GONE);
 
         } catch (JSONException e) {
             e.printStackTrace();

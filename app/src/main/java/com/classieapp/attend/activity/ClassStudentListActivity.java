@@ -241,6 +241,10 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 String studentName = jo.getString("studentName");
                 String studentPresent = jo.getString("studentPresent");
                 String studentPhoto = jo.getString("studentPhoto");
+                String studentActive = jo.getString("studentActive");
+                String studentInactiveDate = jo.getString("inactiveDate");
+
+                if(!studentActive.equals("yes")) continue;
 
                 HashMap<String,String> student = new HashMap<>();
                 student.put("studentID",studentID);

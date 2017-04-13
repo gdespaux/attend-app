@@ -255,7 +255,6 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         String tag_string_req = "req_get_all_students";
 
         pDialog.setMessage("Loading Students...");
-        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 AppConfig.URL_GET_ALL_STUDENTS, new Response.Listener<String>() {
@@ -263,7 +262,6 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Get All Students Response: " + response.toString());
-                hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -293,7 +291,6 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
                 Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
             }
         }) {
 

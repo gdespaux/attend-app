@@ -11,94 +11,159 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="344dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         app:cardCornerRadius="2dp"
         app:cardElevation="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginLeft="8dp"
-        app:layout_constraintLeft_toLeftOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:paddingBottom="16dp"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp"
-                android:paddingTop="24dp">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/studentName"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/student_name"
-                    android:textAlignment="gravity"
-                    android:textAppearance="@android:style/TextAppearance.Material.Title"
-                    android:textSize="24sp"
-                    android:transitionName="transClassName"
-                    android:typeface="normal"
-                    tools:layout_editor_absoluteX="8dp"
-                    tools:layout_editor_absoluteY="235dp" />
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="24dp">
 
-                <TextView
-                    android:id="@+id/studentAge"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Student Age" />
+                    <TextView
+                        android:id="@+id/studentName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/student_name"
+                        android:textAlignment="gravity"
+                        android:textAppearance="@android:style/TextAppearance.Material.Title"
+                        android:textSize="24sp"
+                        android:transitionName="transClassName"
+                        android:typeface="normal"
+                        tools:layout_editor_absoluteX="8dp"
+                        tools:layout_editor_absoluteY="235dp" />
 
-                <TextView
-                    android:id="@+id/studentDOB"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingTop="12dp"
-                    android:text="@string/student_birthday"
-                    android:textAlignment="viewStart"
-                    android:textSize="16sp"
-                    android:transitionName="transClassLocation" />
+                    <TextView
+                        android:id="@+id/studentAge"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Student Age" />
 
-                <TextView
-                    android:id="@+id/studentPhone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingTop="12dp"
-                    android:text="@string/student_phone"
-                    android:textAlignment="viewStart"
-                    android:transitionName="transClassTime" />
+                    <TextView
+                        android:id="@+id/studentDOB"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="@string/student_birthday"
+                        android:textAlignment="viewStart"
+                        android:textSize="16sp"
+                        android:transitionName="transClassLocation" />
 
-                <TextView
-                    android:id="@+id/studentGender"
+                    <TextView
+                        android:id="@+id/studentPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="@string/student_phone"
+                        android:textAlignment="viewStart"
+                        android:transitionName="transClassTime" />
+
+                    <TextView
+                        android:id="@+id/studentGender"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="@string/student_gender" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingTop="12dp"
-                    android:text="@string/student_gender" />
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp"
+                    android:paddingTop="24dp">
+
+                    <com.classieapp.attend.utils.CircularNetworkImageView
+                        android:id="@+id/studentPhoto"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp" />
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
-                <com.classieapp.attend.utils.CircularNetworkImageView
-                    android:id="@+id/studentPhoto"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingBottom="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
+                    <TextView
+                        android:id="@+id/studentLastSeen"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="Last Seen" />
+
+                    <TextView
+                        android:id="@+id/studentEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="Student Email" />
+
+                    <TextView
+                        android:id="@+id/studentAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="Student Address" />
+
+                    <TextView
+                        android:id="@+id/studentEnrollDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="Student Enroll Date" />
+
+                    <TextView
+                        android:id="@+id/studentMedInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingTop="12dp"
+                        android:text="Student Med Info" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>

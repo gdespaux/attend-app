@@ -310,7 +310,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         String tag_string_req = "req_get_all_classes";
 
         pDialog.setMessage("Loading Classes...");
-        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 AppConfig.URL_GET_ALL_CLASSES, new Response.Listener<String>() {
@@ -318,7 +317,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Get Class Response: " + response.toString());
-                hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -348,7 +346,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
                 Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
             }
         }) {
 
