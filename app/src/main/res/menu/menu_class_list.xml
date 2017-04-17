@@ -2,11 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.classieapp.attend.activity.ClassListFragment">
-    <!-- "Change Date", should always appear as action button -->
+    tools:context="com.quickattend.quickattend.activity.ClassListFragment">
     <item
-        android:id="@+id/action_change_date"
-        android:icon="@drawable/ic_today_black_24dp"
-        android:title="Change Date"
-        app:showAsAction="always|withText"/>
+        android:id="@+id/action_view_all_classes"
+        android:orderInCategory="101"
+        android:title="@string/action_view_all_classes"
+        app:showAsAction="never" />
 </menu>

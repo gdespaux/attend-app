@@ -7,7 +7,7 @@
     android:visibility="visible"
     android:padding="10dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.classieapp.attend.activity.AddClassActivity"
+    tools:context="com.quickattend.quickattend.activity.AddClassActivity"
     tools:showIn="@layout/activity_add_class">
 
     <TextView
@@ -76,9 +76,8 @@
                 android:drawableStart="@drawable/ic_access_time_black_24dp"
                 android:drawableTint="@color/place_autocomplete_prediction_secondary_text"
                 android:ems="10"
-                android:focusable="false"
                 android:hint="@string/class_time"
-                android:inputType="none" />
+                android:inputType="time" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout

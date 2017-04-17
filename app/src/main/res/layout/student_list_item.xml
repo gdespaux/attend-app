@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <com.classieapp.attend.utils.CircularNetworkImageView
+    <com.quickattend.quickattend.utils.CircularNetworkImageView
         android:id="@+id/studentPhoto"
         android:layout_width="48dp"
         android:layout_height="48dp"

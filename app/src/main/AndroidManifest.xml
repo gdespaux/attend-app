@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.classieapp.attend">
+    package="com.quickattend.quickattend">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -26,7 +26,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
-        android:name=".app.AppController"
+        android:name="com.quickattend.quickattend.app.AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -50,7 +50,7 @@
             android:resource="@color/colorAccent" />
         <!-- [END fcm_default_icon] -->
         <activity
-            android:name=".activity.LoginActivity"
+            android:name="com.quickattend.quickattend.activity.LoginActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
@@ -62,43 +62,43 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.MainOldActivity"
+            android:name="com.quickattend.quickattend.activity.MainOldActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.RegisterActivity"
+            android:name="com.quickattend.quickattend.activity.RegisterActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_register"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.AddClassActivity"
+            android:name="com.quickattend.quickattend.activity.AddClassActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_add_class"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName="com.quickattend.quickattend.activity.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible|adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.MainActivity" />
+                android:value="com.quickattend.quickattend.activity.MainActivity" />
         </activity>
         <activity
-            android:name=".activity.MainActivity"
+            android:name="com.quickattend.quickattend.activity.MainActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_main2"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.SingleClassActivity"
+            android:name="com.quickattend.quickattend.activity.SingleClassActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_single_class"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName="com.quickattend.quickattend.activity.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.MainActivity" />
+                android:value="com.quickattend.quickattend.activity.MainActivity" />
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -115,16 +115,16 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service android:name=".utils.GeofenceTransitionService" />
+        <service android:name="com.quickattend.quickattend.utils.GeofenceTransitionService" />
         <!-- [START firebase_service] -->
-        <service android:name=".utils.FirebaseMessageService">
+        <service android:name="com.quickattend.quickattend.utils.FirebaseMessageService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!-- [END firebase_service] -->
         <!-- [START firebase_iid_service] -->
-        <service android:name=".utils.FirebaseIDService">
+        <service android:name="com.quickattend.quickattend.utils.FirebaseIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
@@ -132,30 +132,30 @@
         <!-- [END firebase_iid_service] -->
 
         <activity
-            android:name=".activity.ClassStudentListActivity"
+            android:name="com.quickattend.quickattend.activity.ClassStudentListActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_class_student_list"
-            android:parentActivityName=".activity.SingleClassActivity"
+            android:parentActivityName="com.quickattend.quickattend.activity.SingleClassActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.SingleClassActivity" />
+                android:value="com.quickattend.quickattend.activity.SingleClassActivity" />
         </activity>
         <activity
-            android:name=".activity.AddStudentActivity"
+            android:name="com.quickattend.quickattend.activity.AddStudentActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_add_student"
-            android:parentActivityName=".activity.ClassStudentListActivity"
+            android:parentActivityName="com.quickattend.quickattend.activity.ClassStudentListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateVisible|adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.classieapp.attend.activity.ClassStudentListActivity" />
+                android:value="com.quickattend.quickattend.activity.ClassStudentListActivity" />
         </activity>
         <activity
-            android:name=".activity.SingleStudentActivity"
+            android:name="com.quickattend.quickattend.activity.SingleStudentActivity"
             android:label="@string/title_activity_single_student"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

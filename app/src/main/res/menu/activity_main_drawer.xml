@@ -20,7 +20,7 @@
             android:icon="@drawable/ic_show_chart_black_24dp"
             android:title="Reports" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_profile"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Profile" />
     </group>
@@ -34,13 +34,8 @@
         </menu>
     </item>
 
-    <item android:title="Options">
+    <item android:title="Other">
         <menu>
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="Settings" />
-
             <item
                 android:id="@+id/nav_log_out"
                 android:icon="@drawable/ic_power_settings_new_black_24dp"

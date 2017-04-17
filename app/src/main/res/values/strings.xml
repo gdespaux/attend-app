@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">Quick Attend</string>
     <string name="action_settings">Settings</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_change_date">Change Date</string>
+    <string name="action_view_students">View Students</string>
+    <string name="action_view_all_classes">Show All Company Classes</string>
+    <string name="action_view_all_info">Show All Info</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->

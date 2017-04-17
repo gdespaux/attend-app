@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:739467031581:android:771b1f0ad329cda8",
         "android_client_info": {
-          "package_name": "com.classieapp.attend"
+          "package_name": "com.quickattend.quickattend"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "739467031581-cnlk4e1i5tmdoi6dqnrdb48ierd71ocq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.classieapp.attend",
+            "package_name": "com.quickattend.quickattend",
             "certificate_hash": "9f1d39aa45d78bb512c3383115ff95507415f164"
           }
         },

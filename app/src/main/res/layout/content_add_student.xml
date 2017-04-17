@@ -8,7 +8,7 @@
     android:fillViewport="true"
     android:visibility="visible"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.classieapp.attend.activity.AddStudentActivity"
+    tools:context="com.quickattend.quickattend.activity.AddStudentActivity"
     tools:showIn="@layout/activity_add_student">
 
     <LinearLayout
