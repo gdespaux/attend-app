@@ -48,6 +48,7 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:10.2.1'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     compile 'com.instabug.library:instabug:4.0.7'
+    compile 'com.github.paolorotolo:appintro:4.1.0'
     testCompile 'junit:junit:4.12'
 }
 

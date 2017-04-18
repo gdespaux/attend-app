@@ -155,6 +155,9 @@
             android:name="com.quickattend.quickattend.activity.SingleStudentActivity"
             android:label="@string/title_activity_single_student"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
+            android:name="com.quickattend.quickattend.activity.IntroActivity"
+            android:label="@string/title_activity_intro"></activity>
     </application>
 
 </manifest>
