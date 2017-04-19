@@ -222,7 +222,10 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                 String className = jo.getString("className");
                 String classLocation = jo.getString("classLocation");
                 String classTime = jo.getString("classTime");
+                String classCountPresent = jo.getString("classCountPresent");
                 String classCount = jo.getString("classCount");
+
+                classCount = classCountPresent + "/" + classCount;
 
                 HashMap<String,String> classes = new HashMap<>();
                 classes.put("classID",classID);
@@ -238,7 +241,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         }
 
         ListAdapter adapter = new SimpleAdapter(
-                getActivity(), list, R.layout.list_item,
+                getActivity(), list, R.layout.today_class_list_item,
                 new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
                 new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
@@ -286,12 +289,12 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
             public void onResponse(String response) {
                 Log.d(TAG, "Get Class Response: " + response.toString());
                 //hideDialog();
+                JSON_STRING = response;
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
-                        JSON_STRING = response;
                         showClass();
                         //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
@@ -299,6 +302,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
+                        showClass();
                         Toast.makeText(getActivity(),
                                 errorMsg, Toast.LENGTH_SHORT).show();
                     }
@@ -313,6 +317,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
+                showClass();
                 Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 //hideDialog();

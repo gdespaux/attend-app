@@ -62,16 +62,13 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
             convertView = inflater.inflate(R.layout.typeahead_student_list_item, null);
             holder = new ViewHolder();
 
-            holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
-            holder.studentAge = (TextView) convertView.findViewById(R.id.studentAge);
             holder.studentID = (TextView) convertView.findViewById(R.id.studentID);
+            holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
 
             Log.i("RESPONSE", list.toString());
 
-            holder.studentName.setText(list.get(position).get("studentName"));
-            holder.studentAge.setText("Age: " + list.get(position).get("studentAge"));
             holder.studentID.setText(list.get(position).get("studentID"));
-
+            holder.studentName.setText(list.get(position).get("studentName"));
 
             convertView.setTag(holder);
         } else {
@@ -118,14 +115,12 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
                     constraint = constraint.toString().toLowerCase();
                     for (int i = 0; i < mOriginalValues.size(); i++) {
                         String data = mOriginalValues.get(i).get("studentName");
-                        String studentName = mOriginalValues.get(i).get("studentName");
-                        String studentAge = mOriginalValues.get(i).get("studentAge");
                         String studentID = mOriginalValues.get(i).get("studentID");
+                        String studentName = mOriginalValues.get(i).get("studentName");
                         if (data.toLowerCase().startsWith(constraint.toString())) {
                             HashMap<String,String> filteredStudent = new HashMap<>();
-                            filteredStudent.put("studentName",studentName);
-                            filteredStudent.put("studentAge", studentAge);
                             filteredStudent.put("studentID", studentID);
+                            filteredStudent.put("studentName",studentName);
                             FilteredArrList.add(filteredStudent);
                         }
                     }
@@ -140,8 +135,8 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
     }
 
     private static class ViewHolder {
-        TextView studentName;
-        TextView studentAge;
         TextView studentID;
+        TextView studentName;
+
     }
 }

@@ -186,8 +186,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Start the thread
-        t.start();
+        // Start the thread for intro
+        //t.start();
     }
 
     // Fetches reg id from shared preferences

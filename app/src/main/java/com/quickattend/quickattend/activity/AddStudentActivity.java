@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -78,7 +79,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
     private LinearLayout hideableInfo;
 
-    private String studentGender;
+    private String studentGender ="";
 
     String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
 
@@ -186,6 +187,9 @@ public class AddStudentActivity extends AppCompatActivity {
             inputStudentID.setText(getIntent().getStringExtra("studentID"));
 
             studentGender = getIntent().getStringExtra("studentGender");
+            if(studentGender == null){
+                studentGender = "";
+            }
 
             String myFormat = "yyyy-MM-dd"; //In which you need put here
             SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
@@ -363,6 +367,9 @@ public class AddStudentActivity extends AppCompatActivity {
         });
 
         classID = getIntent().getStringExtra("classID");
+        if(classID == null){
+            classID = "";
+        }
 
         getTypeaheadStudents();
 
@@ -497,7 +504,7 @@ public class AddStudentActivity extends AppCompatActivity {
      */
     private void getTypeaheadStudents() {
         // Tag used to cancel the request
-        String tag_string_req = "req_get_all_classes";
+        String tag_string_req = "req_get_typeahead_students";
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 AppConfig.URL_TYPEAHEAD_ACCOUNT_STUDENTS, new Response.Listener<String>() {
@@ -516,21 +523,19 @@ public class AddStudentActivity extends AppCompatActivity {
 
                         for (int i = 0; i < result.length(); i++) {
                             JSONObject jo = result.getJSONObject(i);
-                            String studentName = jo.getString("studentName");
-                            String studentAge = jo.getString("studentAge");
                             String studentID = jo.getString("studentID");
+                            String studentName = jo.getString("studentName");
 
                             HashMap<String, String> student = new HashMap<>();
-                            student.put("studentName", studentName);
-                            student.put("studentAge", studentAge);
                             student.put("studentID", studentID);
+                            student.put("studentName", studentName);
                             list.add(student);
                         }
 
                         AddStudentAdapter adapter = new AddStudentAdapter(
                                 AddStudentActivity.this, list,
-                                new String[]{"studentName", "studentAge", "studentID"},
-                                new int[]{R.id.studentName, R.id.studentAge, R.id.studentID});
+                                new String[]{"studentID", "studentName"},
+                                new int[]{R.id.studentID, R.id.studentName});
 
                         inputStudentName.setAdapter(adapter);
                         inputStudentName.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -540,8 +545,8 @@ public class AddStudentActivity extends AppCompatActivity {
                                 HashMap<String, String> student = (HashMap<String, String>) parent.getItemAtPosition(position);
 
                                 Log.i("FROMARRAY", student.get("studentName"));
-                                inputStudentName.setText(student.get("studentName"));
                                 inputStudentID.setText(student.get("studentID"));
+                                inputStudentName.setText(student.get("studentName"));
 
                                 didSelectItem = true;
                                 hideableInfo.setVisibility(View.GONE);
@@ -612,7 +617,7 @@ public class AddStudentActivity extends AppCompatActivity {
             case R.id.action_add_student:
 
                 if (!studentName.isEmpty()) {
-                    addStudent(classID, studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
+                    addStudent(studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
 
                     return true;
                 } else {
@@ -625,7 +630,7 @@ public class AddStudentActivity extends AppCompatActivity {
             case R.id.action_update_student:
 
                 if (!studentName.isEmpty()) {
-                    updateStudent(classID, studentName, studentBirthday, studentPhone, studentID);
+                    updateStudent(studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
 
                     return true;
                 } else {
@@ -648,7 +653,7 @@ public class AddStudentActivity extends AppCompatActivity {
      * Function to store student in MySQL database will post params(class, name,
      * age, existing id) to add student url
      */
-    private void addStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentEmail, final String studentAddress, final String studentEnrollDate, final String studentMedInfo, final String studentID) {
+    private void addStudent(final String studentName, final String studentDOB, final String studentPhone, final String studentEmail, final String studentAddress, final String studentEnrollDate, final String studentMedInfo, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_student";
 
@@ -738,7 +743,7 @@ public class AddStudentActivity extends AppCompatActivity {
      * Function to update student in MySQL database will post params(class, name,
      * age, existing id) to update student url
      */
-    private void updateStudent(final String classID, final String studentName, final String studentDOB, final String studentPhone, final String studentID) {
+    private void updateStudent(final String studentName, final String studentDOB, final String studentPhone, final String studentEmail, final String studentAddress, final String studentEnrollDate, final String studentMedInfo, final String studentID) {
         // Tag used to cancel the request
         String tag_string_req = "req_update_student";
 
@@ -757,6 +762,10 @@ public class AddStudentActivity extends AppCompatActivity {
                 inputStudentDOB.setText("");
                 inputStudentID.setText("");
                 inputStudentPhone.setText("");
+                inputStudentEmail.setText("");
+                inputStudentAddress.setText("");
+                inputStudentEnrollDate.setText("");
+                inputStudentMedInfo.setText("");
 
                 ((RadioButton) findViewById(R.id.radioMale)).setChecked(false);
                 ((RadioButton) findViewById(R.id.radioFemale)).setChecked(false);
@@ -806,6 +815,10 @@ public class AddStudentActivity extends AppCompatActivity {
                 params.put("studentPhone", studentPhone);
                 params.put("studentGender", studentGender);
                 params.put("studentPhoto", image);
+                params.put("studentEmail", studentEmail);
+                params.put("studentAddress", studentAddress);
+                params.put("studentEnrollDate", studentEnrollDate);
+                params.put("studentMedInfo", studentMedInfo);
 
                 return params;
             }
