@@ -77,14 +77,14 @@ public class StudentFullListAdapter extends BaseAdapter {
             holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
             holder.studentPhoto = (CircularNetworkImageView) convertView.findViewById(R.id.studentPhoto);
 
-            holder.studentID.setText(list.get(position).get("studentID"));
-            holder.studentName.setText(list.get(position).get("studentName"));
-            holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
-
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+
+        holder.studentID.setText(list.get(position).get("studentID"));
+        holder.studentName.setText(list.get(position).get("studentName"));
+        holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
 
         return convertView;
     }

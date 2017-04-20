@@ -33,6 +33,8 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
         // Saving reg id to shared preferences
         storeRegIdInPref(refreshedToken);
 
+        Log.e("FIREBASE", refreshedToken);
+
         // sending reg id to your server
         sendRegistrationToServer(refreshedToken);
 

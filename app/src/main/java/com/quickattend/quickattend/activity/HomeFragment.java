@@ -193,10 +193,9 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         //        Pair.create(v, "transClassTime"),
         //        Pair.create(v, "transClassLocation"));
 
-        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
         i.putExtra("classID",classID);
         i.putExtra("className", className);
-        getActivity().startActivity(i, transitionActivityOptions.toBundle());
+        getActivity().startActivity(i);
 
         //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
         //intent.putExtra("classID",classID);

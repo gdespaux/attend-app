@@ -102,7 +102,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 // Launching the add class activity
                 Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
                 intent.putExtra("classID",classID);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(ClassStudentListActivity.this).toBundle());
+                startActivity(intent);
             }
         });
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);

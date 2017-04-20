@@ -126,9 +126,8 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         //        Pair.create(v, "transClassTime"),
         //        Pair.create(v, "transClassLocation"));
 
-        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
         i.putExtra("studentID", studentID);
-        getActivity().startActivity(i, transitionActivityOptions.toBundle());
+        getActivity().startActivity(i);
 
         //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
         //intent.putExtra("classID",classID);

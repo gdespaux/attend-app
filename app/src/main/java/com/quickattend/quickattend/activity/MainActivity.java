@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
                 }
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(MainActivity.this).toBundle());
+                startActivity(intent);
             }
         });
 
@@ -284,6 +284,9 @@ public class MainActivity extends AppCompatActivity
             fab.hide();
         } else if (id == R.id.nav_feedback) {
             Instabug.invoke();
+        } else if (id == R.id.nav_about) {
+            fragment = new AboutFragment();
+            fab.hide();
         } else if (id == R.id.nav_log_out) {
             logoutUser();
         }

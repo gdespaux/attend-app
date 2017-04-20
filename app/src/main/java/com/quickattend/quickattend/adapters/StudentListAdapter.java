@@ -45,6 +45,8 @@ public class StudentListAdapter extends BaseAdapter {
 
     @Override
     public int getViewTypeCount() {
+        int count = getCount();
+
         return 1;
     }
 
@@ -79,19 +81,19 @@ public class StudentListAdapter extends BaseAdapter {
             holder.studentPhoto = (CircularNetworkImageView) convertView.findViewById(R.id.studentPhoto);
             holder.studentPresent = (CheckBox) convertView.findViewById(R.id.studentPresent);
 
-            holder.studentID.setText(list.get(position).get("studentID"));
-            holder.studentName.setText(list.get(position).get("studentName"));
-            holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
-
-            if(list.get(position).get("studentPresent").equals("yes")){
-                holder.studentPresent.setChecked(true);
-            } else {
-                holder.studentPresent.setChecked(false);
-            }
-
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder)convertView.getTag();
+        }
+
+        holder.studentID.setText(list.get(position).get("studentID"));
+        holder.studentName.setText(list.get(position).get("studentName"));
+        holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
+
+        if(list.get(position).get("studentPresent").equals("yes")){
+            holder.studentPresent.setChecked(true);
+        } else {
+            holder.studentPresent.setChecked(false);
         }
 
         return convertView;

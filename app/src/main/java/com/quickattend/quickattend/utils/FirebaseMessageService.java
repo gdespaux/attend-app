@@ -18,6 +18,10 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
 
     private NotificationUtils notificationUtils;
 
+    public FirebaseMessageService(){
+        super();
+    }
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.e(TAG, "From: " + remoteMessage.getFrom());

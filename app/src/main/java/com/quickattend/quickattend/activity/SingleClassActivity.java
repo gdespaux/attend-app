@@ -173,7 +173,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                 Intent intent = new Intent(SingleClassActivity.this, ClassStudentListActivity.class);
                 intent.putExtra("classID", classID);
                 intent.putExtra("className", className);
-                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
+                startActivity(intent);
 
             }
         });
@@ -236,7 +236,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
                 intent.putExtra("classTime", classTimeText.getText());
                 intent.putExtra("classLocation", classLocationText.getText());
                 intent.putExtra("onDays", onDays);
-                startActivityForResult(intent, STATIC_RESULT, ActivityOptions.makeSceneTransitionAnimation(SingleClassActivity.this).toBundle());
+                startActivityForResult(intent, STATIC_RESULT);
 
                 return true;
 

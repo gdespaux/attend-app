@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Remove from Instabug included perms -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove"></uses-permission>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -114,14 +114,16 @@
 
         <service android:name="com.quickattend.quickattend.utils.GeofenceTransitionService" />
         <!-- [START firebase_service] -->
-        <service android:name="com.quickattend.quickattend.utils.FirebaseMessageService">
+        <service android:name="com.quickattend.quickattend.utils.FirebaseMessageService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!-- [END firebase_service] -->
         <!-- [START firebase_iid_service] -->
-        <service android:name="com.quickattend.quickattend.utils.FirebaseIDService">
+        <service android:name="com.quickattend.quickattend.utils.FirebaseIDService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
@@ -154,10 +156,10 @@
         <activity
             android:name="com.quickattend.quickattend.activity.SingleStudentActivity"
             android:label="@string/title_activity_single_student"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name="com.quickattend.quickattend.activity.IntroActivity"
-            android:label="@string/title_activity_intro"></activity>
+            android:label="@string/title_activity_intro"/>
     </application>
 
 </manifest>

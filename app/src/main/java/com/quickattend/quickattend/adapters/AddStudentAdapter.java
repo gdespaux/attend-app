@@ -65,15 +65,15 @@ public class AddStudentAdapter extends BaseAdapter implements Filterable {
             holder.studentID = (TextView) convertView.findViewById(R.id.studentID);
             holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
 
-            Log.i("RESPONSE", list.toString());
-
-            holder.studentID.setText(list.get(position).get("studentID"));
-            holder.studentName.setText(list.get(position).get("studentName"));
+            //Log.i("RESPONSE", list.toString());
 
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+
+        holder.studentID.setText(list.get(position).get("studentID"));
+        holder.studentName.setText(list.get(position).get("studentName"));
 
         return convertView;
     }

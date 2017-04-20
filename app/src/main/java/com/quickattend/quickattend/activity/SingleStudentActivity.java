@@ -172,7 +172,7 @@ public class SingleStudentActivity extends AppCompatActivity {
                 intent.putExtra("studentAddress", studentAddress);
                 intent.putExtra("studentEnrollDate", studentEnrollDate);
                 intent.putExtra("studentMedInfo", studentMedInfo);
-                startActivityForResult(intent, STATIC_RESULT, ActivityOptions.makeSceneTransitionAnimation(SingleStudentActivity.this).toBundle());
+                startActivityForResult(intent, STATIC_RESULT);
 
                 return true;
             default:

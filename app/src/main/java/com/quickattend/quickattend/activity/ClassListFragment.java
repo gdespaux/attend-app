@@ -186,11 +186,10 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
 
         Intent i = new Intent(getActivity(), SingleClassActivity.class);
 
-        ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity());
         i.putExtra("classID",classID);
         i.putExtra("className", className);
         i.putExtra("classDate", currentDate);
-        getActivity().startActivity(i, transitionActivityOptions.toBundle());
+        getActivity().startActivity(i);
 
         //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
         //intent.putExtra("classID",classID);
