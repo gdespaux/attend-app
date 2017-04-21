@@ -4,7 +4,8 @@ Lists class students to take attendance.
 Called when class clicked on home screen
  */
 
-import android.app.ActivityOptions;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -78,6 +80,11 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     String currentDate;
 
+    FloatingActionButton fab, fabExistingStudent, fabNewStudent;
+    LinearLayout fabLayout1, fabLayout2;
+    View fabBGLayout;
+    boolean isFABOpen = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,18 +101,43 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         }
 
         getSupportActionBar().setTitle(className + ": " + currentDate);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fabLayout1= (LinearLayout) findViewById(R.id.fabLayout1);
+        fabLayout2= (LinearLayout) findViewById(R.id.fabLayout2);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fabExistingStudent = (FloatingActionButton) findViewById(R.id.fab1);
+        fabNewStudent = (FloatingActionButton) findViewById(R.id.fab2);
+        fabBGLayout=findViewById(R.id.fabBGLayout);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!isFABOpen){
+                    showFABMenu();
+                }else{
+                    closeFABMenu();
+                }
+            }
+        });
+
+        fabNewStudent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 // Launching the add class activity
+                closeFABMenu();
                 Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
                 intent.putExtra("classID",classID);
                 startActivity(intent);
             }
         });
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        fabBGLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeFABMenu();
+            }
+        });
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -386,6 +418,81 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     private void hideDialog() {
         if (pDialog.isShowing())
             pDialog.dismiss();
+    }
+
+    private void showFABMenu(){
+        isFABOpen=true;
+        fabLayout1.setVisibility(View.VISIBLE);
+        fabLayout2.setVisibility(View.VISIBLE);
+
+        fabBGLayout.animate()
+                .alpha(1.0f)
+                .setDuration(300)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        fabBGLayout.setVisibility(View.VISIBLE);
+                    }
+                });
+
+        fab.animate().rotationBy(180);
+        fab.setImageResource(R.drawable.ic_close_black_24dp);
+        fabLayout1.animate().translationY(-getResources().getDimension(R.dimen.standard_65));
+        fabLayout2.animate().translationY(-getResources().getDimension(R.dimen.standard_110));
+    }
+
+    private void closeFABMenu(){
+        isFABOpen=false;
+
+        fabBGLayout.animate()
+                .alpha(0.0f)
+                .setDuration(300)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        fabBGLayout.setVisibility(View.GONE);
+                    }
+                });
+
+        fab.animate().rotationBy(-180);
+        fab.setImageResource(R.drawable.ic_add_black_24dp);
+        fabLayout1.animate().translationY(0);
+        fabLayout2.animate().translationY(0).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                if(!isFABOpen){
+                    fabLayout1.setVisibility(View.GONE);
+                    fabLayout2.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(isFABOpen){
+            closeFABMenu();
+        }else{
+            super.onBackPressed();
+        }
     }
 
 }

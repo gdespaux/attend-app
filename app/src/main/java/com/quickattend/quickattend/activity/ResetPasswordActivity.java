@@ -30,17 +30,18 @@ import com.quickattend.quickattend.app.AppController;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class LoginActivity extends Activity {
-    private static final String TAG = LoginActivity.class.getSimpleName();
-    private Button btnLogin;
-    private Button btnLinkToRegister;
+public class ResetPasswordActivity extends Activity {
+    private static final String TAG = ResetPasswordActivity.class.getSimpleName();
+
     private Button btnResetPassword;
+    private Button btnHaveCode;
+    private Button btnEnterCode;
     private EditText inputEmail;
-    private EditText inputPassword;
+    private EditText inputCode;
+
     private ProgressDialog pDialog;
     private SessionManager session;
     private SQLiteHandler db;
-    private Switch switchRememberEmail;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,11 +49,10 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.activity_login);
 
         inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        btnLogin = (Button) findViewById(R.id.btnLogin);
-        btnLinkToRegister = (Button) findViewById(R.id.btnLinkToRegisterScreen);
+        inputCode = (EditText) findViewById(R.id.code);
         btnResetPassword = (Button) findViewById(R.id.btnResetPassword);
-        switchRememberEmail = (Switch) findViewById(R.id.rememberEmail);
+        btnHaveCode = (Button) findViewById(R.id.btnHaveCode);
+        btnEnterCode = (Button) findViewById(R.id.btnEnterCode);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -67,51 +67,29 @@ public class LoginActivity extends Activity {
         // Check if user is already logged in or not
         if (session.isLoggedIn()) {
             // User is already logged in. Take him to main activity
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(ResetPasswordActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
 
-        if(session.rememberEmail()){
-            inputEmail.setText(session.getUserEmail());
-            switchRememberEmail.setChecked(true);
-            switchRememberEmail.getThumbDrawable().setColorFilter(Color.argb(255, 29, 233, 182), PorterDuff.Mode.MULTIPLY);
-            switchRememberEmail.getTrackDrawable().setColorFilter(Color.argb(255, 178, 223, 219), PorterDuff.Mode.MULTIPLY);
-        } else {
-            switchRememberEmail.getThumbDrawable().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
-            switchRememberEmail.getTrackDrawable().setColorFilter(Color.LTGRAY, PorterDuff.Mode.MULTIPLY);
-        }
-
-        // Login button Click Event
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        // Reset button Click Event
+        btnResetPassword.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 String email = inputEmail.getText().toString().trim();
-                String password = inputPassword.getText().toString().trim();
 
                 // Check for empty data in the form
-                if (!email.isEmpty() && !password.isEmpty()) {
-                    // login user
-                    checkLogin(email, password);
+                if (!email.isEmpty()) {
+                    // send reset email
+                    sendResetEmail(email);
                 } else {
                     // Prompt user to enter credentials
                     Toast.makeText(getApplicationContext(),
-                            "Please enter your credentials!", Toast.LENGTH_LONG)
+                            "Please enter your email!", Toast.LENGTH_LONG)
                             .show();
                 }
             }
 
-        });
-
-        // Link to Register Screen
-        btnLinkToRegister.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                Intent i = new Intent(getApplicationContext(),
-                        RegisterActivity.class);
-                startActivity(i);
-                finish();
-            }
         });
 
         // Link to Password Reset Screen
@@ -140,21 +118,21 @@ public class LoginActivity extends Activity {
     }
 
     /**
-     * function to verify login details in mysql db
+     * function to send reset email and store token in mysql db
      * */
-    private void checkLogin(final String email, final String password) {
+    private void sendResetEmail(final String email) {
         // Tag used to cancel the request
-        String tag_string_req = "req_login";
+        String tag_string_req = "req_send_reset_email";
 
-        pDialog.setMessage("Logging in ...");
+        pDialog.setMessage("Generating Code ...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Method.POST,
-                AppConfig.URL_LOGIN, new Response.Listener<String>() {
+                AppConfig.URL_SEND_RESET_CODE, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Login Response: " + response.toString());
+                Log.d(TAG, "Reset Response: " + response.toString());
                 hideDialog();
 
                 try {
@@ -163,10 +141,6 @@ public class LoginActivity extends Activity {
 
                     // Check for error node in json
                     if (!error) {
-                        // user successfully logged in
-                        // Create login session
-                        session.setLogin(true);
-                        session.setRememberEmail(switchRememberEmail.isChecked());
 
                         // Now store the user in SQLite
                         String uid = jObj.getString("uid");
@@ -174,20 +148,9 @@ public class LoginActivity extends Activity {
 
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
-                        String email = user.getString("email");
-                        String accountType = user.getString("accountType");
-                        String created_at = user
-                                .getString("created_at");
-
-                        if(switchRememberEmail.isChecked()){
-                            session.setUserEmail(email);
-                        }
-
-                        // Inserting row in users table
-                        db.addUser(name, email, uid, accountID, accountType, created_at);
 
                         // Launch main activity
-                        Intent intent = new Intent(LoginActivity.this,
+                        Intent intent = new Intent(ResetPasswordActivity.this,
                                 MainActivity.class);
                         startActivity(intent);
                         finish();
@@ -208,7 +171,7 @@ public class LoginActivity extends Activity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Login Error: " + error.getMessage());
+                Log.e(TAG, "Reset Code Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 hideDialog();
@@ -220,7 +183,6 @@ public class LoginActivity extends Activity {
                 // Posting parameters to login url
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("email", email);
-                params.put("password", password);
 
                 return params;
             }

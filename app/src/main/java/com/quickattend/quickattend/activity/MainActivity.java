@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity
     private SessionManager session;
 
     private String fabAction;
-
     private String userID;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;

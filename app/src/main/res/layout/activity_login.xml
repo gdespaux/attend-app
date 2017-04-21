@@ -2,26 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
     android:paddingBottom="10dp"
     android:paddingEnd="20dp"
     android:paddingStart="20dp"
-    android:paddingTop="10dp"
-    android:weightSum="1">
+    android:paddingTop="10dp">
 
     <ImageView
         android:id="@+id/imageLogo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="125dp"
         android:layout_gravity="top|center"
-        android:layout_weight="0.5"
         android:contentDescription="@string/quick_attend_logo"
         android:scaleType="fitCenter"
-        android:visibility="visible"
-        android:src="@drawable/app_logo" />
+        android:src="@drawable/app_logo"
+        android:visibility="visible" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/layoutLoginEmail"
@@ -70,7 +68,7 @@
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:text="@string/action_sign_in" />
@@ -78,10 +76,18 @@
     <!-- Link to Login Screen -->
 
     <Button
-        android:id="@+id/btnLinkToRegisterScreen"
-        android:layout_width="fill_parent"
+        android:id="@+id/btnResetPassword"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dip"
+        android:layout_marginTop="10dp"
+        android:background="@null"
+        android:text="@string/forgot_password" />
+
+    <Button
+        android:id="@+id/btnLinkToRegisterScreen"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
         android:background="@null"
         android:text="@string/link_to_register"
         android:textAllCaps="false"

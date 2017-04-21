@@ -115,7 +115,9 @@
                 android:layout_weight="1"
                 android:text="Repeating Dates:"
                 android:textAlignment="textStart"
-                android:textAppearance="@android:style/TextAppearance.Material.Title" />
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout

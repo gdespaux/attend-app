@@ -61,6 +61,9 @@ public class AppConfig {
     // Server set inactive student url
     public static String URL_SET_STUDENT_INACTIVE = BASE_URL + "setStudentInactive.php";
 
+    // Server send reset code
+    public static String URL_SEND_RESET_CODE= BASE_URL + "sendResetCode.php";
+
     // Server delete url
     public static String URL_DELETE = BASE_URL + "delete.php";
 
