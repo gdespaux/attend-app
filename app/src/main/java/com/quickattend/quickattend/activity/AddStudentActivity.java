@@ -90,6 +90,7 @@ public class AddStudentActivity extends AppCompatActivity {
     private String email;
 
     private boolean editMode = false;
+    private boolean studentOnly = false;
     private boolean didSelectItem = false;
 
     List<String> studentList = new ArrayList<String>();
@@ -219,6 +220,9 @@ public class AddStudentActivity extends AppCompatActivity {
             ((RadioButton) findViewById(R.id.radioMale)).setChecked(getIntent().getStringExtra("studentGender").equals("Male"));
             ((RadioButton) findViewById(R.id.radioFemale)).setChecked(getIntent().getStringExtra("studentGender").equals("Female"));
 
+        } else if(getIntent().hasExtra("studentOnly")){
+            studentOnly = true;
+            hideableInfo.setVisibility(View.GONE);
         } else {
             //currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
         }
@@ -275,7 +279,9 @@ public class AddStudentActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 didSelectItem = false;
-                hideableInfo.setVisibility(View.VISIBLE);
+                if(!studentOnly){
+                    hideableInfo.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -617,7 +623,17 @@ public class AddStudentActivity extends AppCompatActivity {
             case R.id.action_add_student:
 
                 if (!studentName.isEmpty()) {
-                    addStudent(studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
+                    if(studentOnly){
+                        if(didSelectItem){
+                            addExistingStudent(studentID);
+                        }
+                        Toast.makeText(getApplicationContext(),
+                                "Please select a student!", Toast.LENGTH_LONG)
+                                .show();
+                        return false;
+                    } else {
+                        addStudent(studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
+                    }
 
                     return true;
                 } else {
@@ -647,6 +663,86 @@ public class AddStudentActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    /**
+     * Function to store student in MySQL database will post params(class, name,
+     * age, existing id) to add student url
+     */
+    private void addExistingStudent(final String studentID) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_add_existing_student";
+
+        pDialog.setMessage("Enrolling Student...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_ADD_EXISTING_STUDENT, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Add Student Response: " + response.toString());
+                hideDialog();
+
+                inputStudentName.setText("");
+                inputStudentDOB.setText("");
+                inputStudentID.setText("");
+                inputStudentPhone.setText("");
+                inputStudentEmail.setText("");
+                inputStudentAddress.setText("");
+                inputStudentEnrollDate.setText("");
+                inputStudentMedInfo.setText("");
+
+                ((RadioButton) findViewById(R.id.radioMale)).setChecked(false);
+                ((RadioButton) findViewById(R.id.radioFemale)).setChecked(false);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        Toast.makeText(getApplicationContext(), "Student enrolled!", Toast.LENGTH_LONG).show();
+                        finish();
+                    } else {
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Creation Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+
+                //Converting Bitmap to String
+                String image = getStringImage(bitmap);
+
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("classID", classID);
+                params.put("studentID", studentID);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     /**

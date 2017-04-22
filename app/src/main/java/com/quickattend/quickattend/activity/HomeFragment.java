@@ -1,5 +1,6 @@
 package com.quickattend.quickattend.activity;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -210,6 +211,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
     private void showClass(){
         JSONObject jsonObject = null;
+        Activity mActivity = getActivity();
         ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
@@ -240,7 +242,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         }
 
         ListAdapter adapter = new SimpleAdapter(
-                getActivity(), list, R.layout.today_class_list_item,
+                mActivity, list, R.layout.today_class_list_item,
                 new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
                 new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
@@ -332,6 +334,8 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
                 if(getAccountClasses){
                     params.put("accountID", accountID);
+                } else {
+                    params.put("accountID", "");
                 }
 
                 return params;

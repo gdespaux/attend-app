@@ -8,9 +8,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -50,7 +52,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener {
+public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
     private static final String TAG = ClassStudentListActivity.class.getSimpleName();
     private ListView listView;
     private ProgressDialog pDialog;
@@ -94,7 +96,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         className = getIntent().getStringExtra("className");
 
-        if(getIntent().hasExtra("classDate")){
+        if (getIntent().hasExtra("classDate")) {
             currentDate = getIntent().getStringExtra("classDate");
         } else {
             currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
@@ -103,21 +105,33 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         getSupportActionBar().setTitle(className + ": " + currentDate);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        fabLayout1= (LinearLayout) findViewById(R.id.fabLayout1);
-        fabLayout2= (LinearLayout) findViewById(R.id.fabLayout2);
+        fabLayout1 = (LinearLayout) findViewById(R.id.fabLayout1);
+        fabLayout2 = (LinearLayout) findViewById(R.id.fabLayout2);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fabExistingStudent = (FloatingActionButton) findViewById(R.id.fab1);
         fabNewStudent = (FloatingActionButton) findViewById(R.id.fab2);
-        fabBGLayout=findViewById(R.id.fabBGLayout);
+        fabBGLayout = findViewById(R.id.fabBGLayout);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isFABOpen){
+                if (!isFABOpen) {
                     showFABMenu();
-                }else{
+                } else {
                     closeFABMenu();
                 }
+            }
+        });
+
+        fabExistingStudent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Launching the add class activity
+                closeFABMenu();
+                Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
+                intent.putExtra("classID", classID);
+                intent.putExtra("studentOnly", "yes");
+                startActivity(intent);
             }
         });
 
@@ -127,7 +141,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 // Launching the add class activity
                 closeFABMenu();
                 Intent intent = new Intent(ClassStudentListActivity.this, AddStudentActivity.class);
-                intent.putExtra("classID",classID);
+                intent.putExtra("classID", classID);
                 startActivity(intent);
             }
         });
@@ -161,6 +175,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         listView = (ListView) findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
 
         classID = getIntent().getStringExtra("classID");
         getClassStudents(classID);
@@ -211,8 +226,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         //Intent intent = new Intent(this, ViewEmployee.class);
-        HashMap<String,String> map =(HashMap)parent.getItemAtPosition(position);
-        String studentID = map.get("studentID").toString();
+        HashMap<String, String> map = (HashMap) parent.getItemAtPosition(position);
+        String studentID = map.get("studentID");
         //intent.putExtra("classID",empId);
         //startActivity(intent);
 
@@ -224,19 +239,46 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     }
 
     @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+        HashMap<String, String> map = (HashMap) parent.getItemAtPosition(position);
+        final String studentID = map.get("studentID");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ClassStudentListActivity.this);
+        builder.setTitle("Delete Student")
+                .setMessage("This will remove the student from the class. This will not delete the actual student.\nAre you sure?")
+                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteStudentFromClass(studentID);
+                        dialog.dismiss();
+                    }
+                });
+        builder.show();
+
+        return true;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         getClassStudents(classID);
     }
 
-    private void showStudent(){
+    private void showStudent() {
         JSONObject jsonObject = null;
-        ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
+        ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
             JSONArray result = jsonObject.getJSONArray("students");
 
-            for(int i = 0; i<result.length(); i++){
+            for (int i = 0; i < result.length(); i++) {
                 JSONObject jo = result.getJSONObject(i);
                 String studentID = jo.getString("studentID");
                 String studentName = jo.getString("studentName");
@@ -245,13 +287,13 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                 String studentActive = jo.getString("studentActive");
                 String studentInactiveDate = jo.getString("inactiveDate");
 
-                if(!studentActive.equals("yes")) continue;
+                if (!studentActive.equals("yes")) continue;
 
-                HashMap<String,String> student = new HashMap<>();
-                student.put("studentID",studentID);
+                HashMap<String, String> student = new HashMap<>();
+                student.put("studentID", studentID);
                 student.put("studentName", studentName);
-                student.put("studentPresent",studentPresent);
-                student.put("studentPhoto",studentPhoto);
+                student.put("studentPresent", studentPresent);
+                student.put("studentPhoto", studentPhoto);
                 list.add(student);
             }
 
@@ -268,9 +310,69 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     }
 
     /**
+     * Function to set selected student deleted from class in MySQL DB
+     */
+    private void deleteStudentFromClass(final String studentID) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_delete_student_from_class";
+
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_DELETE, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Delete Student Response: " + response);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        JSON_STRING = response;
+                        finish();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("classID", classID);
+                params.put("studentID", studentID);
+                params.put("deleteType", "studentFromClass");
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
      * Logging out the user. Will set isLoggedIn flag to false in shared
      * preferences Clears the user data from sqlite users table
-     * */
+     */
     private void logoutUser() {
         session.setLogin(false);
 
@@ -284,7 +386,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     /**
      * Function to get all of user's classes from MySQL DB
-     * */
+     */
     private void addStudentAttendance(final String studentID, final Boolean studentPresent) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_attendance";
@@ -328,7 +430,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             @Override
             protected Map<String, String> getParams() {
                 // Posting params to register url
-                if(studentPresent){
+                if (studentPresent) {
                     studentAttend = "yes";
                 } else {
                     studentAttend = "no";
@@ -351,7 +453,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     /**
      * Function to get all of user's classes from MySQL DB
-     * */
+     */
     private void getClassStudents(final String classID) {
         // Tag used to cancel the request
         String tag_string_req = "req_get_class_students";
@@ -420,8 +522,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             pDialog.dismiss();
     }
 
-    private void showFABMenu(){
-        isFABOpen=true;
+    private void showFABMenu() {
+        isFABOpen = true;
         fabLayout1.setVisibility(View.VISIBLE);
         fabLayout2.setVisibility(View.VISIBLE);
 
@@ -442,8 +544,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         fabLayout2.animate().translationY(-getResources().getDimension(R.dimen.standard_110));
     }
 
-    private void closeFABMenu(){
-        isFABOpen=false;
+    private void closeFABMenu() {
+        isFABOpen = false;
 
         fabBGLayout.animate()
                 .alpha(0.0f)
@@ -467,7 +569,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                if(!isFABOpen){
+                if (!isFABOpen) {
                     fabLayout1.setVisibility(View.GONE);
                     fabLayout2.setVisibility(View.GONE);
                 }
@@ -488,9 +590,9 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     @Override
     public void onBackPressed() {
-        if(isFABOpen){
+        if (isFABOpen) {
             closeFABMenu();
-        }else{
+        } else {
             super.onBackPressed();
         }
     }

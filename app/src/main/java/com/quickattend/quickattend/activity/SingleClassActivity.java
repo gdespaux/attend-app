@@ -85,7 +85,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
     private LocationRequest locationRequest;
 
-    // Defined in mili seconds.
+    // Defined in milli seconds.
     // This number in extremely low, and should be used only for debug
     private final int UPDATE_INTERVAL = 5000;
     private final int FASTEST_INTERVAL = 3000;
@@ -315,7 +315,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 @Override
                 public void onResponse(String response) {
-                    Log.d(TAG, "Start Class Response: " + response.toString());
+                    Log.d(TAG, "Start Class Response: " + response);
                 }
             }, new Response.ErrorListener() {
 
@@ -360,7 +360,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 @Override
                 public void onResponse(String response) {
-                    Log.d(TAG, "Start Class Response: " + response.toString());
+                    Log.d(TAG, "Start Class Response: " + response);
                 }
             }, new Response.ErrorListener() {
 
@@ -443,7 +443,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     }
 
     /**
-     * Function to get selected class from MySQL DB
+     * Function to set selected class deleted from MySQL DB
      */
     private void deleteClass(){
         // Tag used to cancel the request
@@ -455,7 +455,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Delete Class Response: " + response.toString());
+                Log.d(TAG, "Delete Class Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -514,7 +514,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Class Response: " + response.toString());
+                Log.d(TAG, "Get Class Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);

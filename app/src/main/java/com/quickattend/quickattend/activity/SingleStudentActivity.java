@@ -2,8 +2,10 @@ package com.quickattend.quickattend.activity;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -47,6 +49,8 @@ public class SingleStudentActivity extends AppCompatActivity {
     private Button startClassButton;
     private Button showStudentsButton;
 
+    private Menu menu;
+
     private TextView studentNameText;
     private TextView studentDOBText;
     private TextView studentAgeText;
@@ -56,6 +60,7 @@ public class SingleStudentActivity extends AppCompatActivity {
     private TextView studentAddressText;
     private TextView studentEnrollDateText;
     private TextView studentMedInfoText;
+    private TextView studentActiveText;
     private TextView studentLastSeenText;
     private CircularNetworkImageView studentPhoto;
 
@@ -73,6 +78,7 @@ public class SingleStudentActivity extends AppCompatActivity {
     private String studentAddress;
     private String studentEnrollDate;
     private String studentMedInfo;
+    private boolean studentIsActive;
     private static final int STATIC_RESULT = 4;
 
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
@@ -94,6 +100,7 @@ public class SingleStudentActivity extends AppCompatActivity {
         studentAddressText = (TextView) findViewById(R.id.studentAddress);
         studentEnrollDateText = (TextView) findViewById(R.id.studentEnrollDate);
         studentMedInfoText = (TextView) findViewById(R.id.studentMedInfo);
+        studentActiveText = (TextView) findViewById(R.id.studentActive);
         studentLastSeenText = (TextView) findViewById(R.id.studentLastSeen);
         studentPhoto = (CircularNetworkImageView) findViewById(R.id.studentPhoto);
 
@@ -151,7 +158,7 @@ public class SingleStudentActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_single_student, menu);
-
+        this.menu = menu;
         return true;
     }
 
@@ -175,6 +182,64 @@ public class SingleStudentActivity extends AppCompatActivity {
                 startActivityForResult(intent, STATIC_RESULT);
 
                 return true;
+
+            case R.id.action_set_inactive:
+
+                String title;
+                String message;
+                String button;
+
+                if(!studentIsActive){
+                    title = "Reactivate Student";
+                    message = "This will set the student to active status. Their records are restored.\nAre you sure?";
+                    button = "ACTIVATE";
+                } else {
+                    title = "Deactivate Student";
+                    message = "This will set the student to inactive status. Their records are preserved and they can be reactivated later.\nAre you sure?";
+                    button = "DEACTIVATE";
+                }
+
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(SingleStudentActivity.this);
+                builder1.setTitle(title)
+                        .setMessage(message)
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton(button, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deactivateStudent();
+                                dialog.dismiss();
+                            }
+                        });
+                builder1.show();
+
+                return true;
+
+            case R.id.action_delete_student:
+                AlertDialog.Builder builder = new AlertDialog.Builder(SingleStudentActivity.this);
+                builder.setTitle("Delete Student")
+                        .setMessage("This will delete the student and their attendance records! Are you sure?\n(You can set inactive to prevent record loss)")
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteStudent();
+                                dialog.dismiss();
+                            }
+                        });
+                builder.show();
+
+                return true;
+
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -202,8 +267,16 @@ public class SingleStudentActivity extends AppCompatActivity {
             String studentMedInfo = jo.getString("studentMedInfo");
             String lastClass = jo.getString("studentLastClass");
             String lastClassDate = jo.getString("studentLastAttendance");
+            String studentActive = jo.getString("studentActive");
 
             getSupportActionBar().setTitle(studentName);
+            if(studentActive.equals("yes")){
+                menu.findItem(R.id.action_set_inactive).setTitle("Set Inactive");
+                studentIsActive = true;
+            } else {
+                menu.findItem(R.id.action_set_inactive).setTitle("Set Active");
+                studentIsActive = false;
+            }
 
             this.studentName = studentName;
             this.studentDOB = studentDOB;
@@ -245,6 +318,12 @@ public class SingleStudentActivity extends AppCompatActivity {
                 studentEnrollDateText.setText("");
             }
 
+            if(studentActive.equals("yes")){
+                studentActive = "Active";
+            } else{
+                studentActive = "Inactive";
+            }
+
             studentNameText.setText(studentName);
             //studentDOBText.setText(studentDOB);
             studentPhoneText.setText(studentPhone);
@@ -253,6 +332,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             studentAddressText.setText(studentAddress);
             studentMedInfoText.setText(studentMedInfo);
             this.studentPhoto.setImageUrl(studentPhoto, imageLoader);
+            studentActiveText.setText(studentActive);
 
             if(studentEmailText.getText().equals("")) studentEmailText.setVisibility(View.GONE);
             if(studentAddressText.getText().equals("")) studentAddressText.setVisibility(View.GONE);
@@ -268,6 +348,128 @@ public class SingleStudentActivity extends AppCompatActivity {
     }
 
     /**
+     * Function to set selected student deleted from MySQL DB
+     */
+    private void deactivateStudent(){
+        // Tag used to cancel the request
+        String tag_string_req = "req_deactivate_student";
+
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_SET_STUDENT_INACTIVE, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Deactivate Student Response: " + response);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        JSON_STRING = response;
+                        finish();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("studentID", studentID);
+                if(studentIsActive){
+                    params.put("studentActive", "inactive");
+                } else {
+                    params.put("studentActive", "active");
+                }
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
+     * Function to set selected student deleted from MySQL DB
+     */
+    private void deleteStudent(){
+        // Tag used to cancel the request
+        String tag_string_req = "req_delete_student";
+
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_DELETE, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Delete Student Response: " + response);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        JSON_STRING = response;
+                        finish();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("studentID", studentID);
+                params.put("deleteType", "students");
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
      * Function to get selected student from MySQL DB
      */
     private void getSingleStudent() {
@@ -280,7 +482,7 @@ public class SingleStudentActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Student Response: " + response.toString());
+                Log.d(TAG, "Get Student Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);

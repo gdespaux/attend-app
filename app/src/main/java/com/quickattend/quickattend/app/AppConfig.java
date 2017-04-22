@@ -49,6 +49,9 @@ public class AppConfig {
     // Server add student url
     public static String URL_ADD_STUDENT = BASE_URL + "addStudent.php";
 
+    // Server add student to class url
+    public static String URL_ADD_EXISTING_STUDENT = BASE_URL + "addExistingStudent.php";
+
     // Server update student url
     public static String URL_UPDATE_STUDENT = BASE_URL + "updateStudent.php";
 
