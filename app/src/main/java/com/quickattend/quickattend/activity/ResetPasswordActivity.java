@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -37,7 +38,12 @@ public class ResetPasswordActivity extends Activity {
     private Button btnHaveCode;
     private Button btnEnterCode;
     private EditText inputEmail;
+    private EditText inputSecondEmail;
+    private EditText inputPassword;
     private EditText inputCode;
+
+    private LinearLayout passwordResetForm;
+    private LinearLayout enterCodeForm;
 
     private ProgressDialog pDialog;
     private SessionManager session;
@@ -46,13 +52,18 @@ public class ResetPasswordActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_reset_password);
 
         inputEmail = (EditText) findViewById(R.id.email);
+        inputSecondEmail = (EditText) findViewById(R.id.secondEmail);
+        inputPassword = (EditText) findViewById(R.id.password);
         inputCode = (EditText) findViewById(R.id.code);
         btnResetPassword = (Button) findViewById(R.id.btnResetPassword);
         btnHaveCode = (Button) findViewById(R.id.btnHaveCode);
         btnEnterCode = (Button) findViewById(R.id.btnEnterCode);
+
+        passwordResetForm = (LinearLayout) findViewById(R.id.passwordResetForm);
+        enterCodeForm = (LinearLayout) findViewById(R.id.enterCodeForm);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -82,6 +93,7 @@ public class ResetPasswordActivity extends Activity {
                 if (!email.isEmpty()) {
                     // send reset email
                     sendResetEmail(email);
+                    showCodeScreen();
                 } else {
                     // Prompt user to enter credentials
                     Toast.makeText(getApplicationContext(),
@@ -92,14 +104,35 @@ public class ResetPasswordActivity extends Activity {
 
         });
 
-        // Link to Password Reset Screen
-        btnResetPassword.setOnClickListener(new View.OnClickListener() {
+        // Reset button Click Event
+        btnHaveCode.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
-                Intent i = new Intent(getApplicationContext(),
-                        ResetPasswordActivity.class);
-                startActivity(i);
+                showCodeScreen();
             }
+
+        });
+
+        // Reset button Click Event
+        btnEnterCode.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                String email = inputSecondEmail.getText().toString().trim();
+                String code = inputCode.getText().toString().trim();
+                String password = inputPassword.getText().toString().trim();
+
+                // Check for empty data in the form
+                if (!email.isEmpty() && !code.isEmpty() && !password.isEmpty()) {
+                    // send reset email
+                    resetPassword(email, code, password);
+                } else {
+                    // Prompt user to enter credentials
+                    Toast.makeText(getApplicationContext(),
+                            "Please enter all fields!", Toast.LENGTH_LONG)
+                            .show();
+                }
+            }
+
         });
 
     }
@@ -117,6 +150,13 @@ public class ResetPasswordActivity extends Activity {
         }
     }
 
+    public void showCodeScreen(){
+
+        passwordResetForm.setVisibility(View.GONE);
+        enterCodeForm.setVisibility(View.VISIBLE);
+
+    }
+
     /**
      * function to send reset email and store token in mysql db
      * */
@@ -125,6 +165,9 @@ public class ResetPasswordActivity extends Activity {
         String tag_string_req = "req_send_reset_email";
 
         pDialog.setMessage("Generating Code ...");
+
+        inputEmail.setText("");
+
         showDialog();
 
         StringRequest strReq = new StringRequest(Method.POST,
@@ -141,17 +184,78 @@ public class ResetPasswordActivity extends Activity {
 
                     // Check for error node in json
                     if (!error) {
+                        Toast.makeText(getApplicationContext(), "Code Sent! Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Error in login. Get the error message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // JSON error
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
 
-                        // Now store the user in SQLite
-                        String uid = jObj.getString("uid");
-                        String accountID = jObj.getString("account_id");
+            }
+        }, new Response.ErrorListener() {
 
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Reset Code Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
 
-                        // Launch main activity
-                        Intent intent = new Intent(ResetPasswordActivity.this,
-                                MainActivity.class);
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting parameters to login url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("userEmail", email);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
+     * function to send reset email and store token in mysql db
+     * */
+    private void resetPassword(final String email, final String resetCode, final String password) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_reset_password";
+
+        pDialog.setMessage("Resetting Password ...");
+
+        inputPassword.setText("");
+
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Method.POST,
+                AppConfig.URL_RESET_PASSWORD, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Reset Response: " + response.toString());
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+
+                    // Check for error node in json
+                    if (!error) {
+                        Toast.makeText(getApplicationContext(), "Password reset! Please login", Toast.LENGTH_LONG).show();
+                        // Launch login activity
+                        Intent intent = new Intent(
+                                ResetPasswordActivity.this,
+                                LoginActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
@@ -182,7 +286,9 @@ public class ResetPasswordActivity extends Activity {
             protected Map<String, String> getParams() {
                 // Posting parameters to login url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("email", email);
+                params.put("userEmail", email);
+                params.put("userCode", resetCode);
+                params.put("userPassword", password);
 
                 return params;
             }

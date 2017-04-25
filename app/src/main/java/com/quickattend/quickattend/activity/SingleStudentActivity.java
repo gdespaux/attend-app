@@ -305,7 +305,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             int day = studentCalendar.get(Calendar.DAY_OF_MONTH);
 
             if(!studentDOB.equals("0000-00-00")){
-                studentDOBText.setText(newSdf.format(sdf.parse(studentDOB)));
+                studentDOBText.setText("DOB: " + newSdf.format(sdf.parse(studentDOB)));
                 studentAgeText.setText("Age: " + getAge(year, month, day));
             } else {
                 studentDOBText.setText("");
@@ -313,7 +313,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             }
 
             if(!studentEnrollDate.equals("0000-00-00")){
-                studentEnrollDateText.setText(newSdf.format(sdf.parse(studentEnrollDate)));
+                studentEnrollDateText.setText("Enroll Date: " + newSdf.format(sdf.parse(studentEnrollDate)));
             } else {
                 studentEnrollDateText.setText("");
             }
@@ -326,11 +326,11 @@ public class SingleStudentActivity extends AppCompatActivity {
 
             studentNameText.setText(studentName);
             //studentDOBText.setText(studentDOB);
-            studentPhoneText.setText(studentPhone);
+            studentPhoneText.setText("Phone: " + studentPhone);
             studentGenderText.setText(studentGender);
-            studentEmailText.setText(studentEmail);
-            studentAddressText.setText(studentAddress);
-            studentMedInfoText.setText(studentMedInfo);
+            studentEmailText.setText("Email: " + studentEmail);
+            studentAddressText.setText("Address: " + studentAddress);
+            studentMedInfoText.setText("Med Info: " + studentMedInfo);
             this.studentPhoto.setImageUrl(studentPhoto, imageLoader);
             studentActiveText.setText(studentActive);
 

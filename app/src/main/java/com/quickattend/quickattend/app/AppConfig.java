@@ -65,7 +65,10 @@ public class AppConfig {
     public static String URL_SET_STUDENT_INACTIVE = BASE_URL + "setStudentInactive.php";
 
     // Server send reset code
-    public static String URL_SEND_RESET_CODE= BASE_URL + "sendResetCode.php";
+    public static String URL_SEND_RESET_CODE = BASE_URL + "sendPassResetCode.php";
+
+    // Server reset password
+    public static String URL_RESET_PASSWORD = BASE_URL + "resetPassword.php";
 
     // Server delete url
     public static String URL_DELETE = BASE_URL + "delete.php";

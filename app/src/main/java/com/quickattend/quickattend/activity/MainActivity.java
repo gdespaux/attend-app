@@ -51,6 +51,8 @@ public class MainActivity extends AppCompatActivity
     private TextView txtName;
     private TextView txtEmail;
 
+    private DrawerLayout drawer;
+
     private SQLiteHandler db;
     private SessionManager session;
 
@@ -100,7 +102,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -282,6 +284,7 @@ public class MainActivity extends AppCompatActivity
             fragment = new UserProfileFragment();
             fab.hide();
         } else if (id == R.id.nav_feedback) {
+            drawer.closeDrawer(GravityCompat.START, false);
             Instabug.invoke();
         } else if (id == R.id.nav_about) {
             fragment = new AboutFragment();
