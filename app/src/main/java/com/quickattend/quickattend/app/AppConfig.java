@@ -82,6 +82,9 @@ public class AppConfig {
     // Server export all classes to csv
     public static String URL_EXPORT_ALL_CLASSES = BASE_URL + "exportAllClasses.php";
 
+    // Server export all classes to csv
+    public static String URL_EXPORT_ATTENDANCE_BY_DATE = BASE_URL + "exportClassAttendanceByDate.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 

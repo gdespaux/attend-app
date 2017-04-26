@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -64,11 +65,14 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import rx.Single;
+
 public class SingleClassActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback {
 
     private static final String TAG = SingleClassActivity.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private ProgressDialog pDialog;
 
     private TextView mLatitudeText;
     private TextView mLongitudeText;
@@ -106,6 +110,9 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     private String userID;
 
     private String classID;
+    private String name;
+    private String accountID;
+    private String email;
     private String className;
     private String classLocation;
     private String classTime;
@@ -120,6 +127,10 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         setContentView(R.layout.activity_single_class);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Progress dialog
+        pDialog = new ProgressDialog(SingleClassActivity.this);
+        pDialog.setCancelable(false);
 
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -146,8 +157,9 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         final HashMap<String, String> user = db.getUserDetails();
 
         userID = user.get("uid");
-        String name = user.get("name");
-        String email = user.get("email");
+        accountID = user.get("account_id");
+        name = user.get("name");
+        email = user.get("email");
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -269,6 +281,11 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 return true;
 
+            case R.id.action_export_attendance_by_date:
+                exportAttendance();
+
+                return true;
+
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -298,6 +315,72 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
         super.onPause();
+    }
+
+    /**
+     * Export attendance from DB to user email
+     * */
+    private void exportAttendance() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_export_attendance_by_date";
+
+        pDialog.setMessage("Exporting Attendance...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_EXPORT_ATTENDANCE_BY_DATE, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Export Attendance Response: " + response);
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        hideDialog();
+                        Toast.makeText(SingleClassActivity.this, "Attendance exported. Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(SingleClassActivity.this,
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(SingleClassActivity.this,
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("userEmail", email);
+                params.put("userName", name);
+                params.put("classID", classID);
+                params.put("className", className);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     /**
@@ -870,6 +953,16 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         */
         Log.i("Connect Info: ", "Connection closed!");
         super.onStop();
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+    }
+
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 
     /**

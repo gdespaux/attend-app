@@ -13,8 +13,13 @@
         android:title="@string/action_view_students"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_delete_class"
+        android:id="@+id/action_export_attendance_by_date"
         android:orderInCategory="101"
+        android:title="@string/action_export_attendance_by_date"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete_class"
+        android:orderInCategory="102"
         android:title="@string/action_delete"
         app:showAsAction="never" />
 </menu>

@@ -8,6 +8,7 @@
     <string name="action_view_students">View Students</string>
     <string name="action_export_all_students">Export Students</string>
     <string name="action_export_all_classes">Export Classes</string>
+    <string name="action_export_attendance_by_date">Export Attendance</string>
     <string name="action_view_all_classes">Show All Company Classes</string>
     <string name="action_view_all_info">Show All Info</string>
     <string name="title_activity_login">Sign in</string>

@@ -269,7 +269,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     }
 
     /**
-     * Export students from DB to user email
+     * Export classes from DB to user email
      * */
     private void exportClasses() {
         // Tag used to cancel the request
