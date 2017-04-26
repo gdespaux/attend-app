@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.quickattend.quickattend.activity.StudentListFragment">
+    <item
+        android:id="@+id/action_export_all_students"
+        android:orderInCategory="100"
+        android:title="@string/action_export_all_students"
+        app:showAsAction="never" />
+</menu>

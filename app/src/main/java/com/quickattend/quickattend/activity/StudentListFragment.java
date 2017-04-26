@@ -1,11 +1,15 @@
 package com.quickattend.quickattend.activity;
 
 import android.app.ActivityOptions;
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import android.app.ProgressDialog;
@@ -21,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +50,8 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
     private SQLiteHandler db;
     private SessionManager session;
     private String accountID;
+    private String name;
+    private String email;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,8 +85,8 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         final HashMap<String, String> user = db.getUserDetails();
 
         accountID = user.get("account_id");
-        String name = user.get("name");
-        String email = user.get("email");
+        name = user.get("name");
+        email = user.get("email");
 
         View view = inflater.inflate(R.layout.fragment_student_list, container, false);
         ListView listView = (ListView) view.findViewById(android.R.id.list);
@@ -111,27 +118,39 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_student_list, menu);
+        super.onCreateOptionsMenu(menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_export_all_students) {
+            exportStudents();
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
         String studentID = map.get("studentID").toString();
 
         Intent i = new Intent(getActivity(), SingleStudentActivity.class);
-
-        View sharedView = v;
-        String transitionName = "transClassName";
-
-        //ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-        //        Pair.create(v, "transClassName"),
-        //        Pair.create(v, "transClassTime"),
-        //        Pair.create(v, "transClassLocation"));
-
         i.putExtra("studentID", studentID);
         getActivity().startActivity(i);
 
-        //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
-        //intent.putExtra("classID",classID);
-        //startActivity(intent);
     }
 
     @Override
@@ -208,6 +227,70 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         //startActivity(intent);
     }
 
+    /**
+     * Export students from DB to user email
+     * */
+    private void exportStudents() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_export_all_students";
+
+        pDialog.setMessage("Exporting Students...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_EXPORT_ALL_STUDENTS, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Export Students Response: " + response);
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        hideDialog();
+                        Toast.makeText(getActivity(), "Students exported. Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getActivity(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getActivity(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("userEmail", email);
+                params.put("userName", name);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
 
     /**
      * Function to get all of account's students from MySQL DB
@@ -223,7 +306,7 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get All Students Response: " + response.toString());
+                Log.d(TAG, "Get All Students Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);

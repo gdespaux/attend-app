@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.NONE)
                 .build();
-        Instabug.identifyUser(email, email);
+        Instabug.identifyUser(name, email);
 
         //  Declare a new thread to do a preference check
         Thread t = new Thread(new Runnable() {

@@ -16,7 +16,7 @@ android {
         applicationId "com.quickattend.quickattend"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 8
+        versionCode 9
         versionName "0.1.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

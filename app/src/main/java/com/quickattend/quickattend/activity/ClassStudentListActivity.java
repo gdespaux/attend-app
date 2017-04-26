@@ -164,6 +164,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         final HashMap<String, String> user = db.getUserDetails();
 
         accountID = user.get("account_id");
+        String name = user.get("name");
         email = user.get("email");
 
         // session manager
@@ -183,7 +184,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
-        Instabug.identifyUser(email, email);
+        Instabug.identifyUser(name, email);
     }
 
     private void updateStudentDate() {

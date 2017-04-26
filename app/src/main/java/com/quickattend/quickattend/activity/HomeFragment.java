@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -56,6 +57,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
     private SessionManager session;
     private String userID;
     private String accountID;
+    Activity mActivity;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -135,6 +137,12 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mActivity = getActivity();
+    }
+
     private void updateStudentDate() {
 
         String myFormat = "MM/dd/yyyy"; //In which you need put here
@@ -211,7 +219,6 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
     private void showClass(){
         JSONObject jsonObject = null;
-        Activity mActivity = getActivity();
         ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
         try {
             jsonObject = new JSONObject(JSON_STRING);

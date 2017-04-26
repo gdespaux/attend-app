@@ -177,6 +177,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
         userID = user.get("uid");
+        String name = user.get("name");
         email = user.get("email");
         accountID = user.get("account_id");
 
@@ -280,7 +281,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
-        Instabug.identifyUser(email, email);
+        Instabug.identifyUser(name, email);
     }
 
     private AdapterView.OnItemClickListener mAutocompleteClickListener

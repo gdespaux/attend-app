@@ -160,6 +160,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
         accountID = user.get("account_id");
         email = user.get("email");
+        String name = user.get("name");
 
         inputStudentDOB = (EditText) findViewById(R.id.studentDOB);
         inputStudentPhone = (EditText) findViewById(R.id.studentPhone);
@@ -382,7 +383,7 @@ public class AddStudentActivity extends AppCompatActivity {
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
-        Instabug.identifyUser(email, email);
+        Instabug.identifyUser(name, email);
 
     }
 
@@ -681,7 +682,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Student Response: " + response.toString());
+                Log.d(TAG, "Add Student Response: " + response);
                 hideDialog();
 
                 inputStudentName.setText("");
@@ -761,7 +762,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Student Response: " + response.toString());
+                Log.d(TAG, "Add Student Response: " + response);
                 hideDialog();
 
                 inputStudentName.setText("");
@@ -851,7 +852,7 @@ public class AddStudentActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Student Response: " + response.toString());
+                Log.d(TAG, "Update Student Response: " + response);
                 hideDialog();
 
                 inputStudentName.setText("");

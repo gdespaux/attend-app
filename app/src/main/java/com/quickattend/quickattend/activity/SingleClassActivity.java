@@ -212,7 +212,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
-        Instabug.identifyUser(email, email);
+        Instabug.identifyUser(name, email);
 
     }
 

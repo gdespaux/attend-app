@@ -55,6 +55,8 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     private SessionManager session;
     private String userID;
     private String accountID;
+    private String name;
+    private String email;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -106,8 +108,8 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
 
         userID = user.get("uid");
         accountID = user.get("account_id");
-        String name = user.get("name");
-        String email = user.get("email");
+        name = user.get("name");
+        email = user.get("email");
 
         View view = inflater.inflate(R.layout.fragment_class_list, container, false);
         ListView listView = (ListView) view.findViewById(android.R.id.list);
@@ -169,6 +171,10 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
             return true;
         } else if (id == R.id.action_view_all_classes) {
             getAllClasses(true);
+
+            return true;
+        } else if (id == R.id.action_export_all_classes) {
+            exportClasses();
 
             return true;
         }
@@ -260,6 +266,70 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         String className = map.get("className").toString();
         //intent.putExtra("classID",empId);
         //startActivity(intent);
+    }
+
+    /**
+     * Export students from DB to user email
+     * */
+    private void exportClasses() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_export_all_classes";
+
+        pDialog.setMessage("Exporting Classes...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_EXPORT_ALL_CLASSES, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Export Classes Response: " + response);
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        hideDialog();
+                        Toast.makeText(getActivity(), "Classes exported. Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getActivity(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getActivity(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("userEmail", email);
+                params.put("userName", name);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     /**

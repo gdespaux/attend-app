@@ -76,6 +76,12 @@ public class AppConfig {
     // Server get user info url
     public static String URL_GET_USER_INFO = BASE_URL + "userInfo.php";
 
+    // Server export all students to csv
+    public static String URL_EXPORT_ALL_STUDENTS = BASE_URL + "exportAllStudents.php";
+
+    // Server export all classes to csv
+    public static String URL_EXPORT_ALL_CLASSES = BASE_URL + "exportAllClasses.php";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
