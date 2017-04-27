@@ -170,7 +170,8 @@
             android:label="@string/title_activity_intro" />
         <activity
             android:name=".activity.ResetPasswordActivity"
-            android:label="@string/title_activity_reset_password"></activity>
+            android:label="@string/title_activity_reset_password" />
+        <activity android:name=".activity.ExportActivity"></activity>
     </application>
 
 </manifest>

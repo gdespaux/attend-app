@@ -2,9 +2,11 @@ package com.quickattend.quickattend.activity;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,11 +32,13 @@ import com.quickattend.quickattend.utils.SessionManager;
 import com.instabug.library.Instabug;
 import com.instabug.library.invocation.InstabugInvocationEvent;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -48,6 +52,7 @@ public class SingleStudentActivity extends AppCompatActivity {
     private TextView mLongitudeText;
     private Button startClassButton;
     private Button showStudentsButton;
+    private ProgressDialog pDialog;
 
     private Menu menu;
 
@@ -68,6 +73,9 @@ public class SingleStudentActivity extends AppCompatActivity {
     private SQLiteHandler db;
     private SessionManager session;
     private String userID;
+    private String accountID;
+    private String name;
+    private String email;
 
     private String studentID;
     private String studentName;
@@ -84,12 +92,19 @@ public class SingleStudentActivity extends AppCompatActivity {
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
     private Calendar studentCalendar = Calendar.getInstance();
 
+    private ArrayList<String> dialogItems = new ArrayList<String>();
+    private ArrayList<String> dialogItemsMap = new ArrayList<String>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_student);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Progress dialog
+        pDialog = new ProgressDialog(SingleStudentActivity.this);
+        pDialog.setCancelable(false);
 
         studentNameText = (TextView) findViewById(R.id.studentName);
         studentDOBText = (TextView) findViewById(R.id.studentDOB);
@@ -118,11 +133,13 @@ public class SingleStudentActivity extends AppCompatActivity {
         final HashMap<String, String> user = db.getUserDetails();
 
         userID = user.get("uid");
-        String name = user.get("name");
-        String email = user.get("email");
+        accountID = user.get("account_id");
+        name = user.get("name");
+        email = user.get("email");
 
         studentID = getIntent().getStringExtra("studentID");
         getSingleStudent();
+        getStudentClasses();
 
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
@@ -219,6 +236,37 @@ public class SingleStudentActivity extends AppCompatActivity {
 
                 return true;
 
+            case R.id.action_export_attendance:
+                exportAttendance();
+
+                return true;
+
+            case R.id.action_export_class_attendance:
+                CharSequence[] items = dialogItems.toArray(new CharSequence[dialogItems.size()]);
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(SingleStudentActivity.this);
+                builder2.setTitle("Export Class Attendance") //
+                        .setItems(items, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                //exportClassAttendance(dialogItems.get(which), dialogItemsMap.get(which));
+                                // Launching the add class activity
+                                Intent exportIntent = new Intent(SingleStudentActivity.this, ExportActivity.class);
+                                exportIntent.putExtra("studentID", studentID);
+                                exportIntent.putExtra("studentName", studentName);
+                                exportIntent.putExtra("classID", dialogItemsMap.get(which));
+                                exportIntent.putExtra("className", dialogItems.get(which));
+                                startActivity(exportIntent);
+                            }
+                        })
+                        .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // TODO
+                                dialog.dismiss();
+                            }
+                        });
+                builder2.show();
+
+                return true;
+
             case R.id.action_delete_student:
                 AlertDialog.Builder builder = new AlertDialog.Builder(SingleStudentActivity.this);
                 builder.setTitle("Delete Student")
@@ -246,6 +294,140 @@ public class SingleStudentActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    /**
+     * Export attendance from DB to user email
+     * */
+    private void exportAttendance() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_export_student_attendance_by_class";
+
+        pDialog.setMessage("Exporting Attendance...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_EXPORT_STUDENT_ATTENDANCE_BY_CLASS, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Export Attendance Response: " + response);
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        hideDialog();
+                        Toast.makeText(SingleStudentActivity.this, "Attendance exported. Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(SingleStudentActivity.this,
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(SingleStudentActivity.this,
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("studentID", studentID);
+                params.put("studentName", studentName);
+                params.put("userEmail", email);
+                params.put("userName", name);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    /**
+     * Export class attendance from DB to user email
+     * */
+    private void exportClassAttendance(final String className, final String classID) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_export_student_class_attendance";
+
+        pDialog.setMessage("Exporting Attendance...");
+        showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_EXPORT_STUDENT_CLASS_ATTENDANCE_BY_DATE, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Export Attendance Response: " + response);
+                hideDialog();
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        hideDialog();
+                        Toast.makeText(SingleStudentActivity.this, "Attendance exported. Please check your email", Toast.LENGTH_LONG).show();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(SingleStudentActivity.this,
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(SingleStudentActivity.this,
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("accountID", accountID);
+                params.put("studentID", studentID);
+                params.put("classID", classID);
+                params.put("studentName", studentName);
+                params.put("className", className);
+                params.put("userEmail", email);
+                params.put("userName", name);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     private void showStudent() {
@@ -528,6 +710,72 @@ public class SingleStudentActivity extends AppCompatActivity {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
+    /**
+     * Function to get selected student from MySQL DB
+     */
+    private void getStudentClasses() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_get_student_classes";
+
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_GET_STUDENT_CLASSES, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Get Student Classes Response: " + response);
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        JSONArray result = jObj.getJSONArray("classes");
+
+                        for(int i = 0; i<result.length(); i++){
+                            JSONObject jo = result.getJSONObject(i);
+                            String classID = jo.getString("classID");
+                            String className = jo.getString("className");
+
+                            dialogItems.add(className);
+                            dialogItemsMap.add(classID);
+                        }
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Fetching Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("studentID", studentID);
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("onActivityResult()", Integer.toString(resultCode));
@@ -542,6 +790,16 @@ public class SingleStudentActivity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+    }
+
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 
     /**

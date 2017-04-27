@@ -58,6 +58,9 @@ public class AppConfig {
     // Server get single student url
     public static String URL_GET_SINGLE_STUDENT = BASE_URL + "getStudent.php";
 
+    // Server get single student url
+    public static String URL_GET_STUDENT_CLASSES = BASE_URL + "getStudentClasses.php";
+
     // Server get chart attendance data url
     public static String URL_GET_CHART_ATTENDANCE = BASE_URL + "getChartAttendance.php";
 
@@ -82,8 +85,14 @@ public class AppConfig {
     // Server export all classes to csv
     public static String URL_EXPORT_ALL_CLASSES = BASE_URL + "exportAllClasses.php";
 
-    // Server export all classes to csv
+    // Server export class attendance by date to csv
     public static String URL_EXPORT_ATTENDANCE_BY_DATE = BASE_URL + "exportClassAttendanceByDate.php";
+
+    // Server export student attendance by class to csv
+    public static String URL_EXPORT_STUDENT_ATTENDANCE_BY_CLASS = BASE_URL + "exportStudentAttendanceByClass.php";
+
+    // Server export student class attendance by date to csv
+    public static String URL_EXPORT_STUDENT_CLASS_ATTENDANCE_BY_DATE = BASE_URL + "exportStudentClassAttendanceByDate.php";
 
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
