@@ -12,6 +12,7 @@
     <string name="action_export_class_attendance">Export...</string>
     <string name="action_view_all_classes">Show All Company Classes</string>
     <string name="action_view_all_info">Show All Info</string>
+    <string name="search_title">Search</string>
     <string name="title_activity_login">Sign in</string>
 
     <!-- Strings related to login -->
