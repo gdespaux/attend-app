@@ -2,9 +2,15 @@ package com.quickattend.quickattend.activity;
 
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +22,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -52,6 +59,8 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
     private String accountID;
     private String name;
     private String email;
+
+    private StudentFullListAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -122,6 +131,54 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_student_list, menu);
         super.onCreateOptionsMenu(menu,inflater);
+
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        View searchLayout = searchView.findViewById((android.support.v7.appcompat.R.id.search_plate));
+        searchEditText.setHint("Search...");
+        searchEditText.setTextColor(getResources().getColor(R.color.white));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.white));
+        searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);
+
+        /*MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                // Set styles for expanded state here
+                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                // Set styles for collapsed state here
+                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
+                }
+                return true;
+            }
+        });*/
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                if(query.isEmpty()){
+                    query = "backspaceNOW";
+                }
+
+                Log.e("QUERY", query + " searched");
+                adapter.getFilter().filter(query);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -195,7 +252,7 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new StudentFullListAdapter(
+        adapter = new StudentFullListAdapter(
                 getActivity(), list,
                 new String[]{"studentID", "studentName", "studentPhoto"},
                 new int[]{R.id.studentID, R.id.studentName, R.id.studentPhoto});
