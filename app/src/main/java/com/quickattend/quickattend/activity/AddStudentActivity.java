@@ -8,13 +8,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -47,12 +50,14 @@ import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 import com.instabug.library.Instabug;
 import com.instabug.library.invocation.InstabugInvocationEvent;
+import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -135,8 +140,10 @@ public class AddStudentActivity extends AppCompatActivity {
 
     String selectedDate;
 
-    private Bitmap bitmap;
+    private Bitmap studentPhotoBitmap;
     private final int PICK_IMAGE_REQUEST = 4;
+    private static int REQUEST_CROP_PICTURE = 5;
+    private String mCurrentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -252,11 +259,31 @@ public class AddStudentActivity extends AppCompatActivity {
                                     Log.i("OPTION", "Take Photo!");
                                     Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                     if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-                                        startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                                        File photoFile = null;
+                                        try{
+                                            photoFile = createImageFile();
+                                        } catch(IOException ex){
+
+                                        }
+                                        if (photoFile != null) {
+                                            Uri photoURI = FileProvider.getUriForFile(AddStudentActivity.this,
+                                                    "com.quickattend.quickattend.fileprovider",
+                                                    photoFile);
+                                            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                                        }
                                     }
                                 } else if (which == 1) {
                                     Log.i("OPTION", "Choose Photo!");
-                                    showFileChooser();
+                                    File photoFile = null;
+                                    try{
+                                        photoFile = createImageFile();
+                                    } catch(IOException ex){
+
+                                    }
+                                    if (photoFile != null) {
+                                        showFileChooser();
+                                    }
                                 }
                             }
                         })
@@ -488,21 +515,23 @@ public class AddStudentActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            bitmap = (Bitmap) extras.get("data");
-            studentPicture.setImageBitmap(bitmap);
+            File newPhoto = new File(mCurrentPhotoPath);
+            Uri photoUri = Uri.fromFile(newPhoto);
+
+            Crop.of(photoUri, photoUri).asSquare().start(AddStudentActivity.this);
         }
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri filePath = data.getData();
-            try {
-                //Getting the Bitmap from Gallery
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-                //Setting the Bitmap to ImageView
-                studentPicture.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            File newPhoto = new File(mCurrentPhotoPath);
+            Uri photoUri = Uri.fromFile(newPhoto);
+
+            Crop.of(filePath, photoUri).asSquare().start(AddStudentActivity.this);
+        }
+
+        if ((requestCode == Crop.REQUEST_CROP) && (resultCode == RESULT_OK)) {
+            // When we are done cropping, display it in the ImageView.
+            setPic();
         }
     }
 
@@ -730,7 +759,7 @@ public class AddStudentActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
 
                 //Converting Bitmap to String
-                String image = getStringImage(bitmap);
+                String image = getStringImage(studentPhotoBitmap);
 
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
@@ -810,7 +839,7 @@ public class AddStudentActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
 
                 //Converting Bitmap to String
-                String image = getStringImage(bitmap);
+                String image = getStringImage(studentPhotoBitmap);
 
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
@@ -901,7 +930,7 @@ public class AddStudentActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
 
                 //Converting Bitmap to String
-                String image = getStringImage(bitmap);
+                String image = getStringImage(studentPhotoBitmap);
 
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
@@ -924,6 +953,46 @@ public class AddStudentActivity extends AppCompatActivity {
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void setPic() {
+        // Get the dimensions of the View
+        int targetW = studentPicture.getWidth();
+        int targetH = studentPicture.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        studentPhotoBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+        studentPicture.setImageBitmap(studentPhotoBitmap);
     }
 
     private void showDialog() {

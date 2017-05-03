@@ -16,8 +16,8 @@ android {
         applicationId "com.quickattend.quickattend"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 10
-        versionName "0.1.7"
+        versionCode 11
+        versionName "0.1.8"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -51,6 +51,7 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     compile 'com.instabug.library:instabug:4.0.8'
     compile 'com.github.paolorotolo:appintro:4.1.0'
+    compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     testCompile 'junit:junit:4.12'
 }
 

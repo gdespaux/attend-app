@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Remove from Instabug included perms -->
@@ -190,6 +191,16 @@
             android:name=".activity.ExportActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
+        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.quickattend.quickattend.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
     </application>
 
 </manifest>
