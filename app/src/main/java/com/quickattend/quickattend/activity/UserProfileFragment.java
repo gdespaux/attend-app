@@ -43,7 +43,8 @@ public class UserProfileFragment extends Fragment {
 
     private TextView userNameText;
     private TextView userEmailText;
-    private TextView userAccountType;
+    private TextView userAccountTypeText;
+    private TextView userSubPlanText;
     private TextView userDevId;
     private TextView userAppVersion;
 
@@ -83,7 +84,8 @@ public class UserProfileFragment extends Fragment {
 
         userNameText = (TextView) view.findViewById(R.id.userNameText);
         userEmailText = (TextView) view.findViewById(R.id.userEmailText);
-        userAccountType = (TextView) view.findViewById(R.id.userAccountType);
+        userAccountTypeText = (TextView) view.findViewById(R.id.userAccountType);
+        userSubPlanText = (TextView) view.findViewById(R.id.userSubPlan);
         userDevId = (TextView) view.findViewById(R.id.userDevId);
         userAppVersion = (TextView) view.findViewById(R.id.userAppVersion);
 
@@ -132,12 +134,12 @@ public class UserProfileFragment extends Fragment {
             String userName = jo.getString("userName");
             String userEmail = jo.getString("userEmail");
             String userAccountType = jo.getString("userAccountType");
-            //String userDevId = jo.getString("classTime");
-            //String userAppVersion = jo.getString("classCount");
+            String userSubPlan = jo.getString("userSubPlan");
 
             userNameText.setText(userName);
-            userEmailText.setText(userEmail);
-            this.userAccountType.setText(userAccountType);
+            userEmailText.setText("Email: " + userEmail);
+            userAccountTypeText.setText("Account Type: " + userAccountType);
+            userSubPlanText.setText("Subscription: " + userSubPlan);
 
         } catch (JSONException e) {
             e.printStackTrace();

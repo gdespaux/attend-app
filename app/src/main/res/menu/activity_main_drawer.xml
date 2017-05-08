@@ -23,6 +23,10 @@
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Profile" />
+        <item
+            android:id="@+id/nav_leads"
+            android:icon="@drawable/ic_tablet_android_black_24dp"
+            android:title="Lead Mode" />
     </group>
 
     <item android:title="Communicate">

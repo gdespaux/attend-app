@@ -262,26 +262,25 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
             fragment = new HomeFragment();
             fabAction = "Class";
             fab.show();
         } else if (id == R.id.nav_class_list) {
-            // Handle the camera action
             fragment = new ClassListFragment();
             fabAction = "Class";
             fab.show();
         } else if (id == R.id.nav_student_list) {
-            // Handle the camera action
             fragment = new StudentListFragment();
             fabAction = "Student";
             fab.show();
         } else if (id == R.id.nav_reports) {
-            // Handle the camera action
             fragment = new ReportsFragment();
             fab.hide();
         } else if (id == R.id.nav_profile) {
             fragment = new UserProfileFragment();
+            fab.hide();
+        } else if (id == R.id.nav_leads) {
+            fragment = new LeadFragment();
             fab.hide();
         } else if (id == R.id.nav_feedback) {
             drawer.closeDrawer(GravityCompat.START, false);

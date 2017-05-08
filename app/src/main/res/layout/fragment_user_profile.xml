@@ -56,6 +56,12 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="User Account Type" />
+
+                        <TextView
+                            android:id="@+id/userSubPlan"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Sub Plan" />
                     </LinearLayout>
                 </LinearLayout>
 
