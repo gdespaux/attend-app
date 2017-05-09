@@ -5,8 +5,8 @@ android {
         Release {
             keyAlias 'ReleaseKey'
             keyPassword 'Quickattend2017'
-            //storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
-            storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
+            storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
+            //storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
             storePassword 'Quickattend2017'
         }
     }
@@ -32,6 +32,9 @@ android {
             buildConfigField 'String', 'BASE_URL', '"http://quickattendapp.com/"'
         }
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -50,10 +53,11 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:10.2.1'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     compile 'com.instabug.library:instabug:4.0.8'
-    compile 'com.github.paolorotolo:appintro:4.1.0'
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
+    compile 'com.heinrichreimersoftware:material-intro:1.6.2'
     testCompile 'junit:junit:4.12'
 }
+
 
 
 

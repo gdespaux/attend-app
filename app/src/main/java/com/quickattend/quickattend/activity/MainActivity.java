@@ -1,8 +1,8 @@
 package com.quickattend.quickattend.activity;
 
-import android.app.ActivityOptions;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -12,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -61,6 +62,9 @@ public class MainActivity extends AppCompatActivity
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     FloatingActionButton fab;
+    private NavigationView navigationView;
+
+    private boolean leadMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +81,10 @@ public class MainActivity extends AppCompatActivity
 
         if (!session.isLoggedIn()) {
             logoutUser();
+        }
+
+        if(session.inLeadMode()){
+            leadMode = true;
         }
 
         // Fetching user details from sqlite
@@ -108,7 +116,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         View headerView = navigationView.getHeaderView(0);
@@ -157,38 +165,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
         Instabug.identifyUser(name, email);
 
-        //  Declare a new thread to do a preference check
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //  Initialize SharedPreferences
-                SharedPreferences getPrefs = PreferenceManager
-                        .getDefaultSharedPreferences(getBaseContext());
-
-                //  Create a new boolean and preference and set it to true
-                boolean isFirstStart = getPrefs.getBoolean("firstStart", true);
-
-                //  If the activity has never started before...
-                if (isFirstStart) {
-
-                    //  Launch app intro
-                    Intent i = new Intent(MainActivity.this, IntroActivity.class);
-                    startActivity(i);
-
-                    //  Make a new preferences editor
-                    //SharedPreferences.Editor e = getPrefs.edit();
-
-                    //  Edit preference to make it false because we don't want this to run again
-                    //e.putBoolean("firstStart", false);
-
-                    //  Apply changes
-                    //e.apply();
-                }
-            }
-        });
-
-        // Start the thread for intro
-        //t.start();
+        Log.e("LEADMODE", "Is on: " + leadMode);
     }
 
     // Fetches reg id from shared preferences
@@ -222,6 +199,19 @@ public class MainActivity extends AppCompatActivity
 
         // clear the notification area when the app is opened
         NotificationUtils.clearNotifications(getApplicationContext());
+
+        Log.e("LEADMODE", "Is on: " + leadMode);
+
+        if(leadMode){
+            fragment = new LeadFragment();
+            fab.hide();
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.activity_main_drawer_empty);
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            fragmentManager.beginTransaction()
+                    .add(R.id.frame_container, fragment).commit();
+        }
     }
 
     @Override
@@ -280,8 +270,32 @@ public class MainActivity extends AppCompatActivity
             fragment = new UserProfileFragment();
             fab.hide();
         } else if (id == R.id.nav_leads) {
-            fragment = new LeadFragment();
-            fab.hide();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("Lead Mode")
+                    .setMessage("This will put the device into public Lead Mode. Are you sure?\n(You can only exit Lead Mode by logging out and then back in via the left menu)")
+                    .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            session.enterLeadMode(true);
+                            Log.e("LEADMODE", "Is on: " + leadMode);
+                            fragment = new LeadFragment();
+                            fab.hide();
+                            navigationView.getMenu().clear();
+                            navigationView.inflateMenu(R.menu.activity_main_drawer_empty);
+                            FragmentManager fragmentManager = getSupportFragmentManager();
+                            fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            fragmentManager.beginTransaction()
+                                    .add(R.id.frame_container, fragment).commit();
+                        }
+                    });
+            builder.show();
         } else if (id == R.id.nav_feedback) {
             drawer.closeDrawer(GravityCompat.START, false);
             Instabug.invoke();
@@ -289,6 +303,7 @@ public class MainActivity extends AppCompatActivity
             fragment = new AboutFragment();
             fab.hide();
         } else if (id == R.id.nav_log_out) {
+            session.enterLeadMode(false);
             logoutUser();
         }
 

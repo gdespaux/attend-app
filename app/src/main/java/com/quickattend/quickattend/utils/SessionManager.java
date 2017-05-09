@@ -24,6 +24,7 @@ public class SessionManager {
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
     private static final String KEY_REMEMBER_EMAIL = "rememberEmail";
     private static final String KEY_USER_EMAIL = "userEmail";
+    private static final String KEY_LEAD_MODE= "inLeadMode";
 
     public SessionManager(Context context) {
         this._context = context;
@@ -63,5 +64,19 @@ public class SessionManager {
 
     public String getUserEmail(){
         return pref.getString(KEY_USER_EMAIL, "");
+    }
+
+    public void enterLeadMode(boolean leadMode) {
+
+        editor.putBoolean(KEY_LEAD_MODE, leadMode);
+
+        // commit changes
+        editor.commit();
+
+        Log.d(TAG, "Lead mode entered! (Logout to exit)");
+    }
+
+    public boolean inLeadMode(){
+        return pref.getBoolean(KEY_LEAD_MODE, false);
     }
 }

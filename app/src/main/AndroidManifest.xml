@@ -174,10 +174,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activity.IntroActivity"
+            android:name=".activity.MainIntroActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_intro"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Intro" />
         <activity
             android:name=".activity.ResetPasswordActivity"
             android:configChanges="orientation"
@@ -192,6 +193,7 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.quickattend.quickattend.fileprovider"
