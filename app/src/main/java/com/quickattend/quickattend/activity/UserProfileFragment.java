@@ -25,10 +25,12 @@ import java.util.Map;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.utils.CircularNetworkImageView;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
@@ -45,8 +47,9 @@ public class UserProfileFragment extends Fragment {
     private TextView userEmailText;
     private TextView userAccountTypeText;
     private TextView userSubPlanText;
-    private TextView userDevId;
-    private TextView userAppVersion;
+    private CircularNetworkImageView userPhoto;
+
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,8 +89,7 @@ public class UserProfileFragment extends Fragment {
         userEmailText = (TextView) view.findViewById(R.id.userEmailText);
         userAccountTypeText = (TextView) view.findViewById(R.id.userAccountType);
         userSubPlanText = (TextView) view.findViewById(R.id.userSubPlan);
-        userDevId = (TextView) view.findViewById(R.id.userDevId);
-        userAppVersion = (TextView) view.findViewById(R.id.userAppVersion);
+        userPhoto = (CircularNetworkImageView) view.findViewById(R.id.userPhoto);
 
         getUserInfo(false);
 
@@ -135,11 +137,13 @@ public class UserProfileFragment extends Fragment {
             String userEmail = jo.getString("userEmail");
             String userAccountType = jo.getString("userAccountType");
             String userSubPlan = jo.getString("userSubPlan");
+            String userPhoto = jo.getString("userPhoto");
 
             userNameText.setText(userName);
             userEmailText.setText("Email: " + userEmail);
-            userAccountTypeText.setText("Account Type: " + userAccountType);
+            userAccountTypeText.setText(userAccountType);
             userSubPlanText.setText("Subscription: " + userSubPlan);
+            this.userPhoto.setImageUrl(userPhoto, imageLoader);
 
         } catch (JSONException e) {
             e.printStackTrace();

@@ -24,7 +24,8 @@ public class SessionManager {
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
     private static final String KEY_REMEMBER_EMAIL = "rememberEmail";
     private static final String KEY_USER_EMAIL = "userEmail";
-    private static final String KEY_LEAD_MODE= "inLeadMode";
+    private static final String KEY_LEAD_MODE = "inLeadMode";
+    private static final String KEY_FIRST_RUN = "firstRun";
 
     public SessionManager(Context context) {
         this._context = context;
@@ -78,5 +79,19 @@ public class SessionManager {
 
     public boolean inLeadMode(){
         return pref.getBoolean(KEY_LEAD_MODE, false);
+    }
+
+    public void firstRun(boolean firstRun) {
+
+        editor.putBoolean(KEY_FIRST_RUN, firstRun);
+
+        // commit changes
+        editor.commit();
+
+        Log.d(TAG, "First run detected!");
+    }
+
+    public boolean isFirstRun(){
+        return pref.getBoolean(KEY_FIRST_RUN, true);
     }
 }

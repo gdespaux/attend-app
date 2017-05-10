@@ -5,8 +5,8 @@ android {
         Release {
             keyAlias 'ReleaseKey'
             keyPassword 'Quickattend2017'
-            //storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
-            storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
+            storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
+            //storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
             storePassword 'Quickattend2017'
         }
     }

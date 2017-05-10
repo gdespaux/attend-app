@@ -12,22 +12,51 @@ public class MainIntroActivity extends IntroActivity {
         super.onCreate(savedInstanceState);
         // Add slides, edit configuration...
         addSlide(new SimpleSlide.Builder()
-                .title("First Intro Slide")
-                .description("It's really rather exquisite")
-                //.image(R.drawable.image_1)
+                .title("Thanks for joining QuickAttend")
+                .description("We've made attendance tracking a pleasant experience")
+                .image(R.drawable.filled_clipboard_icon)
                 .background(R.color.colorPrimary)
                 .backgroundDark(R.color.colorPrimaryDark)
                 .scrollable(false)
                 .build());
 
         addSlide(new SimpleSlide.Builder()
-                .title("Second Intro Slide")
-                .description("Isn't this pleasant?")
-                //.image(R.drawable.image_1)
+                .title("Ditch the pen and paper")
+                .description("You'll love our new system")
+                .image(R.drawable.filled_pen_icon)
                 .background(R.color.colorPrimary)
                 .backgroundDark(R.color.colorPrimaryDark)
                 .scrollable(false)
-                .permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                //.permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .build());
+
+        addSlide(new SimpleSlide.Builder()
+                .title("Stay in touch")
+                .description("Notify students of changes or cancellations")
+                .image(R.drawable.filled_email_icon)
+                .background(R.color.colorPrimary)
+                .backgroundDark(R.color.colorPrimaryDark)
+                .scrollable(false)
+                //.permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .build());
+
+        addSlide(new SimpleSlide.Builder()
+                .title("Enjoy the freedom")
+                .description("Export all of your info easily")
+                .image(R.drawable.filled_csv_file)
+                .background(R.color.colorPrimary)
+                .backgroundDark(R.color.colorPrimaryDark)
+                .scrollable(false)
+                //.permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .build());
+
+        addSlide(new SimpleSlide.Builder()
+                .title("Ready to start?")
+                .description("Let's make your account!")
+                .background(R.color.colorPrimary)
+                .backgroundDark(R.color.colorPrimaryDark)
+                .scrollable(false)
+                //.permission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .build());
     }
 }

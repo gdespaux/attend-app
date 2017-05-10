@@ -72,6 +72,12 @@ public class RegisterActivity extends AppCompatActivity {
             finish();
         }
 
+        if (session.isFirstRun()) {
+            Intent i = new Intent(RegisterActivity.this, MainIntroActivity.class);
+            startActivity(i);
+            session.firstRun(false);
+        }
+
         // Register Button Click event
         btnRegister.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -96,7 +102,6 @@ public class RegisterActivity extends AppCompatActivity {
                 Intent i = new Intent(getApplicationContext(),
                         LoginActivity.class);
                 startActivity(i);
-                finish();
             }
         });
 
