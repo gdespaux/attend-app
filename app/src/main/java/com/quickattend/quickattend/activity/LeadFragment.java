@@ -92,7 +92,7 @@ public class LeadFragment extends Fragment {
     };
 
     String selectedDate;
-    private String studentGender ="";
+    private String studentGender = "";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -138,7 +138,7 @@ public class LeadFragment extends Fragment {
 
         inputStudentEmail = (EditText) view.findViewById(R.id.studentEmail);
         inputStudentAddress = (EditText) view.findViewById(R.id.studentAddress);
-        inputStudentMiscInfo = (EditText) view.findViewById(R.id.studentMedInfo);
+        inputStudentMiscInfo = (EditText) view.findViewById(R.id.studentMiscInfo);
 
         radioGroup = (RadioGroup) view.findViewById(R.id.genderRadios);
 
@@ -288,6 +288,7 @@ public class LeadFragment extends Fragment {
                 params.put("studentGender", studentGender);
                 params.put("studentEmail", studentEmail);
                 params.put("studentAddress", studentAddress);
+                params.put("studentMiscInfo", studentMiscInfo);
 
                 return params;
             }
