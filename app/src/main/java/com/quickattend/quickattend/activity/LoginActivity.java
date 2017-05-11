@@ -162,7 +162,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Login Response: " + response.toString());
+                Log.d(TAG, "Login Response: " + response);
                 hideDialog();
 
                 try {
@@ -183,6 +183,7 @@ public class LoginActivity extends AppCompatActivity {
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
+                        String photo = user.getString("userPhoto");
                         String accountType = user.getString("accountType");
                         String created_at = user
                                 .getString("created_at");
@@ -192,7 +193,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, accountID, accountType, created_at);
+                        db.addUser(name, email, uid, photo, accountID, accountType, created_at);
 
                         // Launch main activity
                         Intent intent = new Intent(LoginActivity.this,

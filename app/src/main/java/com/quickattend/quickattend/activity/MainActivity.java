@@ -29,10 +29,12 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.utils.CircularNetworkImageView;
 import com.quickattend.quickattend.utils.NotificationUtils;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = MainActivity.class.getSimpleName();
     private TextView txtName;
     private TextView txtEmail;
+    private CircularNetworkImageView userPhotoView;
 
     private DrawerLayout drawer;
 
@@ -59,10 +62,12 @@ public class MainActivity extends AppCompatActivity
 
     private String fabAction;
     private String userID;
+    private String userPhoto;
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     FloatingActionButton fab;
     private NavigationView navigationView;
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     private boolean leadMode = false;
 
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity
 
         String name = user.get("name");
         String email = user.get("email");
+        userPhoto = user.get("userPhoto");
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -123,9 +129,11 @@ public class MainActivity extends AppCompatActivity
 
         txtName = (TextView) headerView.findViewById(R.id.name);
         txtEmail = (TextView) headerView.findViewById(R.id.email);
+        userPhotoView = (CircularNetworkImageView) headerView.findViewById(R.id.userPhoto);
         // Displaying the user details on the screen
         txtName.setText(name);
         txtEmail.setText(email);
+        userPhotoView.setImageUrl(userPhoto, imageLoader);
 
         //default fragment loaded
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -292,7 +300,7 @@ public class MainActivity extends AppCompatActivity
                             FragmentManager fragmentManager = getSupportFragmentManager();
                             fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                             fragmentManager.beginTransaction()
-                                    .add(R.id.frame_container, fragment).commit();
+                                    .replace(R.id.frame_container, fragment).commit();
                         }
                     });
             builder.show();
