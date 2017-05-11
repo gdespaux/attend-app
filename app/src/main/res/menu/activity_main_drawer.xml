@@ -16,6 +16,10 @@
             android:icon="@drawable/ic_view_list_black_24dp"
             android:title="Student List" />
         <item
+            android:id="@+id/nav_lead_list"
+            android:icon="@drawable/ic_view_list_black_24dp"
+            android:title="Leads List" />
+        <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_show_chart_black_24dp"
             android:title="Reports" />
@@ -44,6 +48,10 @@
 
     <item android:title="Other">
         <menu>
+            <item
+                android:id="@+id/nav_replay_intro"
+                android:icon="@drawable/ic_replay_black_24dp"
+                android:title="Replay Intro"/>
             <item
                 android:id="@+id/nav_log_out"
                 android:icon="@drawable/ic_power_settings_new_black_24dp"

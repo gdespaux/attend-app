@@ -136,13 +136,13 @@ public class UserProfileFragment extends Fragment {
             String userName = jo.getString("userName");
             String userEmail = jo.getString("userEmail");
             String userAccountType = jo.getString("userAccountType");
-            String userSubPlan = jo.getString("userSubPlan");
+            String userSubPlan = jo.getString("userSubPlan") + "Plan";
             String userPhoto = jo.getString("userPhoto");
 
             userNameText.setText(userName);
-            userEmailText.setText("Email: " + userEmail);
+            userEmailText.setText(userEmail);
             userAccountTypeText.setText(userAccountType);
-            userSubPlanText.setText("Subscription: " + userSubPlan);
+            userSubPlanText.setText(userSubPlan);
             this.userPhoto.setImageUrl(userPhoto, imageLoader);
 
         } catch (JSONException e) {

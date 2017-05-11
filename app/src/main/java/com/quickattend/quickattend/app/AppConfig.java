@@ -52,6 +52,9 @@ public class AppConfig {
     // Server add lead url
     public static String URL_ADD_LEAD = BASE_URL + "addLead.php";
 
+    // Server get all leads url
+    public static String URL_GET_ALL_LEADS = BASE_URL + "getAllLeads.php";
+
     // Server add student to class url
     public static String URL_ADD_EXISTING_STUDENT = BASE_URL + "addExistingStudent.php";
 
@@ -87,6 +90,9 @@ public class AppConfig {
 
     // Server export all classes to csv
     public static String URL_EXPORT_ALL_CLASSES = BASE_URL + "exportAllClasses.php";
+
+    // Server export all leads to csv
+    public static String URL_EXPORT_ALL_LEADS = BASE_URL + "exportAllLeads.php";
 
     // Server export class attendance by date to csv
     public static String URL_EXPORT_ATTENDANCE_BY_DATE = BASE_URL + "exportClassAttendanceByDate.php";

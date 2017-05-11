@@ -74,7 +74,7 @@
 
                 <android.support.v7.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="200dp"
                     android:layout_marginBottom="16dp"
                     android:layout_marginEnd="24dp"
                     android:layout_marginStart="24dp"
@@ -103,16 +103,49 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    android:id="@+id/userPhoneText"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:drawablePadding="16dp"
+                                    android:drawableStart="@drawable/ic_local_phone_black_24dp"
+                                    android:drawableTint="@color/bg_register"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="8dp"
+                                    android:text="(555) 123-4567" />
+
+                                <TextView
                                     android:id="@+id/userEmailText"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
+                                    android:drawablePadding="16dp"
+                                    android:drawableStart="@drawable/ic_email_black_24dp"
+                                    android:drawableTint="@color/bg_register"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="8dp"
                                     android:text="user@example.com" />
+
+                                <TextView
+                                    android:id="@+id/userAddressText"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:drawablePadding="16dp"
+                                    android:drawableStart="@drawable/ic_location_on_black_24dp"
+                                    android:drawableTint="@color/bg_register"
+                                    android:gravity="top|start"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="8dp"
+                                    android:text="333 Ocean Ave, Gretna, LA 70053" />
 
                                 <TextView
                                     android:id="@+id/userSubPlan"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="Subscription: Free" />
+                                    android:drawablePadding="16dp"
+                                    android:drawableStart="@drawable/ic_card_membership_black_24dp"
+                                    android:drawableTint="@color/bg_register"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="8dp"
+                                    android:text="Free Plan" />
 
                             </LinearLayout>
                         </LinearLayout>

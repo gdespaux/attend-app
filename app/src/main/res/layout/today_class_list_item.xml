@@ -72,18 +72,20 @@
             android:layout_marginTop="8dp"
             android:contentDescription="@string/class_count_icon"
             android:scaleType="fitCenter"
+            android:tint="@color/bg_register"
             app:srcCompat="@drawable/ic_group_black_24dp" />
 
         <TextView
             android:id="@+id/classCount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:fontFamily="sans-serif"
             android:gravity="center"
             android:text="8/15"
             android:textAlignment="center"
             android:textAppearance="@android:style/TextAppearance.Material.Title"
-            android:textSize="36sp"
+            android:textSize="24sp"
             android:typeface="normal" />
     </LinearLayout>
 

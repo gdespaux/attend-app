@@ -2,9 +2,15 @@ package com.quickattend.quickattend.activity;
 
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,23 +22,18 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
-import android.widget.ImageButton;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import com.android.volley.Request;
@@ -40,13 +41,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
+import com.quickattend.quickattend.adapters.LeadListAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class ClassListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener {
-    private static final String TAG = ClassListFragment.class.getSimpleName();
+public class LeadListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+    private static final String TAG = LeadListFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -54,29 +56,11 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
-    private String userID;
     private String accountID;
     private String name;
     private String email;
 
-    private ImageButton addClassImage;
-
-    private Calendar studentCalendar = Calendar.getInstance();
-    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            // TODO Auto-generated method stub
-            studentCalendar.set(Calendar.YEAR, year);
-            studentCalendar.set(Calendar.MONTH, monthOfYear);
-            studentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateStudentDate();
-        }
-
-    };
-
-    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+    private LeadListAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -94,7 +78,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("All Classes");
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("All Leads");
 
         // SqLite database handler
         db = new SQLiteHandler(getActivity());
@@ -109,26 +93,15 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
 
-        userID = user.get("uid");
         accountID = user.get("account_id");
         name = user.get("name");
         email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_lead_list, container, false);
         ListView listView = (ListView) view.findViewById(android.R.id.list);
-        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
+        listView.setOnItemLongClickListener(this);
 
-        addClassImage = (ImageButton) view.findViewById(R.id.imageAddClass);
-
-        addClassImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), AddClassActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        getAllClasses(false);
+        getAllLeads();
 
         /*
          * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -139,9 +112,11 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
-                        getAllClasses(false);
+                        getAllLeads();
                     }
                 }
         );
@@ -151,22 +126,59 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
 
     }
 
-    private void updateStudentDate() {
-
-        String myFormat = "MM/dd/yyyy"; //In which you need put here
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        currentDate = sdf.format(studentCalendar.getTime());
-
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("My Classes: " + currentDate);
-        getTodayClasses();
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_class_list, menu);
+        inflater.inflate(R.menu.menu_lead_list, menu);
         super.onCreateOptionsMenu(menu,inflater);
+
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        View searchLayout = searchView.findViewById((android.support.v7.appcompat.R.id.search_plate));
+        searchEditText.setHint("Search...");
+        searchEditText.setTextColor(getResources().getColor(R.color.white));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.white));
+        searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);
+
+        /*MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                // Set styles for expanded state here
+                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                // Set styles for collapsed state here
+                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
+                }
+                return true;
+            }
+        });*/
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                if(query.isEmpty()){
+                    query = "backspaceNOW";
+                }
+
+                Log.e("QUERY", query + " searched");
+                adapter.getFilter().filter(query);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -177,18 +189,8 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_change_date) {
-            new DatePickerDialog(getActivity(), date, studentCalendar
-                    .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
-                    studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
-            return true;
-        } else if (id == R.id.action_view_all_classes) {
-            getAllClasses(true);
-
-            return true;
-        } else if (id == R.id.action_export_all_classes) {
-            exportClasses();
+        if (id == R.id.action_export_all_leads) {
+            exportLeads();
 
             return true;
         }
@@ -199,61 +201,57 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
-        String classID = map.get("classID").toString();
-        String className = map.get("className").toString();
+        String leadID = map.get("leadID").toString();
 
-        Intent i = new Intent(getActivity(), SingleClassActivity.class);
+        //Intent i = new Intent(getActivity(), SingleLeadActivity.class);
+        //i.putExtra("leadID", leadID);
+        //getActivity().startActivity(i);
 
-        i.putExtra("classID",classID);
-        i.putExtra("className", className);
-        i.putExtra("classDate", currentDate);
-        getActivity().startActivity(i);
+    }
 
-        //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
-        //intent.putExtra("classID",classID);
-        //startActivity(intent);
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Toast.makeText(getActivity(),
+                "Can't edit yet!", Toast.LENGTH_LONG).show();
+        return true;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getAllClasses(false);
+        getAllLeads();
     }
 
-    private void showClass(){
+    private void showLead(){
         JSONObject jsonObject = null;
         ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
-            JSONArray result = jsonObject.getJSONArray("classes");
+            JSONArray result = jsonObject.getJSONArray("leads");
 
             for(int i = 0; i<result.length(); i++){
                 JSONObject jo = result.getJSONObject(i);
-                String classID = jo.getString("classID");
-                String className = jo.getString("className");
-                String classLocation = jo.getString("classLocation");
-                String classTime = jo.getString("classTime");
-                String classCount = jo.getString("classCount");
+                String leadID = jo.getString("leadID");
+                String leadName = jo.getString("leadName");
 
-                HashMap<String,String> classes = new HashMap<>();
-                classes.put("classID",classID);
-                classes.put("className",className);
-                classes.put("classTime", classTime);
-                classes.put("classLocation",classLocation);
-                classes.put("classCount", classCount);
-                list.add(classes);
+                HashMap<String,String> leads = new HashMap<>();
+                leads.put("leadID", leadID);
+                leads.put("leadName", leadName);
+
+                Log.d(TAG, leadName);
+
+                list.add(leads);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new SimpleAdapter(
-                getActivity(), list, R.layout.list_item,
-                new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
-                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
+        adapter = new LeadListAdapter(
+                getActivity(), list,
+                new String[]{"leadID", "leadName"},
+                new int[]{R.id.leadID, R.id.leadName});
 
         setListAdapter(adapter);
     }
@@ -283,21 +281,21 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     }
 
     /**
-     * Export classes from DB to user email
+     * Export leads from DB to user email
      * */
-    private void exportClasses() {
+    private void exportLeads() {
         // Tag used to cancel the request
-        String tag_string_req = "req_export_all_classes";
+        String tag_string_req = "req_export_all_leads";
 
-        pDialog.setMessage("Exporting Classes...");
+        pDialog.setMessage("Exporting Leads...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_EXPORT_ALL_CLASSES, new Response.Listener<String>() {
+                AppConfig.URL_EXPORT_ALL_LEADS, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Export Classes Response: " + response);
+                Log.d(TAG, "Export Leads Response: " + response);
                 hideDialog();
 
                 try {
@@ -305,7 +303,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
                         hideDialog();
-                        Toast.makeText(getActivity(), "Classes exported. Please check your email", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Leads exported. Please check your email", Toast.LENGTH_LONG).show();
                     } else {
 
                         // Error occurred in registration. Get the error
@@ -346,96 +344,29 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    /**
-     * Function to get all of user's classes from MySQL DB
-     * */
-    private void getAllClasses(final boolean getAccountClasses) {
-        // Tag used to cancel the request
-        String tag_string_req = "req_get_all_classes";
 
-        pDialog.setMessage("Loading Classes...");
+    /**
+     * Function to get all of account's leads from MySQL DB
+     * */
+    private void getAllLeads() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_get_all_leads";
+
+        pDialog.setMessage("Loading Leads...");
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_ALL_CLASSES, new Response.Listener<String>() {
+                AppConfig.URL_GET_ALL_LEADS, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                //Log.d(TAG, "Get Class Response: " + response.toString());
+                Log.d(TAG, "Get All Leads Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
                         JSON_STRING = response;
-                        showClass();
-                        //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
-                    } else {
-
-                        // Error occurred in registration. Get the error
-                        // message
-                        String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_SHORT).show();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                mSwipeRefreshLayout.setRefreshing(false);
-
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getActivity(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        }) {
-
-            @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("userID", userID);
-
-                if(getAccountClasses){
-                    params.put("accountID", accountID);
-                }
-
-                return params;
-            }
-
-        };
-
-        // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-    }
-
-    /**
-     * Function to get all of user's classes from MySQL DB
-     * */
-    private void getTodayClasses() {
-        // Tag used to cancel the request
-        String tag_string_req = "req_get_today_classes";
-
-        pDialog.setMessage("Loading Classes...");
-        showDialog();
-
-        StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_TODAY_CLASSES, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(String response) {
-                //Log.d(TAG, "Get Class Response: " + response.toString());
-                hideDialog();
-
-                try {
-                    JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
-                    if (!error) {
-                        JSON_STRING = response;
-                        showClass();
+                        showLead();
                         //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
 
@@ -458,7 +389,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
                 Toast.makeText(getActivity(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
             }
         }) {
 
@@ -466,8 +396,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
             protected Map<String, String> getParams() {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("userID", userID);
-                params.put("classDate", currentDate);
+                params.put("accountID", accountID);
                 return params;
             }
 

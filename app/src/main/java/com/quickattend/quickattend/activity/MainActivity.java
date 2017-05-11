@@ -109,6 +109,8 @@ public class MainActivity extends AppCompatActivity
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
                 } else if (fabAction.equals("Student")) {
                     intent = new Intent(MainActivity.this, AddStudentActivity.class);
+                } else if (fabAction.equals("Lead")) {
+                    intent = new Intent(MainActivity.this, AddLeadActivity.class);
                 } else {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
                 }
@@ -271,6 +273,10 @@ public class MainActivity extends AppCompatActivity
             fragment = new StudentListFragment();
             fabAction = "Student";
             fab.show();
+        } else if (id == R.id.nav_lead_list) {
+            fragment = new LeadListFragment();
+            fabAction = "Lead";
+            fab.show();
         } else if (id == R.id.nav_reports) {
             fragment = new ReportsFragment();
             fab.hide();
@@ -310,6 +316,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_about) {
             fragment = new AboutFragment();
             fab.hide();
+        } else if (id == R.id.nav_replay_intro) {
+            Intent introIntent = new Intent(MainActivity.this, MainIntroActivity.class);
+            startActivity(introIntent);
+
         } else if (id == R.id.nav_log_out) {
             session.enterLeadMode(false);
             logoutUser();

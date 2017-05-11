@@ -52,11 +52,13 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:10.2.4'
     compile 'com.google.firebase:firebase-messaging:10.2.1'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
-    compile 'com.instabug.library:instabug:4.0.8'
+    compile 'com.instabug.library:instabug:4.0.10'
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     compile 'com.heinrichreimersoftware:material-intro:1.6.2'
     testCompile 'junit:junit:4.12'
 }
+
+
 
 
 

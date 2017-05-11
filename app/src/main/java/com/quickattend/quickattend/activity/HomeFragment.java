@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -58,6 +59,8 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
     private String userID;
     private String accountID;
     Activity mActivity;
+
+    private ImageButton changeDateImage;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -111,8 +114,20 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         String name = user.get("name");
         String email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
         ListView listView = (ListView) view.findViewById(android.R.id.list);
+        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
+
+        changeDateImage = (ImageButton) view.findViewById(R.id.imageChangeDate);
+
+        changeDateImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new DatePickerDialog(getActivity(), date, studentCalendar
+                        .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
+                        studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
 
         getTodayClasses(false);
 
@@ -295,7 +310,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Class Response: " + response.toString());
+                Log.d(TAG, "Get Class Response: " + response);
                 //hideDialog();
                 JSON_STRING = response;
 
@@ -311,8 +326,8 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                         // message
                         String errorMsg = jObj.getString("error_msg");
                         showClass();
-                        Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getActivity(),
+                        //        errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

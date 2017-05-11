@@ -6,7 +6,7 @@
     <color name="colorTransBg">#9a000000</color>
 
     <color name="bg_login">#0097A7</color>
-    <color name="bg_register">#9E9E9E</color>
+    <color name="bg_register">#9e9e9e</color>
     <color name="bg_main">#428bca</color>
     <color name="white">#ffffff</color>
     <color name="input_login">#222222</color>
