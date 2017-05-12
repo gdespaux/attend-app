@@ -59,6 +59,8 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
     private String userID;
     private String accountID;
     Activity mActivity;
+    private View view;
+    private ListView listView;
 
     private ImageButton changeDateImage;
 
@@ -114,9 +116,8 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         String name = user.get("name");
         String email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-        ListView listView = (ListView) view.findViewById(android.R.id.list);
-        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
+        view = inflater.inflate(R.layout.fragment_home, container, false);
+        listView = (ListView) view.findViewById(android.R.id.list);
 
         changeDateImage = (ImageButton) view.findViewById(R.id.imageChangeDate);
 
@@ -269,6 +270,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                 new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
         setListAdapter(adapter);
+        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
 
     /**

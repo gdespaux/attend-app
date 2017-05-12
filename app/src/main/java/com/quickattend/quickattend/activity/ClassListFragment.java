@@ -58,23 +58,10 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
     private String accountID;
     private String name;
     private String email;
+    private View view;
+    private ListView listView;
 
     private ImageButton addClassImage;
-
-    private Calendar studentCalendar = Calendar.getInstance();
-    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear,
-                              int dayOfMonth) {
-            // TODO Auto-generated method stub
-            studentCalendar.set(Calendar.YEAR, year);
-            studentCalendar.set(Calendar.MONTH, monthOfYear);
-            studentCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            updateStudentDate();
-        }
-
-    };
 
     String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
 
@@ -114,9 +101,8 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         name = user.get("name");
         email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_class_list, container, false);
-        ListView listView = (ListView) view.findViewById(android.R.id.list);
-        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
+        view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        listView = (ListView) view.findViewById(android.R.id.list);
 
         addClassImage = (ImageButton) view.findViewById(R.id.imageAddClass);
 
@@ -151,17 +137,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
 
     }
 
-    private void updateStudentDate() {
-
-        String myFormat = "MM/dd/yyyy"; //In which you need put here
-        SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
-
-        currentDate = sdf.format(studentCalendar.getTime());
-
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("My Classes: " + currentDate);
-        getTodayClasses();
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -176,14 +151,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_change_date) {
-            new DatePickerDialog(getActivity(), date, studentCalendar
-                    .get(Calendar.YEAR), studentCalendar.get(Calendar.MONTH),
-                    studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
-
-            return true;
-        } else if (id == R.id.action_view_all_classes) {
+        if (id == R.id.action_view_all_classes) {
             getAllClasses(true);
 
             return true;
@@ -256,6 +224,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                 new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
 
         setListAdapter(adapter);
+        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
 
     /**
@@ -403,71 +372,6 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
                     params.put("accountID", accountID);
                 }
 
-                return params;
-            }
-
-        };
-
-        // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-    }
-
-    /**
-     * Function to get all of user's classes from MySQL DB
-     * */
-    private void getTodayClasses() {
-        // Tag used to cancel the request
-        String tag_string_req = "req_get_today_classes";
-
-        pDialog.setMessage("Loading Classes...");
-        showDialog();
-
-        StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_TODAY_CLASSES, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(String response) {
-                //Log.d(TAG, "Get Class Response: " + response.toString());
-                hideDialog();
-
-                try {
-                    JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
-                    if (!error) {
-                        JSON_STRING = response;
-                        showClass();
-                        //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
-                    } else {
-
-                        // Error occurred in registration. Get the error
-                        // message
-                        String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                mSwipeRefreshLayout.setRefreshing(false);
-
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getActivity(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
-            }
-        }) {
-
-            @Override
-            protected Map<String, String> getParams() {
-                // Posting params to register url
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("userID", userID);
-                params.put("classDate", currentDate);
                 return params;
             }
 

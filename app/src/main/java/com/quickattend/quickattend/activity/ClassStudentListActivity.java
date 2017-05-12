@@ -8,12 +8,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -32,6 +35,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
+import com.quickattend.quickattend.adapters.Student;
 import com.quickattend.quickattend.adapters.StudentListAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
@@ -49,12 +53,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class ClassStudentListActivity extends AppCompatActivity implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+public class ClassStudentListActivity extends AppCompatActivity {
     private static final String TAG = ClassStudentListActivity.class.getSimpleName();
-    private ListView listView;
+    private RecyclerView listView;
     private ProgressDialog pDialog;
 
     private String JSON_STRING;
@@ -64,6 +69,9 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     private String className;
     private String accountID;
     private String email;
+
+    private List<Student> students;
+    private StudentListAdapter adapter;
 
     private Calendar studentCalendar = Calendar.getInstance();
     DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -174,17 +182,20 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             logoutUser();
         }
 
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(this);
-        listView.setOnItemLongClickListener(this);
-
         classID = getIntent().getStringExtra("classID");
-        getClassStudents(classID);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+
+        listView = (RecyclerView) findViewById(R.id.listView);
+        listView.setHasFixedSize(true);
+        listView.setLayoutManager(layoutManager);
 
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
         Instabug.identifyUser(name, email);
+
+        getClassStudents(classID);
     }
 
     private void updateStudentDate() {
@@ -225,48 +236,6 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Intent intent = new Intent(this, ViewEmployee.class);
-        HashMap<String, String> map = (HashMap) parent.getItemAtPosition(position);
-        String studentID = map.get("studentID");
-        //intent.putExtra("classID",empId);
-        //startActivity(intent);
-
-        CheckBox studentPresent = (CheckBox) view.findViewById(R.id.studentPresent);
-        Boolean presentNow = !studentPresent.isChecked();
-        studentPresent.setChecked(presentNow);
-
-        addStudentAttendance(studentID, presentNow);
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-        HashMap<String, String> map = (HashMap) parent.getItemAtPosition(position);
-        final String studentID = map.get("studentID");
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(ClassStudentListActivity.this);
-        builder.setTitle("Delete Student")
-                .setMessage("This will remove the student from the class. This will not delete the actual student.\nAre you sure?")
-                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        deleteStudentFromClass(studentID);
-                        dialog.dismiss();
-                    }
-                });
-        builder.show();
-
-        return true;
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         getClassStudents(classID);
@@ -274,7 +243,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
     private void showStudent() {
         JSONObject jsonObject = null;
-        ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+        students = new ArrayList<>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
             JSONArray result = jsonObject.getJSONArray("students");
@@ -290,30 +259,21 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
                 if (!studentActive.equals("yes")) continue;
 
-                HashMap<String, String> student = new HashMap<>();
-                student.put("studentID", studentID);
-                student.put("studentName", studentName);
-                student.put("studentPresent", studentPresent);
-                student.put("studentPhoto", studentPhoto);
-                list.add(student);
+                Student student = new Student(studentID, studentName, studentPhoto, studentPresent, classID, accountID, currentDate);
+                students.add(student);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        ListAdapter adapter = new StudentListAdapter(
-                ClassStudentListActivity.this, list,
-                new String[]{"studentID", "studentName", "studentPresent", "studentPhoto"},
-                new int[]{R.id.studentID, R.id.studentName, R.id.studentPresent, R.id.studentPhoto});
-
+        adapter = new StudentListAdapter(this, R.layout.student_list_item, students);
         listView.setAdapter(adapter);
     }
 
     /**
      * Function to set selected student deleted from class in MySQL DB
      */
-    private void deleteStudentFromClass(final String studentID) {
+    public void deleteStudentFromClass(final String studentID, final String classID, final Context context) {
         // Tag used to cancel the request
         String tag_string_req = "req_delete_student_from_class";
 
@@ -336,7 +296,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
+                        Toast.makeText(context,
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -349,7 +309,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(context,
                         error.getMessage(), Toast.LENGTH_LONG).show();
             }
         }) {
@@ -368,6 +328,8 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+
+
     }
 
     /**
@@ -388,7 +350,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
     /**
      * Function to get all of user's classes from MySQL DB
      */
-    private void addStudentAttendance(final String studentID, final Boolean studentPresent) {
+    public void addStudentAttendance(final String studentID, final Boolean studentPresent, final String classID, final String accountID, final String currentDate, final Context context) {
         // Tag used to cancel the request
         String tag_string_req = "req_add_attendance";
 
@@ -397,7 +359,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Attendance Response: " + response.toString());
+                Log.d(TAG, "Add Attendance Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -408,7 +370,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
                         // Error occurred in registration. Get the error
                         // message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
+                        Toast.makeText(context,
                                 errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -421,7 +383,7 @@ public class ClassStudentListActivity extends AppCompatActivity implements ListV
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Fetching Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
+                Toast.makeText(context,
                         error.getMessage(), Toast.LENGTH_LONG).show();
             }
         }) {
