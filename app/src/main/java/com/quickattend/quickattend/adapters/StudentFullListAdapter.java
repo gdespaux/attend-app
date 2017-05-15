@@ -2,95 +2,105 @@ package com.quickattend.quickattend.adapters;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.quickattend.quickattend.R;
-import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.activity.ClassStudentListActivity;
+import com.quickattend.quickattend.activity.StudentListFragment;
+import com.quickattend.quickattend.models.Student;
+import com.quickattend.quickattend.models.StudentFull;
+import com.quickattend.quickattend.models.StudentFullHolder;
+import com.quickattend.quickattend.models.StudentHolder;
 import com.quickattend.quickattend.utils.CircularNetworkImageView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-public class StudentFullListAdapter extends BaseAdapter implements Filterable {
-    Context context;
-    ArrayList<HashMap<String, String>> list;
-    ArrayList<HashMap<String, String>> mOriginalValues;
-    String[] fromString;
-    int[] toView;
+public class StudentFullListAdapter extends RecyclerView.Adapter<StudentFullHolder> implements Filterable {
 
-    private static LayoutInflater inflater = null;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
+    private List<StudentFull> students;
+    private List<StudentFull> mOriginalValues;
+    private Context context;
+    private int itemResource;
 
-    public StudentFullListAdapter(Context thisContext, ArrayList<HashMap<String, String>> hashMaps, String[] fromThis, int[] toThat) {
-        // TODO Auto-generated constructor stub
-        context = thisContext;
-        list = hashMaps;
-        fromString = fromThis;
-        toView = toThat;
+    // Allows to remember the last item shown on screen
+    private int lastPosition = -1;
 
-        inflater = (LayoutInflater) context.
-                getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public StudentFullListAdapter(Context context, int itemResource, List<StudentFull> students) {
+
+        this.students = students;
+        this.context = context;
+        this.itemResource = itemResource;
     }
 
     @Override
-    public int getCount() {
-        // TODO Auto-generated method stub
-        return list.size();
+    public StudentFullHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(this.itemResource, parent, false);
+
+        return new StudentFullHolder(this.context, view);
     }
 
     @Override
-    public int getViewTypeCount() {
-        return 1;
+    public void onBindViewHolder(final StudentFullHolder holder, final int position) {
+
+        final StudentFull student = this.students.get(position);
+
+        holder.bindStudent(student);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final StudentListFragment classUtils = new StudentListFragment();
+                final String studentID = student.studentID;
+
+                classUtils.openSingleStudent(studentID, context);
+            }
+        });
+
+        setAnimation(holder.itemView, position);
     }
 
     @Override
-    public int getItemViewType(int position) {
-        return position;
+    public int getItemCount() {
+        return (null != students ? this.students.size() : 0);
     }
 
-    @Override
-    public Object getItem(int position) {
-        // TODO Auto-generated method stub
-        return list.get(position);
-    }
+    /**
+     * Here is the key method to apply the animation
+     */
+    private void setAnimation(View viewToAnimate, int position) {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition) {
+            Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in_up);
 
-    @Override
-    public long getItemId(int position) {
-        // TODO Auto-generated method stub
-        return position;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-
-        ViewHolder holder;
-
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.student_list_full_item, null);
-            holder = new ViewHolder();
-
-            holder.studentID = (TextView) convertView.findViewById(R.id.studentID);
-            holder.studentName = (TextView) convertView.findViewById(R.id.studentName);
-            holder.studentPhoto = (CircularNetworkImageView) convertView.findViewById(R.id.studentPhoto);
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
+            if(position > 20){
+                //animation.setStartOffset(position * 25 - 1250);
+            } else {
+                //animation.setStartOffset(position * 25);
+            }
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
         }
+    }
 
-        holder.studentID.setText(list.get(position).get("studentID"));
-        holder.studentName.setText(list.get(position).get("studentName"));
-        holder.studentPhoto.setImageUrl(list.get(position).get("studentPhoto"), imageLoader);
-
-        return convertView;
+    @Override
+    public void onViewDetachedFromWindow(final StudentFullHolder holder) {
+        holder.clearAnimation();
     }
 
     @Override
@@ -101,7 +111,7 @@ public class StudentFullListAdapter extends BaseAdapter implements Filterable {
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
 
-                list = (ArrayList<HashMap<String, String>>) results.values; // has the filtered values
+                students = (List<StudentFull>) results.values; // has the filtered values
                 notifyDataSetChanged();
             }
 
@@ -109,10 +119,10 @@ public class StudentFullListAdapter extends BaseAdapter implements Filterable {
             protected FilterResults performFiltering(CharSequence constraint) {
 
                 FilterResults results = new FilterResults();
-                ArrayList<HashMap<String, String>> FilteredArrList = new ArrayList<HashMap<String, String>>();
+                ArrayList<StudentFull> FilteredArrList = new ArrayList<StudentFull>();
 
                 if (mOriginalValues == null) {
-                    mOriginalValues = new ArrayList<HashMap<String, String>>(list); // saves the original data in mOriginalValues
+                    mOriginalValues = new ArrayList<StudentFull>(students); // saves the original data in mOriginalValues
                     Log.e("ORIGINAL SET", "SET");
                 }
 
@@ -130,14 +140,11 @@ public class StudentFullListAdapter extends BaseAdapter implements Filterable {
                 } else {
                     constraint = constraint.toString().toLowerCase();
                     for (int i = 0; i < mOriginalValues.size(); i++) {
-                        String studentID = mOriginalValues.get(i).get("studentID");
-                        String studentName = mOriginalValues.get(i).get("studentName");
-                        String studentPhoto = mOriginalValues.get(i).get("studentPhoto");
+                        String studentID = mOriginalValues.get(i).studentID;
+                        String studentName = mOriginalValues.get(i).studentName;
+                        String studentPhoto = mOriginalValues.get(i).studentPhoto;
                         if (studentName.toLowerCase().contains(constraint.toString().toLowerCase())) {
-                            HashMap<String, String> filteredStudent = new HashMap<>();
-                            filteredStudent.put("studentName", studentName);
-                            filteredStudent.put("studentID", studentID);
-                            filteredStudent.put("studentPhoto", studentPhoto);
+                            StudentFull filteredStudent = new StudentFull(studentID, studentName, studentPhoto, null);
                             FilteredArrList.add(filteredStudent);
                         }
                     }
@@ -155,9 +162,4 @@ public class StudentFullListAdapter extends BaseAdapter implements Filterable {
         return filter;
     }
 
-    private static class ViewHolder {
-        TextView studentID;
-        TextView studentName;
-        CircularNetworkImageView studentPhoto;
-    }
 }

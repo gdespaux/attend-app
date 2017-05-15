@@ -59,7 +59,6 @@ import java.util.Map;
 
 public class ClassStudentListActivity extends AppCompatActivity {
     private static final String TAG = ClassStudentListActivity.class.getSimpleName();
-    private RecyclerView listView;
     private ProgressDialog pDialog;
 
     private String JSON_STRING;
@@ -72,6 +71,7 @@ public class ClassStudentListActivity extends AppCompatActivity {
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
+    private RecyclerView listView;
     private List<Student> students;
     private StudentListAdapter adapter;
 

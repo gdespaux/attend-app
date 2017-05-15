@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -61,6 +62,10 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
     private String email;
 
     private LeadListAdapter adapter;
+    private View view;
+    private ListView listView;
+
+    private ImageButton addLeadImage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,9 +102,19 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
         name = user.get("name");
         email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_lead_list, container, false);
-        ListView listView = (ListView) view.findViewById(android.R.id.list);
+        view = inflater.inflate(R.layout.fragment_lead_list, container, false);
+        listView = (ListView) view.findViewById(android.R.id.list);
         listView.setOnItemLongClickListener(this);
+
+        addLeadImage = (ImageButton) view.findViewById(R.id.imageAddLead);
+
+        addLeadImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddLeadActivity.class);
+                startActivity(intent);
+            }
+        });
 
         getAllLeads();
 
@@ -141,26 +156,6 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
         searchEditText.setTextColor(getResources().getColor(R.color.white));
         searchEditText.setHintTextColor(getResources().getColor(R.color.white));
         searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);
-
-        /*MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                // Set styles for expanded state here
-                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
-                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                // Set styles for collapsed state here
-                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
-                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
-                }
-                return true;
-            }
-        });*/
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -254,6 +249,7 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
                 new int[]{R.id.leadID, R.id.leadName});
 
         setListAdapter(adapter);
+        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
 
     /**

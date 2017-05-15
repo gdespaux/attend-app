@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- "Update Class", should always appear as action button -->
+    <!-- "Update ClassModel", should always appear as action button -->
     <item
         android:id="@+id/action_update_class"
         android:title="Save"

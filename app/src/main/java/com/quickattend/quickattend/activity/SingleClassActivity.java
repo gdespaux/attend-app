@@ -254,7 +254,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
             case R.id.action_delete_class:
                 AlertDialog.Builder builder = new AlertDialog.Builder(SingleClassActivity.this);
-                builder.setTitle("Delete Class")
+                builder.setTitle("Delete ClassModel")
                         .setMessage("This will delete the class and its attendance records! Are you sure?")
                         .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -398,13 +398,13 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 @Override
                 public void onResponse(String response) {
-                    Log.d(TAG, "Start Class Response: " + response);
+                    Log.d(TAG, "Start ClassModel Response: " + response);
                 }
             }, new Response.ErrorListener() {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Start Class Error: " + error.getMessage());
+                    Log.e(TAG, "Start ClassModel Error: " + error.getMessage());
                 }
             }) {
 
@@ -443,13 +443,13 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
                 @Override
                 public void onResponse(String response) {
-                    Log.d(TAG, "Start Class Response: " + response);
+                    Log.d(TAG, "Start ClassModel Response: " + response);
                 }
             }, new Response.ErrorListener() {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Start Class Error: " + error.getMessage());
+                    Log.e(TAG, "Start ClassModel Error: " + error.getMessage());
                 }
             }) {
 
@@ -538,7 +538,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Delete Class Response: " + response);
+                Log.d(TAG, "Delete ClassModel Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -597,7 +597,7 @@ public class SingleClassActivity extends AppCompatActivity implements GoogleApiC
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Class Response: " + response);
+                Log.d(TAG, "Get ClassModel Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);

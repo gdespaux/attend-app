@@ -35,16 +35,16 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentHolder> {
     }
 
     @Override
-    public StudentHolder onCreateViewHolder(ViewGroup parent, int viewType){
+    public StudentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(parent.getContext())
-                                  .inflate(this.itemResource, parent, false);
+                .inflate(this.itemResource, parent, false);
 
         return new StudentHolder(this.context, view);
     }
 
     @Override
-    public void onBindViewHolder(final StudentHolder holder, final int position){
+    public void onBindViewHolder(final StudentHolder holder, final int position) {
 
         final Student student = this.students.get(position);
 
@@ -104,26 +104,25 @@ public class StudentListAdapter extends RecyclerView.Adapter<StudentHolder> {
     }
 
     @Override
-    public int getItemCount(){
+    public int getItemCount() {
         return (null != students ? this.students.size() : 0);
     }
 
     /**
      * Here is the key method to apply the animation
      */
-    private void setAnimation(View viewToAnimate, int position){
+    private void setAnimation(View viewToAnimate, int position) {
         // If the bound view wasn't previously displayed on screen, it's animated
-        if (position > lastPosition)
-        {
+        if (position > lastPosition) {
             Animation animation = AnimationUtils.loadAnimation(context, R.anim.fade_in_up);
-            animation.setStartOffset(position * 100);
+            //animation.setStartOffset(position * 25);
             viewToAnimate.startAnimation(animation);
             lastPosition = position;
         }
     }
 
     @Override
-    public void onViewDetachedFromWindow(final StudentHolder holder){
+    public void onViewDetachedFromWindow(final StudentHolder holder) {
         holder.clearAnimation();
     }
 

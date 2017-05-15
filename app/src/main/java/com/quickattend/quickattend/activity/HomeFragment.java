@@ -3,10 +3,14 @@ package com.quickattend.quickattend.activity;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -42,12 +47,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
+import com.quickattend.quickattend.adapters.StudentFullListAdapter;
+import com.quickattend.quickattend.adapters.TodayClassAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.models.ClassModel;
+import com.quickattend.quickattend.models.StudentFull;
+import com.quickattend.quickattend.utils.RecyclerViewEmptySupport;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class HomeFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener {
+public class HomeFragment extends Fragment {
     private static final String TAG = HomeFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
@@ -59,9 +69,11 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
     private String userID;
     private String accountID;
     Activity mActivity;
-    private View view;
-    private ListView listView;
 
+    private RecyclerViewEmptySupport listView;
+    private View view;
+    private List<ClassModel> classes;
+    private TodayClassAdapter adapter;
     private ImageButton changeDateImage;
 
     private Calendar studentCalendar = Calendar.getInstance();
@@ -117,7 +129,12 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         String email = user.get("email");
 
         view = inflater.inflate(R.layout.fragment_home, container, false);
-        listView = (ListView) view.findViewById(android.R.id.list);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+
+        listView = (RecyclerViewEmptySupport) view.findViewById(R.id.listView);
+        listView.setHasFixedSize(true);
+        listView.setLayoutManager(layoutManager);
 
         changeDateImage = (ImageButton) view.findViewById(R.id.imageChangeDate);
 
@@ -129,8 +146,6 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
                         studentCalendar.get(Calendar.DAY_OF_MONTH)).show();
             }
         });
-
-        getTodayClasses(false);
 
         /*
          * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -200,31 +215,11 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        Log.i("Clicked!", "Item was clicked!");
-        HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
-        String classID = map.get("classID").toString();
-        String className = map.get("className").toString();
-
-        Intent i = new Intent(getActivity(), ClassStudentListActivity.class);
-
-        View sharedView = v;
-        String transitionName = "transClassName";
-
-        //ActivityOptions transitionActivityOptions = ActivityOptions.makeSceneTransitionAnimation(getActivity(),
-        //        Pair.create(v, "transClassName"),
-        //        Pair.create(v, "transClassTime"),
-        //        Pair.create(v, "transClassLocation"));
-
-        i.putExtra("classID",classID);
+    public void openSingleClass(final String classID, final String className, Context context){
+        Intent i = new Intent(context, ClassStudentListActivity.class);
+        i.putExtra("classID", classID);
         i.putExtra("className", className);
-        getActivity().startActivity(i);
-
-        //Intent intent = new Intent(getActivity(), SingleClassActivity.class);
-        //intent.putExtra("classID",classID);
-        //startActivity(intent);
+        context.startActivity(i);
     }
 
     @Override
@@ -235,7 +230,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
     private void showClass(){
         JSONObject jsonObject = null;
-        ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
+        classes = new ArrayList<>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
             JSONArray result = jsonObject.getJSONArray("classes");
@@ -251,25 +246,16 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
                 classCount = classCountPresent + "/" + classCount;
 
-                HashMap<String,String> classes = new HashMap<>();
-                classes.put("classID",classID);
-                classes.put("className",className);
-                classes.put("classTime", classTime);
-                classes.put("classLocation",classLocation);
-                classes.put("classCount", classCount);
-                list.add(classes);
+                ClassModel thisClass = new ClassModel(classID, className, classTime, classLocation, classCount);
+                classes.add(thisClass);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ListAdapter adapter = new SimpleAdapter(
-                mActivity, list, R.layout.today_class_list_item,
-                new String[]{"classID", "className", "classTime", "classLocation", "classCount"},
-                new int[]{R.id.classID, R.id.className, R.id.classTime, R.id.classLocation, R.id.classCount});
-
-        setListAdapter(adapter);
+        adapter = new TodayClassAdapter(getActivity(), R.layout.today_class_list_item, classes);
+        listView.setAdapter(adapter);
         listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
 
@@ -288,15 +274,6 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
         getActivity().finish();
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Intent intent = new Intent(this, ViewEmployee.class);
-        HashMap<String,String> map =(HashMap)parent.getItemAtPosition(position);
-        String className = map.get("className").toString();
-        //intent.putExtra("classID",empId);
-        //startActivity(intent);
-    }
-
     /**
      * Function to get all of user's classes from MySQL DB
      * */
@@ -312,7 +289,7 @@ public class HomeFragment extends android.support.v4.app.ListFragment implements
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Get Class Response: " + response);
+                Log.d(TAG, "Get ClassModel Response: " + response);
                 //hideDialog();
                 JSON_STRING = response;
 

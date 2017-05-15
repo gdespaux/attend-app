@@ -244,7 +244,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             case R.id.action_export_class_attendance:
                 CharSequence[] items = dialogItems.toArray(new CharSequence[dialogItems.size()]);
                 AlertDialog.Builder builder2 = new AlertDialog.Builder(SingleStudentActivity.this);
-                builder2.setTitle("Export Class Attendance") //
+                builder2.setTitle("Export ClassModel Attendance") //
                         .setItems(items, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 //exportClassAttendance(dialogItems.get(which), dialogItemsMap.get(which));

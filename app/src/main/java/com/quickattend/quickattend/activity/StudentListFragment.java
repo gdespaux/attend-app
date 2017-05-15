@@ -2,14 +2,18 @@ package com.quickattend.quickattend.activity;
 
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +27,7 @@ import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -34,6 +39,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.android.volley.Request;
@@ -42,12 +48,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
 import com.quickattend.quickattend.adapters.StudentFullListAdapter;
+import com.quickattend.quickattend.adapters.StudentListAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.models.Student;
+import com.quickattend.quickattend.models.StudentFull;
+import com.quickattend.quickattend.utils.RecyclerViewEmptySupport;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class StudentListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+public class StudentListFragment extends Fragment {
     private static final String TAG = StudentListFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
@@ -60,7 +70,11 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
     private String name;
     private String email;
 
+    private RecyclerViewEmptySupport listView;
+    private View view;
+    private List<StudentFull> students;
     private StudentFullListAdapter adapter;
+    private ImageButton addStudentImage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -97,11 +111,23 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         name = user.get("name");
         email = user.get("email");
 
-        View view = inflater.inflate(R.layout.fragment_student_list, container, false);
-        ListView listView = (ListView) view.findViewById(android.R.id.list);
-        listView.setOnItemLongClickListener(this);
+        view = inflater.inflate(R.layout.fragment_student_list, container, false);
 
-        getAllStudents();
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+
+        listView = (RecyclerViewEmptySupport) view.findViewById(R.id.listView);
+        listView.setHasFixedSize(true);
+        listView.setLayoutManager(layoutManager);
+
+        addStudentImage = (ImageButton) view.findViewById(R.id.imageAddStudent);
+
+        addStudentImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), AddStudentActivity.class);
+                startActivity(intent);
+            }
+        });
 
         /*
          * Sets up a SwipeRefreshLayout.OnRefreshListener that is invoked when the user
@@ -142,26 +168,6 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         searchEditText.setHintTextColor(getResources().getColor(R.color.white));
         searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);
 
-        /*MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                // Set styles for expanded state here
-                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
-                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                // Set styles for collapsed state here
-                if (((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
-                    ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
-                }
-                return true;
-            }
-        });*/
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -198,23 +204,10 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
-        String studentID = map.get("studentID").toString();
-
-        Intent i = new Intent(getActivity(), SingleStudentActivity.class);
+    public void openSingleStudent(final String studentID, Context context){
+        Intent i = new Intent(context, SingleStudentActivity.class);
         i.putExtra("studentID", studentID);
-        getActivity().startActivity(i);
-
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getActivity(),
-                "Can't edit yet!", Toast.LENGTH_LONG).show();
-        return true;
+        context.startActivity(i);
     }
 
     @Override
@@ -225,7 +218,7 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
 
     private void showStudent(){
         JSONObject jsonObject = null;
-        ArrayList<HashMap<String,String>> list = new ArrayList<HashMap<String, String>>();
+        students = new ArrayList<>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
             JSONArray result = jsonObject.getJSONArray("students");
@@ -237,27 +230,17 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
                 String studentPhone = jo.getString("studentPhone");
                 String studentPhoto = jo.getString("studentPhoto");
 
-                HashMap<String,String> students = new HashMap<>();
-                students.put("studentID",studentID);
-                students.put("studentName",studentName);
-                //students.put("studentPhone", studentPhone);
-                students.put("studentPhoto", studentPhoto);
-
-                Log.d(TAG, studentName);
-
-                list.add(students);
+                StudentFull student = new StudentFull(studentID, studentName, studentPhoto, accountID);
+                students.add(student);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        adapter = new StudentFullListAdapter(
-                getActivity(), list,
-                new String[]{"studentID", "studentName", "studentPhoto"},
-                new int[]{R.id.studentID, R.id.studentName, R.id.studentPhoto});
-
-        setListAdapter(adapter);
+        adapter = new StudentFullListAdapter(getActivity(), R.layout.student_list_full_item, students);
+        listView.setAdapter(adapter);
+        listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
 
     /**
@@ -273,15 +256,6 @@ public class StudentListFragment extends android.support.v4.app.ListFragment imp
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
         getActivity().finish();
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        //Intent intent = new Intent(this, ViewEmployee.class);
-        HashMap<String,String> map =(HashMap)parent.getItemAtPosition(position);
-        String className = map.get("className").toString();
-        //intent.putExtra("classID",empId);
-        //startActivity(intent);
     }
 
     /**

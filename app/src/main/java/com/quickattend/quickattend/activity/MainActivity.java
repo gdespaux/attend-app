@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 // Launching the add class activity
                 Intent intent;
-                if (fabAction.equals("Class")) {
+                if (fabAction.equals("ClassModel")) {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
                 } else if (fabAction.equals("Student")) {
                     intent = new Intent(MainActivity.this, AddStudentActivity.class);
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.frame_container, new HomeFragment()).commit();
-        fabAction = "Class";
+        fabAction = "ClassModel";
 
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -227,11 +227,11 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             fragment = new HomeFragment();
-            fabAction = "Class";
+            fabAction = "ClassModel";
             fab.show();
         } else if (id == R.id.nav_class_list) {
             fragment = new ClassListFragment();
-            fabAction = "Class";
+            fabAction = "ClassModel";
             fab.show();
         } else if (id == R.id.nav_student_list) {
             fragment = new StudentListFragment();

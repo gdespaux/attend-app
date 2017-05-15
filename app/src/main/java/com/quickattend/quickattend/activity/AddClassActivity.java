@@ -429,7 +429,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         // Tag used to cancel the request
         String tag_string_req = "req_add_class";
 
-        pDialog.setMessage("Adding Class...");
+        pDialog.setMessage("Adding ClassModel...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -437,7 +437,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Add Class Response: " + response.toString());
+                Log.d(TAG, "Add ClassModel Response: " + response.toString());
                 hideDialog();
 
                 inputClassName.setText("");
@@ -458,7 +458,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
-                        // Class successfully stored in MySQL
+                        // ClassModel successfully stored in MySQL
                         // Now store the class in sqlite
                         String uid = jObj.getString("uid");
 
@@ -472,7 +472,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                         // Inserting row in users table
                         //db.addUser(name, email, uid, created_at);
 
-                        Toast.makeText(getApplicationContext(), "Class added!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "ClassModel added!", Toast.LENGTH_LONG).show();
                         finish();
 
                     } else {
@@ -535,7 +535,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
         // Tag used to cancel the request
         String tag_string_req = "req_update_class";
 
-        pDialog.setMessage("Updating Class...");
+        pDialog.setMessage("Updating ClassModel...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
@@ -543,7 +543,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Update Class Response: " + response.toString());
+                Log.d(TAG, "Update ClassModel Response: " + response.toString());
                 hideDialog();
 
                 inputClassName.setText("");
@@ -565,7 +565,7 @@ public class AddClassActivity extends AppCompatActivity implements OnConnectionF
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
 
-                        Toast.makeText(getApplicationContext(), "Class updated!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "ClassModel updated!", Toast.LENGTH_LONG).show();
                         setResult(Activity.RESULT_OK);
                         finish();
 

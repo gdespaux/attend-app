@@ -329,7 +329,7 @@ public class ClassListFragment extends android.support.v4.app.ListFragment imple
 
             @Override
             public void onResponse(String response) {
-                //Log.d(TAG, "Get Class Response: " + response.toString());
+                //Log.d(TAG, "Get ClassModel Response: " + response.toString());
 
                 try {
                     JSONObject jObj = new JSONObject(response);
