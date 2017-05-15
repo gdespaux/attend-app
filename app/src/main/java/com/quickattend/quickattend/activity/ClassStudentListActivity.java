@@ -8,12 +8,13 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,12 +23,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -35,10 +32,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
-import com.quickattend.quickattend.adapters.Student;
+import com.quickattend.quickattend.models.Student;
 import com.quickattend.quickattend.adapters.StudentListAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.utils.NotificationUtils;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 import com.instabug.library.Instabug;
@@ -51,6 +49,8 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -69,6 +69,8 @@ public class ClassStudentListActivity extends AppCompatActivity {
     private String className;
     private String accountID;
     private String email;
+
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     private List<Student> students;
     private StudentListAdapter adapter;
@@ -190,12 +192,49 @@ public class ClassStudentListActivity extends AppCompatActivity {
         listView.setHasFixedSize(true);
         listView.setLayoutManager(layoutManager);
 
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                if (intent.getAction().equals(AppConfig.PUSH_NOTIFICATION)) {
+                    // new push notification is received
+                    String message = intent.getStringExtra("message");
+                    String payload = intent.getStringExtra("payload");
+
+                    try {
+                        JSONObject jsonObject = new JSONObject(payload);
+                        String studentName = jsonObject.getString("studentName");
+
+                        //Toast.makeText(getApplicationContext(), "New student: " + studentName, Toast.LENGTH_LONG).show();
+                        Student student = new Student("1000", studentName, "http://quickattendapp.com/documents/stock.png", "yes", "37", "58f623fd419098.10933777", "2017-05-13");
+                        students.add(student);
+                        Collections.sort(students, new Comparator<Student>() {
+                            public int compare(Student obj1, Student obj2) {
+                                // ## Ascending order
+                                return obj1.studentName.compareToIgnoreCase(obj2.studentName);
+                                // return Integer.valueOf(obj1.empId).compareTo(obj2.empId); // To compare integer values
+
+                                // ## Descending order
+                                // return obj2.firstName.compareToIgnoreCase(obj1.firstName); // To compare string values
+                                // return Integer.valueOf(obj2.empId).compareTo(obj1.empId); // To compare integer values
+                            }
+                        });
+                        adapter.notifyItemInserted(students.indexOf(student));
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        };
+
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();
         Instabug.identifyUser(name, email);
 
-        getClassStudents(classID);
+        //getClassStudents(classID);
     }
 
     private void updateStudentDate() {
@@ -238,7 +277,22 @@ public class ClassStudentListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // register new push message receiver
+        // by doing this, the activity will be notified each time a new message arrives
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(AppConfig.PUSH_NOTIFICATION));
+
+        // clear the notification area when the app is opened
+        NotificationUtils.clearNotifications(getApplicationContext());
+
         getClassStudents(classID);
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 
     private void showStudent() {

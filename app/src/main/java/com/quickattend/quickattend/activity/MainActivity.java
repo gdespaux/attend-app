@@ -147,60 +147,26 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                // checking for type intent filter
-                if (intent.getAction().equals(AppConfig.REGISTRATION_COMPLETE)) {
-                    // gcm successfully registered
-                    // now subscribe to `global` topic to receive app wide notifications
-                    FirebaseMessaging.getInstance().subscribeToTopic(AppConfig.TOPIC_GLOBAL);
-
-                    displayFirebaseRegId();
-
-                } else if (intent.getAction().equals(AppConfig.PUSH_NOTIFICATION)) {
+                if (intent.getAction().equals(AppConfig.PUSH_NOTIFICATION)) {
                     // new push notification is received
-
                     String message = intent.getStringExtra("message");
 
                     Toast.makeText(getApplicationContext(), "Push notification: " + message, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "Got ya message!");
                 }
 
-                Log.d(TAG, "Uh oh!");
             }
         };
-
-        displayFirebaseRegId();
 
         new Instabug.Builder(getApplication(), AppConfig.INSTABUG_KEY)
                 .setInvocationEvent(InstabugInvocationEvent.NONE)
                 .build();
         Instabug.identifyUser(name, email);
-
-        Log.e("LEADMODE", "Is on: " + leadMode);
-    }
-
-    // Fetches reg id from shared preferences
-    // and displays on the screen
-    private void displayFirebaseRegId() {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(AppConfig.SHARED_PREF, 0);
-        String regId = pref.getString("regId", null);
-
-        Log.e(TAG, "Firebase reg id: " + regId);
-
-        if (!TextUtils.isEmpty(regId)) {
-            //Toast.makeText(getApplicationContext(), "Firebase Reg Id: " + regId, Toast.LENGTH_LONG).show();
-            sendRegistrationToServer(regId);
-        } else {
-            Toast.makeText(getApplicationContext(), "Firebase Reg Id is not received yet!", Toast.LENGTH_LONG).show();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        // register GCM registration complete receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(AppConfig.REGISTRATION_COMPLETE));
 
         // register new push message receiver
         // by doing this, the activity will be notified each time a new message arrives
@@ -209,8 +175,6 @@ public class MainActivity extends AppCompatActivity
 
         // clear the notification area when the app is opened
         NotificationUtils.clearNotifications(getApplicationContext());
-
-        Log.e("LEADMODE", "Is on: " + leadMode);
 
         if(leadMode){
             fragment = new LeadFragment();
@@ -298,7 +262,6 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             session.enterLeadMode(true);
-                            Log.e("LEADMODE", "Is on: " + leadMode);
                             fragment = new LeadFragment();
                             fab.hide();
                             navigationView.getMenu().clear();
@@ -337,67 +300,4 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    /**
-     * Function to store device id in MySQL database will post params(token)
-     * to register url
-     */
-    public void sendRegistrationToServer(final String token) {
-
-        SharedPreferences pref = getApplicationContext().getSharedPreferences(AppConfig.SHARED_PREF, 0);
-
-        if (token == "") {
-            pref.getString("regID", "");
-        }
-
-        // SqLite database handler
-        db = new SQLiteHandler(getApplicationContext());
-
-        // session manager
-        session = new SessionManager(getApplicationContext());
-
-        // Fetching user details from sqlite
-        final HashMap<String, String> user = db.getUserDetails();
-        userID = user.get("uid");
-
-        if (userID != null) {
-            // Tag used to cancel the request
-            String tag_string_req = "req_reg_id";
-
-            // sending gcm token to server
-            Log.e(TAG, "sendRegistrationToServer: " + token);
-
-            StringRequest strReq = new StringRequest(Request.Method.POST,
-                    AppConfig.URL_REG_ID, new Response.Listener<String>() {
-
-                @Override
-                public void onResponse(String response) {
-                    Log.d(TAG, "Add Reg ID Response: " + response.toString());
-                }
-            }, new Response.ErrorListener() {
-
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Device ID Reg Error: " + error.getMessage());
-                }
-            }) {
-
-                @Override
-                protected Map<String, String> getParams() {
-                    // Posting params to register url
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("userID", userID);
-                    params.put("regID", token);
-
-                    Log.e(TAG, "USERID: " + userID);
-                    Log.e(TAG, "REGID: " + token);
-
-                    return params;
-                }
-
-            };
-
-            // Adding request to request queue
-            AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
-        }
-    }
 }

@@ -2,30 +2,21 @@ package com.quickattend.quickattend.adapters;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.TextView;
 
-import com.android.volley.toolbox.ImageLoader;
 import com.quickattend.quickattend.R;
 import com.quickattend.quickattend.activity.ClassStudentListActivity;
-import com.quickattend.quickattend.app.AppController;
-import com.quickattend.quickattend.utils.CircularNetworkImageView;
+import com.quickattend.quickattend.models.Student;
+import com.quickattend.quickattend.models.StudentHolder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import static com.instabug.library.Instabug.getApplicationContext;
 
 public class StudentListAdapter extends RecyclerView.Adapter<StudentHolder> {
 

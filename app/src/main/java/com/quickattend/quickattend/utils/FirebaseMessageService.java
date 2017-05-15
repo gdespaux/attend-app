@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.quickattend.quickattend.activity.MainActivity;
 import com.quickattend.quickattend.app.AppConfig;
@@ -94,7 +95,8 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
                 // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
-                Log.d("FOREGROUND", "THIS ONE");
+                Log.e("FOREGROUND", "Firebase");
+
             } else {
                 // app is in background, show the notification in notification tray
                 Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
@@ -107,7 +109,7 @@ public class FirebaseMessageService extends com.google.firebase.messaging.Fireba
                     // image is present, show notification with image
                     showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
                 }
-                Log.d("FOREGROUND", "THAT ONE");
+                Log.e("BACKGROUND", "Firebase");
             }
         } catch (JSONException e) {
             Log.e(TAG, "Json Exception: " + e.getMessage());

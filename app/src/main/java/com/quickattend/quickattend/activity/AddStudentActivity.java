@@ -585,6 +585,7 @@ public class AddStudentActivity extends AppCompatActivity {
                                 inputStudentName.setText(student.get("studentName"));
 
                                 didSelectItem = true;
+                                Log.i("FROMARRAY", "selected: " + didSelectItem);
                                 hideableInfo.setVisibility(View.GONE);
                             }
                         });
@@ -652,15 +653,18 @@ public class AddStudentActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.action_add_student:
 
+                Log.i("FROMARRAY", "selected: " + didSelectItem);
+
                 if (!studentName.isEmpty()) {
                     if(studentOnly){
                         if(didSelectItem){
                             addExistingStudent(studentID);
+                        } else {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please select a student!", Toast.LENGTH_LONG)
+                                    .show();
+                            return false;
                         }
-                        Toast.makeText(getApplicationContext(),
-                                "Please select a student!", Toast.LENGTH_LONG)
-                                .show();
-                        return false;
                     } else {
                         addStudent(studentName, studentBirthday, studentPhone, studentEmail, studentAddress, studentEnrollDate, studentMedInfo, studentID);
                     }

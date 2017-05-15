@@ -1,4 +1,4 @@
-package com.quickattend.quickattend.adapters;
+package com.quickattend.quickattend.models;
 
 public class Student {
 

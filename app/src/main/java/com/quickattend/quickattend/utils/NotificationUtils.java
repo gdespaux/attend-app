@@ -178,7 +178,7 @@ public class NotificationUtils {
                     for (String activeProcess : processInfo.pkgList) {
                         if (activeProcess.equals(context.getPackageName())) {
                             isInBackground = false;
-                            Log.d("BACKGROUND", "THIS ONE");
+                            Log.e("FOREGROUND", "Notification Utils");
                         }
                     }
                 }
@@ -188,7 +188,7 @@ public class NotificationUtils {
             ComponentName componentInfo = taskInfo.get(0).topActivity;
             if (componentInfo.getPackageName().equals(context.getPackageName())) {
                 isInBackground = false;
-                Log.d("BACKGROUND", "THAT ONE");
+                Log.e("FOREGROUND", "Notification Utils");
             }
         }
 

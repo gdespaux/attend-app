@@ -1,22 +1,16 @@
-package com.quickattend.quickattend.adapters;
+package com.quickattend.quickattend.models;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.quickattend.quickattend.R;
-import com.quickattend.quickattend.activity.ClassStudentListActivity;
 import com.quickattend.quickattend.app.AppController;
+import com.quickattend.quickattend.models.Student;
 import com.quickattend.quickattend.utils.CircularNetworkImageView;
-
-import java.util.HashMap;
 
 public class StudentHolder extends RecyclerView.ViewHolder {
     private final TextView studentID;
