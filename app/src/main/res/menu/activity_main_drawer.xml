@@ -33,6 +33,19 @@
             android:title="Lead Mode" />
     </group>
 
+    <item android:title="Company">
+        <menu>
+            <item
+                android:id="@+id/nav_user_list"
+                android:icon="@drawable/ic_person_black_24dp"
+                android:title="User List" />
+            <item
+                android:id="@+id/nav_bus_profile"
+                android:icon="@drawable/ic_business_black_24dp"
+                android:title="Company Profile" />
+        </menu>
+    </item>
+
     <item android:title="Communicate">
         <menu>
             <item

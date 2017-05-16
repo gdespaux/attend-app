@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.quickattend.quickattend.activity.ClassListFragment"
+    tools:context="com.quickattend.quickattend.activity.UserListFragment"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
 
@@ -43,7 +43,7 @@
                     android:visibility="gone">
 
                     <ImageButton
-                        android:id="@+id/imageAddClass"
+                        android:id="@+id/imageAddUser"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
@@ -56,7 +56,7 @@
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.25"
-                        app:srcCompat="@drawable/filled_calendar_icon" />
+                        app:srcCompat="@drawable/filled_contacts_icon" />
 
                     <TextView
                         android:id="@+id/textView3"
@@ -66,7 +66,7 @@
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
                         android:layout_marginTop="8dp"
-                        android:text="Add your first class!"
+                        android:text="Add your first user!"
                         android:textSize="30sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"

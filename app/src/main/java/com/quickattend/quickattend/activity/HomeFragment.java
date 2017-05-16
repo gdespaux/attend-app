@@ -215,7 +215,7 @@ public class HomeFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public void openSingleClass(final String classID, final String className, Context context){
+    public void openClassList(final String classID, final String className, Context context){
         Intent i = new Intent(context, ClassStudentListActivity.class);
         i.putExtra("classID", classID);
         i.putExtra("className", className);

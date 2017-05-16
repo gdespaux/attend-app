@@ -111,6 +111,8 @@ public class MainActivity extends AppCompatActivity
                     intent = new Intent(MainActivity.this, AddStudentActivity.class);
                 } else if (fabAction.equals("Lead")) {
                     intent = new Intent(MainActivity.this, AddLeadActivity.class);
+                } else if (fabAction.equals("User")) {
+                    intent = new Intent(MainActivity.this, AddUserActivity.class);
                 } else {
                     intent = new Intent(MainActivity.this, AddClassActivity.class);
                 }
@@ -247,6 +249,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_profile) {
             fragment = new UserProfileFragment();
             fab.hide();
+        } else if (id == R.id.nav_user_list) {
+            fragment = new UserListFragment();
+            fabAction = "User";
+            fab.show();
         } else if (id == R.id.nav_leads) {
 
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);

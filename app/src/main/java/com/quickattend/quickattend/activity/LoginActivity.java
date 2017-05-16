@@ -184,6 +184,8 @@ public class LoginActivity extends AppCompatActivity {
                         String name = user.getString("name");
                         String email = user.getString("email");
                         String photo = user.getString("userPhoto");
+                        String phone = user.getString("userPhone");
+                        String address = user.getString("userAddress");
                         String accountType = user.getString("accountType");
                         String created_at = user
                                 .getString("created_at");
@@ -193,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                         // Inserting row in users table
-                        db.addUser(name, email, uid, photo, accountID, accountType, created_at);
+                        db.addUser(name, email, uid, photo, phone, address, accountID, accountType, created_at);
 
                         // Launch main activity
                         Intent intent = new Intent(LoginActivity.this,

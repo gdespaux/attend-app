@@ -3,12 +3,18 @@ package com.quickattend.quickattend.activity;
 import android.app.ActivityOptions;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,24 +26,20 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import com.android.volley.Request;
@@ -45,17 +47,20 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.quickattend.quickattend.R;
-import com.quickattend.quickattend.adapters.ClassListAdapter;
-import com.quickattend.quickattend.adapters.TodayClassAdapter;
+import com.quickattend.quickattend.adapters.StudentFullListAdapter;
+import com.quickattend.quickattend.adapters.StudentListAdapter;
+import com.quickattend.quickattend.adapters.UserListAdapter;
 import com.quickattend.quickattend.app.AppConfig;
 import com.quickattend.quickattend.app.AppController;
-import com.quickattend.quickattend.models.ClassModel;
+import com.quickattend.quickattend.models.Student;
+import com.quickattend.quickattend.models.StudentFull;
+import com.quickattend.quickattend.models.User;
 import com.quickattend.quickattend.utils.RecyclerViewEmptySupport;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class ClassListFragment extends Fragment {
-    private static final String TAG = ClassListFragment.class.getSimpleName();
+public class UserListFragment extends Fragment {
+    private static final String TAG = UserListFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -63,18 +68,15 @@ public class ClassListFragment extends Fragment {
     private String JSON_STRING;
     private SQLiteHandler db;
     private SessionManager session;
-    private String userID;
     private String accountID;
     private String name;
     private String email;
 
     private RecyclerViewEmptySupport listView;
     private View view;
-    private List<ClassModel> classes;
-    private ClassListAdapter adapter;
-    private ImageButton addClassImage;
-
-    String currentDate = new SimpleDateFormat("MM/dd/yyyy", Locale.US).format(new Date());
+    private List<User> users;
+    private UserListAdapter adapter;
+    private ImageButton addUserImage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -92,7 +94,7 @@ public class ClassListFragment extends Fragment {
         pDialog = new ProgressDialog(getActivity());
         pDialog.setCancelable(false);
 
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("All Classes");
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("All Students");
 
         // SqLite database handler
         db = new SQLiteHandler(getActivity());
@@ -107,12 +109,11 @@ public class ClassListFragment extends Fragment {
         // Fetching user details from sqlite
         final HashMap<String, String> user = db.getUserDetails();
 
-        userID = user.get("uid");
         accountID = user.get("account_id");
         name = user.get("name");
         email = user.get("email");
 
-        view = inflater.inflate(R.layout.fragment_class_list, container, false);
+        view = inflater.inflate(R.layout.fragment_user_list, container, false);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
 
@@ -120,12 +121,12 @@ public class ClassListFragment extends Fragment {
         listView.setHasFixedSize(true);
         listView.setLayoutManager(layoutManager);
 
-        addClassImage = (ImageButton) view.findViewById(R.id.imageAddClass);
+        addUserImage = (ImageButton) view.findViewById(R.id.imageAddUser);
 
-        addClassImage.setOnClickListener(new View.OnClickListener() {
+        addUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), AddClassActivity.class);
+                Intent intent = new Intent(getActivity(), AddStudentActivity.class);
                 startActivity(intent);
             }
         });
@@ -139,9 +140,11 @@ public class ClassListFragment extends Fragment {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
+                        Log.i(TAG, "onRefresh called from SwipeRefreshLayout");
+
                         // This method performs the actual data-refresh operation.
                         // The method calls setRefreshing(false) when it's finished.
-                        getAllClasses(false);
+                        getAllUsers();
                     }
                 }
         );
@@ -154,8 +157,9 @@ public class ClassListFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_class_list, menu);
+        inflater.inflate(R.menu.menu_student_list, menu);
         super.onCreateOptionsMenu(menu,inflater);
+
     }
 
     @Override
@@ -165,12 +169,9 @@ public class ClassListFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_view_all_classes) {
-            getAllClasses(true);
-
-            return true;
-        } else if (id == R.id.action_export_all_classes) {
-            exportClasses();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_export_all_students) {
+            exportStudents();
 
             return true;
         }
@@ -178,43 +179,40 @@ public class ClassListFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public void openSingleClass(final String classID, final String className, Context context){
-        Intent i = new Intent(context, SingleClassActivity.class);
-        i.putExtra("classID", classID);
-        i.putExtra("className", className);
+    public void openSingleUser(final String userID, Context context){
+        Intent i = new Intent(context, SingleStudentActivity.class);
+        i.putExtra("userID", userID);
         context.startActivity(i);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getAllClasses(false);
+        getAllUsers();
     }
 
-    private void showClass(){
+    private void showUser(){
         JSONObject jsonObject = null;
-        classes = new ArrayList<>();
+        users = new ArrayList<>();
         try {
             jsonObject = new JSONObject(JSON_STRING);
-            JSONArray result = jsonObject.getJSONArray("classes");
+            JSONArray result = jsonObject.getJSONArray("users");
 
             for(int i = 0; i<result.length(); i++){
                 JSONObject jo = result.getJSONObject(i);
-                String classID = jo.getString("classID");
-                String className = jo.getString("className");
-                String classLocation = jo.getString("classLocation");
-                String classTime = jo.getString("classTime");
-                String classCount = jo.getString("classCount");
+                String userID = jo.getString("userID");
+                String userName = jo.getString("userName");
+                String userPhoto = jo.getString("userPhoto");
 
-                ClassModel thisClass = new ClassModel(classID, className, classTime, classLocation, classCount);
-                classes.add(thisClass);
+                User user = new User(userID, userName, userPhoto);
+                users.add(user);
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        adapter = new ClassListAdapter(getActivity(), R.layout.today_class_list_item, classes);
+        adapter = new UserListAdapter(getActivity(), R.layout.user_list_item, users);
         listView.setAdapter(adapter);
         listView.setEmptyView(view.findViewById(R.id.empty_list_item));
     }
@@ -235,21 +233,21 @@ public class ClassListFragment extends Fragment {
     }
 
     /**
-     * Export classes from DB to user email
+     * Export students from DB to user email
      * */
-    private void exportClasses() {
+    private void exportStudents() {
         // Tag used to cancel the request
-        String tag_string_req = "req_export_all_classes";
+        String tag_string_req = "req_export_all_users";
 
-        pDialog.setMessage("Exporting Classes...");
+        pDialog.setMessage("Exporting Users...");
         showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_EXPORT_ALL_CLASSES, new Response.Listener<String>() {
+                AppConfig.URL_EXPORT_ALL_STUDENTS, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "Export Classes Response: " + response);
+                Log.d(TAG, "Export Students Response: " + response);
                 hideDialog();
 
                 try {
@@ -257,7 +255,7 @@ public class ClassListFragment extends Fragment {
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
                         hideDialog();
-                        Toast.makeText(getActivity(), "Classes exported. Please check your email", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), "Students exported. Please check your email", Toast.LENGTH_LONG).show();
                     } else {
 
                         // Error occurred in registration. Get the error
@@ -298,28 +296,29 @@ public class ClassListFragment extends Fragment {
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-    /**
-     * Function to get all of user's classes from MySQL DB
-     * */
-    private void getAllClasses(final boolean getAccountClasses) {
-        // Tag used to cancel the request
-        String tag_string_req = "req_get_all_classes";
 
-        pDialog.setMessage("Loading Classes...");
+    /**
+     * Function to get all of account's students from MySQL DB
+     * */
+    private void getAllUsers() {
+        // Tag used to cancel the request
+        String tag_string_req = "req_get_all_users";
+
+        pDialog.setMessage("Loading Users...");
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
-                AppConfig.URL_GET_ALL_CLASSES, new Response.Listener<String>() {
+                AppConfig.URL_GET_ALL_USERS, new Response.Listener<String>() {
 
             @Override
             public void onResponse(String response) {
-                //Log.d(TAG, "Get ClassModel Response: " + response.toString());
+                Log.d(TAG, "Get All Users Response: " + response);
 
                 try {
                     JSONObject jObj = new JSONObject(response);
                     boolean error = jObj.getBoolean("error");
                     if (!error) {
                         JSON_STRING = response;
-                        showClass();
+                        showUser();
                         //Toast.makeText(getApplicationContext(), "Classes loaded!", Toast.LENGTH_LONG).show();
                     } else {
 
@@ -327,7 +326,7 @@ public class ClassListFragment extends Fragment {
                         // message
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getActivity(),
-                                errorMsg, Toast.LENGTH_SHORT).show();
+                                errorMsg, Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -349,12 +348,7 @@ public class ClassListFragment extends Fragment {
             protected Map<String, String> getParams() {
                 // Posting params to register url
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("userID", userID);
-
-                if(getAccountClasses){
-                    params.put("accountID", accountID);
-                }
-
+                params.put("accountID", accountID);
                 return params;
             }
 

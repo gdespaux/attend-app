@@ -85,6 +85,9 @@ public class AppConfig {
     // Server get user info url
     public static String URL_GET_USER_INFO = BASE_URL + "userInfo.php";
 
+    // Server get all users url
+    public static String URL_GET_ALL_USERS = BASE_URL + "getAllUsers.php";
+
     // Server export all students to csv
     public static String URL_EXPORT_ALL_STUDENTS = BASE_URL + "exportAllStudents.php";
 

@@ -5,8 +5,8 @@ android {
         Release {
             keyAlias 'ReleaseKey'
             keyPassword 'Quickattend2017'
-            //storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
-            storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
+            storeFile file('C:/Users/gdespaux/Documents/AndroidStudioProjects/Attend/android.jks')
+            //storeFile file('C:/Users/jLite/StudioProjects/android-studio-attend-app/android.jks')
             storePassword 'Quickattend2017'
         }
     }
@@ -16,8 +16,8 @@ android {
         applicationId "com.quickattend.quickattend"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 12
-        versionName "0.1.9"
+        versionCode 13
+        versionName "0.1.10"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -58,5 +58,7 @@ dependencies {
     compile 'com.heinrichreimersoftware:material-intro:1.6.2'
     testCompile 'junit:junit:4.12'
 }
+
+
 
 apply plugin: 'com.google.gms.google-services'

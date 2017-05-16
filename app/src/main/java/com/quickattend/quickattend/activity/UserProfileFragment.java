@@ -42,6 +42,11 @@ public class UserProfileFragment extends Fragment {
     private SessionManager session;
     private String userID;
     private String accountID;
+    private String accountType;
+    private String userPhotoDB;
+    private String userName;
+    private String userEmail;
+
 
     private TextView userNameText;
     private TextView userEmailText;
@@ -80,8 +85,8 @@ public class UserProfileFragment extends Fragment {
 
         userID = user.get("uid");
         accountID = user.get("account_id");
-        String name = user.get("name");
-        String email = user.get("email");
+        userName = user.get("name");
+        userEmail = user.get("email");
 
         View view = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
@@ -136,7 +141,7 @@ public class UserProfileFragment extends Fragment {
             String userName = jo.getString("userName");
             String userEmail = jo.getString("userEmail");
             String userAccountType = jo.getString("userAccountType");
-            String userSubPlan = jo.getString("userSubPlan") + "Plan";
+            String userSubPlan = jo.getString("userSubPlan") + " Plan";
             String userPhoto = jo.getString("userPhoto");
 
             userNameText.setText(userName);

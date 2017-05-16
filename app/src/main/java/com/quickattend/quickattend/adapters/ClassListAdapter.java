@@ -9,13 +9,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.quickattend.quickattend.R;
-import com.quickattend.quickattend.activity.HomeFragment;
+import com.quickattend.quickattend.activity.ClassListFragment;
 import com.quickattend.quickattend.models.ClassHolder;
 import com.quickattend.quickattend.models.ClassModel;
 
 import java.util.List;
 
-public class TodayClassAdapter extends RecyclerView.Adapter<ClassHolder> {
+public class ClassListAdapter extends RecyclerView.Adapter<ClassHolder> {
 
     private final List<ClassModel> classes;
     private Context context;
@@ -24,7 +24,7 @@ public class TodayClassAdapter extends RecyclerView.Adapter<ClassHolder> {
     // Allows to remember the last item shown on screen
     private int lastPosition = -1;
 
-    public TodayClassAdapter(Context context, int itemResource, List<ClassModel> classes) {
+    public ClassListAdapter(Context context, int itemResource, List<ClassModel> classes) {
 
         this.classes = classes;
         this.context = context;
@@ -50,11 +50,11 @@ public class TodayClassAdapter extends RecyclerView.Adapter<ClassHolder> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final HomeFragment classUtils = new HomeFragment();
+                final ClassListFragment classUtils = new ClassListFragment();
                 final String classID = theClass.classID;
                 final String className = theClass.className;
 
-                classUtils.openClassList(classID, className, context);
+                classUtils.openSingleClass(classID, className, context);
             }
         });
 
