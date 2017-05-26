@@ -169,7 +169,6 @@ public class UserListFragment extends Fragment {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_export_all_students) {
             exportStudents();
 

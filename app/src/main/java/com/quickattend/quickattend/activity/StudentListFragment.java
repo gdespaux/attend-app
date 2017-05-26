@@ -163,7 +163,7 @@ public class StudentListFragment extends Fragment {
         SearchView searchView = (SearchView) searchMenuItem.getActionView();
         EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         View searchLayout = searchView.findViewById((android.support.v7.appcompat.R.id.search_plate));
-        searchEditText.setHint("Search...");
+        searchEditText.setHint("Search students");
         searchEditText.setTextColor(getResources().getColor(R.color.white));
         searchEditText.setHintTextColor(getResources().getColor(R.color.white));
         searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);

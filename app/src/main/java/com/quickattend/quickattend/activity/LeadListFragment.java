@@ -48,7 +48,7 @@ import com.quickattend.quickattend.app.AppController;
 import com.quickattend.quickattend.utils.SQLiteHandler;
 import com.quickattend.quickattend.utils.SessionManager;
 
-public class LeadListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener, ListView.OnItemLongClickListener {
+public class LeadListFragment extends android.support.v4.app.ListFragment implements ListView.OnItemClickListener {
     private static final String TAG = LeadListFragment.class.getSimpleName();
     private ProgressDialog pDialog;
 
@@ -104,7 +104,6 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
 
         view = inflater.inflate(R.layout.fragment_lead_list, container, false);
         listView = (ListView) view.findViewById(android.R.id.list);
-        listView.setOnItemLongClickListener(this);
 
         addLeadImage = (ImageButton) view.findViewById(R.id.imageAddLead);
 
@@ -152,7 +151,7 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
         SearchView searchView = (SearchView) searchMenuItem.getActionView();
         EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         View searchLayout = searchView.findViewById((android.support.v7.appcompat.R.id.search_plate));
-        searchEditText.setHint("Search...");
+        searchEditText.setHint("Search leads");
         searchEditText.setTextColor(getResources().getColor(R.color.white));
         searchEditText.setHintTextColor(getResources().getColor(R.color.white));
         searchLayout.getBackground().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.MULTIPLY);
@@ -199,17 +198,10 @@ public class LeadListFragment extends android.support.v4.app.ListFragment implem
         HashMap<String,String> map =(HashMap) getListView().getItemAtPosition(position);
         String leadID = map.get("leadID").toString();
 
-        //Intent i = new Intent(getActivity(), SingleLeadActivity.class);
-        //i.putExtra("leadID", leadID);
-        //getActivity().startActivity(i);
+        Intent i = new Intent(getActivity(), SingleLeadActivity.class);
+        i.putExtra("leadID", leadID);
+        getActivity().startActivity(i);
 
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-        Toast.makeText(getActivity(),
-                "Can't edit yet!", Toast.LENGTH_LONG).show();
-        return true;
     }
 
     @Override

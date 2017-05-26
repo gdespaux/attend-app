@@ -512,7 +512,7 @@ public class SingleStudentActivity extends AppCompatActivity {
             studentGenderText.setText(studentGender);
             studentEmailText.setText("Email: " + studentEmail);
             studentAddressText.setText("Address: " + studentAddress);
-            studentMedInfoText.setText("Med Info: " + studentMedInfo);
+            studentMedInfoText.setText("Misc Info: " + studentMedInfo);
             this.studentPhoto.setImageUrl(studentPhoto, imageLoader);
             studentActiveText.setText(studentActive);
 
@@ -780,7 +780,6 @@ public class SingleStudentActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("onActivityResult()", Integer.toString(resultCode));
 
         //final LocationSettingsStates states = LocationSettingsStates.fromIntent(data);
         switch (requestCode) {

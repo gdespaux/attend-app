@@ -32,7 +32,7 @@
     <application
         android:name=".app.AppController"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/app_logo"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -58,7 +58,7 @@
             android:configChanges="orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/LoginTheme.NoActionBar"></activity>
+            android:theme="@style/LoginTheme.NoActionBar" />
         <activity
             android:name=".activity.MainOldActivity"
             android:configChanges="orientation"
@@ -198,7 +198,18 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".activity.AddLeadActivity" />
+        <activity
+            android:name=".activity.AddLeadActivity"
+            android:configChanges="orientation"
+            android:label="@string/title_activity_add_lead"
+            android:parentActivityName=".activity.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateVisible|adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.quickattend.quickattend.activity.MainActivity" />
+        </activity>
         <activity
             android:name=".activity.SplashActivity"
             android:theme="@style/SplashTheme">
@@ -208,7 +219,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.AddUserActivity"></activity>
+        <activity android:name=".activity.AddUserActivity" />
+        <activity
+            android:name=".activity.SingleLeadActivity"
+            android:label="@string/title_activity_single_lead"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

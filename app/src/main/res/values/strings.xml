@@ -39,6 +39,7 @@
     <string name="title_activity_class_list">Classes</string>
     <string name="title_activity_add_class">Add class</string>
     <string name="title_activity_single_class">Single class</string>
+    <string name="title_activity_add_lead">Add lead</string>
     <string name="view_all_classes">View All Classes</string>
     <string name="class_location">Class Location (City)</string>
     <string name="class_name">Class Name</string>
@@ -93,4 +94,5 @@
     <string name="title_activity_reset_password">Reset Password</string>
     <string name="forgot_password">Forgot Password?</string>
     <string name="export">Export</string>
+    <string name="title_activity_single_lead">SingleLeadActivity</string>
 </resources>

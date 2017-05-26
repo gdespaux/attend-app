@@ -55,6 +55,12 @@ public class AppConfig {
     // Server get all leads url
     public static String URL_GET_ALL_LEADS = BASE_URL + "getAllLeads.php";
 
+    // Server get lead url
+    public static String URL_GET_SINGLE_LEAD = BASE_URL + "getLead.php";
+
+    // Server update student url
+    public static String URL_UPDATE_LEAD = BASE_URL + "updateLead.php";
+
     // Server add student to class url
     public static String URL_ADD_EXISTING_STUDENT = BASE_URL + "addExistingStudent.php";
 
